@@ -46,7 +46,7 @@
     --vis-text-color: var(--muted-foreground);
   }
 
-  .dark {
+  /* .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
 
@@ -75,7 +75,7 @@
     --destructive-foreground: 0 0% 98%;
 
     --ring: 240 4.9% 83.9%;
-  }
+  } */
 }
 
 @layer base {
