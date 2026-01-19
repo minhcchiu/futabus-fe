@@ -36,18 +36,18 @@ function statusClass(status: string) {
         </h2>
 
         <!-- Form -->
-        <div class="space-y-4">
+        <div class="space-y-4 px-4 md:px-0">
           <input
             type="text"
             placeholder="Vui lòng nhập số điện thoại"
             class="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-emerald-500"
-          >
+          />
 
           <input
             type="text"
             placeholder="Vui lòng nhập mã vé"
             class="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-emerald-500"
-          >
+          />
 
           <!-- Button -->
           <div class="pt-4">
@@ -82,45 +82,62 @@ function statusClass(status: string) {
       </div>
 
       <!-- FOUND -->
-      <div v-else class="space-y-4 rounded-xl border bg-white p-6 shadow-sm">
-        <div class="flex items-center justify-between">
+      <div
+        v-else
+        class="space-y-4 rounded-xl border bg-white p-4 shadow-sm sm:p-6"
+      >
+        <!-- Header -->
+        <div
+          class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+        >
           <h3 class="font-semibold text-green-600">✅ Đã tìm thấy vé</h3>
 
           <span
-            class="rounded-full px-3 py-1 text-xs"
+            class="self-start rounded-full px-3 py-1 text-xs sm:self-auto"
             :class="statusClass(ticket.status)"
           >
             {{ ticket.status }}
           </span>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 text-sm">
+        <!-- Info grid -->
+        <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
           <div>
             <p class="text-xs text-gray-500">Mã vé</p>
             <p class="font-medium">{{ ticket.code }}</p>
           </div>
+
           <div>
             <p class="text-xs text-gray-500">Tuyến</p>
-            <p class="font-medium">{{ ticket.route }}</p>
+            <p class="break-words font-medium">
+              {{ ticket.route }}
+            </p>
           </div>
+
           <div>
             <p class="text-xs text-gray-500">Khởi hành</p>
             <p class="font-medium">{{ ticket.departure }}</p>
           </div>
+
           <div>
             <p class="text-xs text-gray-500">Ghế</p>
-            <p class="font-medium">{{ ticket.seats.join(", ") }}</p>
+            <p class="break-words font-medium">
+              {{ ticket.seats.join(", ") }}
+            </p>
           </div>
         </div>
 
-        <div class="flex items-center justify-between border-t pt-4">
+        <!-- Footer -->
+        <div
+          class="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between"
+        >
           <p class="font-semibold text-green-600">
             Tổng tiền: {{ ticket.total }}đ
           </p>
 
-          <div class="flex gap-3">
-            <button class="btn-outline">Xem chi tiết</button>
-            <button class="btn-danger">Hủy vé</button>
+          <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
+            <button class="btn-outline w-full sm:w-auto">Xem chi tiết</button>
+            <button class="btn-danger w-full sm:w-auto">Hủy vé</button>
           </div>
         </div>
       </div>

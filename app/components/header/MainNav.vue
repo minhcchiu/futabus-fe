@@ -33,7 +33,7 @@ watch(
     if (newPath === menus[0]!.to) {
       setHeaderHeight("h-56");
     } else {
-      setHeaderHeight("h-20");
+      setHeaderHeight("h-20 md:h-36");
     }
   },
 );

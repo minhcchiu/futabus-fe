@@ -6,11 +6,15 @@
         <img
           src="https://futabus.vn/images/icons/pickup.svg"
           alt="pickup"
-        ><span class="flex-1 border-b-2 border-dotted"/><span class="text-gray text-center leading-4"
+        ><span class="flex-1 border-b-2 border-dotted" /><span
+          class="text-gray text-center leading-4"
           >15 giờ <br ><span class="text-[13px]"
             >(Asian/Ho Chi Minh)</span
           ></span
-        ><span class="flex-1 border-b-2 border-dotted"/><img src="https://futabus.vn/images/icons/station.svg" alt="station" >
+        ><span class="flex-1 border-b-2 border-dotted" /><img
+          src="https://futabus.vn/images/icons/station.svg"
+          alt="station"
+        >
       </div>
       <span class="text-2xl font-medium">06:00</span>
     </div>
@@ -22,7 +26,7 @@
       </div>
       <div class="flex-1 text-right">
         <span class="text-[15px] font-medium">Bến Xe Trung Tâm Đà Nẵng</span
-        ><br ><span class="text-gray mt-2"/>
+        ><br ><span class="text-gray mt-2" />
       </div>
     </div>
   </div>

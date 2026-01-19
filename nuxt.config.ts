@@ -52,6 +52,11 @@ export default defineNuxtConfig({
       extensions: [".vue"],
       pathPrefix: false, // Tắt chế độ thêm tiền tố thư mục vào tên component
     },
+    {
+      global: false,
+      path: "~/components/ui",
+      extensions: [".vue"],
+    },
   ],
 
   fonts: {

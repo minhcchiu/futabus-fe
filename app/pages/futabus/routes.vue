@@ -70,60 +70,64 @@ const routes = [
 </script>
 
 <template>
-  <div class="mx-auto px-4 py-6">
+  <div class="mx-auto py-6">
     <div class="space-y-4">
       <!-- Search -->
-      <div class="flex items-center gap-3">
+      <div class="relative flex items-center md:gap-3">
         <SearchInput placeholder="Nhập điểm đi" />
         <div
-          class="flex h-8 w-8 items-center justify-center rounded-full border bg-white text-green-500"
+          class="absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border bg-white text-green-500"
         >
-          ⇄
+          <span>⇄</span>
         </div>
         <SearchInput placeholder="Nhập điểm đến" />
       </div>
 
-      <!-- Table header -->
-      <div
-        class="grid grid-cols-6 rounded-lg border bg-white px-4 py-3 text-sm font-medium text-gray-600"
-      >
-        <div>Tuyến xe</div>
-        <div>Loại xe</div>
-        <div>Quãng đường</div>
-        <div>Thời gian hành trình</div>
-        <div>Giá vé</div>
-        <div />
-      </div>
-
-      <!-- Routes -->
-      <div
-        v-for="(group, index) in routes"
-        :key="index"
-        class="rounded-xl border bg-white"
-      >
+      <div class="mt-6 flex w-full flex-col gap-4 overflow-auto">
+        <!-- Table header -->
         <div
-          v-for="route in group"
-          :key="route.id"
-          class="grid grid-cols-6 items-center gap-2 border-t px-4 py-3 text-sm first:border-t-0"
+          class="grid min-w-[800px] grid-cols-7 rounded-lg border bg-white px-4 py-3 text-sm font-medium text-gray-600"
         >
-          <!-- Route -->
-          <div class="font-medium text-green-500">
-            {{ route.from }}
-            <span class="mx-1">⇒</span>
-            <span class="text-gray-900">{{ route.to }}</span>
-          </div>
+          <div class="col-span-2">Tuyến xe</div>
+          <div>Loại xe</div>
+          <div>Quãng đường</div>
+          <div>Thời gian hành trình</div>
+          <div>Giá vé</div>
+          <div />
+        </div>
 
-          <div>{{ route.type || "---" }}</div>
-          <div>{{ route.distance }}</div>
-          <div>{{ route.duration }}</div>
-          <div>---</div>
-
-          <div class="text-right">
-            <button
-              class="rounded-full bg-green-100 px-4 py-1 text-green-600 hover:bg-green-200"
+        <!-- Routes -->
+        <div class="grid min-w-[800px] gap-2">
+          <div
+            v-for="(group, index) in routes"
+            :key="index"
+            class="rounded-xl border bg-white"
+          >
+            <div
+              v-for="route in group"
+              :key="route.id"
+              class="grid grid-cols-7 items-center gap-2 border-t px-4 py-3 text-sm first:border-t-0"
             >
-              Tìm tuyến xe
-            </button>
+              <!-- Route -->
+              <div class="col-span-2 font-medium text-green-500">
+                {{ route.from }}
+                <span class="mx-1">⇒</span>
+                <span class="text-gray-900">{{ route.to }}</span>
+              </div>
+
+              <div>{{ route.type || "---" }}</div>
+              <div>{{ route.distance }}</div>
+              <div>{{ route.duration }}</div>
+              <div>---</div>
+
+              <div class="text-right">
+                <button
+                  class="rounded-full bg-green-100 px-4 py-1 text-green-600 hover:bg-green-200"
+                >
+                  Tìm tuyến xe
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
