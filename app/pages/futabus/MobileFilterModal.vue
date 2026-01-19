@@ -22,7 +22,7 @@ defineEmits(["update:modelValue"]);
   </transition>
 </template>
 
-<style lang="scss" scoped>
+<style lang="css" scoped>
 .slide-up-enter-active,
 .slide-up-leave-active {
   transition: transform 0.25s ease;
