@@ -27,11 +27,15 @@ const methods = [
     note: "QR chuyển khoản, quét mã thanh toán an toàn và tiện lợi.",
   },
 ];
+
+const emit = defineEmits(["update:model-value"]);
 </script>
 
 <template>
   <div class="rounded-xl bg-white p-4">
-    <h2 class="mb-4 text-lg font-semibold">Chọn phương thức thanh toán</h2>
+    <h2 class="mb-4 hidden text-lg font-semibold md:block">
+      Chọn phương thức thanh toán
+    </h2>
 
     <div class="space-y-3">
       <label
@@ -44,8 +48,9 @@ const methods = [
           type="radio"
           class="accent-green-500"
           :value="item.key"
-        >
-        <img :src="item.icon" class="h-8 w-8" >
+          @change="emit('update:model-value', item.key)"
+        />
+        <img :src="item.icon" class="h-8 w-8" />
         <div>
           <div class="font-medium">{{ item.label }}</div>
           <div v-if="item.note" class="text-xs text-green-500">

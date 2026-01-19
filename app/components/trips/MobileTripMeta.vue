@@ -1,6 +1,4 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="text-gray mt-2 flex justify-between border-t py-1 md:hidden">

@@ -71,7 +71,9 @@ const method = ref("FUTAPAY");
       <BankTransferConfirm :amount="75000" :expire="339" />
     </div>
 
-    <div class="md:hidden">
+    <div
+      class="fixed inset-0 z-[99] flex min-h-screen flex-col bg-gray-100 md:hidden"
+    >
       <MobilePayment />
     </div>
   </div>

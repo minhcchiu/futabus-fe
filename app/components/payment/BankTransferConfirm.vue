@@ -30,39 +30,29 @@ const time = computed(() => {
 </script>
 
 <template>
-  <div class="my-6 rounded-xl bg-white p-6">
-    <!-- NOTE -->
-    <p class="mb-4 text-center text-sm text-gray-700">
-      Sau khi gửi ảnh, vui lòng kiểm tra trạng thái lịch đặt tại tab
-      <b>“Tài khoản”</b> tới khi chủ sân xác nhận đơn.
-    </p>
-
+  <div class="my-6 mb-20 rounded-xl bg-white p-6 shadow-sm">
     <!-- COUNTDOWN -->
-    <div class="mb-6 text-center">
+    <div class="mb-4 text-center">
       <div class="text-sm text-gray-600">
         Đơn của bạn còn được giữ chỗ trong
       </div>
-      <div class="mt-1 text-2xl font-bold text-gray-900">
+      <div class="mt-1 text-xl font-bold text-gray-900">
         {{ time }}
       </div>
     </div>
 
     <!-- UPLOAD AREA -->
-    <div class="mx-auto grid max-w-xl grid-cols-2 gap-4">
+    <div class="mx-auto mb-8 max-w-xl">
       <UploadBox
         label="Nhấn vào để tải hình thanh toán (*)"
         required
         @change="filePayment = $event"
       />
-      <UploadBox
-        label="Nhấn vào để tải minh chứng bạn là HSSV, hoặc đối tượng được ưu đãi khác"
-        @change="fileProof = $event"
-      />
     </div>
 
     <!-- SUBMIT -->
     <button
-      class="mt-8 w-full rounded-lg bg-green-500 py-4 text-center font-semibold text-white hover:bg-green-600"
+      class="mt-8 hidden w-full rounded-lg bg-green-500 py-4 text-center font-semibold text-white hover:bg-green-600 md:block"
     >
       XÁC NHẬN ĐẶT
     </button>

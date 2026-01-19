@@ -103,7 +103,7 @@ const selectedSeats = ["A1", "B1"];
             <p class="font-semibold">Đà Nẵng - Đăk Lăk</p>
             <p class="text-xs opacity-80">Thứ 2, 19/01</p>
           </div>
-          <div></div>
+          <div/>
         </div>
         <div class="flex justify-between border-b bg-white px-4 py-3">
           <div class="font-semibold">
