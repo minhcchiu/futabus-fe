@@ -1,4 +1,6 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import TimeFilter from "~/components/filters/TimeFilter.vue";
+</script>
 
 <template>
   <div class="sticky top-0 z-30 space-y-6 rounded-xl border bg-white p-4">
