@@ -124,3 +124,10 @@ export enum SearchableTypesEnum {
   Answer = "answer",
   Tag = "tag",
 }
+
+export enum BOOKING_STEPS {
+  SEAT = 0,
+  CUSTOMER = 1,
+  PICKUP = 2,
+  PAYMENT = 3,
+}

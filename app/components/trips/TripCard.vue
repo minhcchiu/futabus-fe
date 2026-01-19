@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TimelineStop } from "~/validations/trip.validation";
+const { isMobile } = useDevice();
 
 const timeline: TimelineStop[] = [
   {
@@ -60,16 +61,22 @@ const policy = `<h3>Chính sách huỷ vé</h3>
   <li>Không mang thức ăn/đồ uống có mùi lên xe.</li>
 </ul>
 `;
+
+const selectTrip = () => {
+  if (!isMobile) return;
+  navigateTo("/futabus/booking");
+};
 </script>
 
 <template>
-  <div class="rounded-xl border bg-white p-4">
+  <div class="rounded-xl border bg-white p-4" @click="selectTrip">
     <div class="flex items-start gap-10">
       <TripTime />
       <TripMeta />
     </div>
     <MobileTripMeta />
 
+    <!-- Desktop -->
     <div
       class="my-2 hidden items-center justify-between border-t md:flex md:flex-col"
     >

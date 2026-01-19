@@ -47,27 +47,33 @@ const method = ref("FUTAPAY");
 </script>
 
 <template>
-  <div class="mx-auto px-4 py-6">
-    <div class="grid grid-cols-12 gap-6">
-      <!-- LEFT -->
-      <div class="col-span-4 space-y-4 rounded-xl bg-white">
-        <PaymentMethodList v-model="method" />
+  <div>
+    <div class="mx-auto hidden px-4 py-6 md:block">
+      <div class="grid grid-cols-12 gap-6">
+        <!-- LEFT -->
+        <div class="col-span-4 space-y-4 rounded-xl bg-white">
+          <PaymentMethodList v-model="method" />
+        </div>
+
+        <!-- CENTER -->
+        <div class="col-span-4">
+          <PaymentQRCode :amount="400000" :expire="1199" method="FUTAPAY" />
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-span-4 space-y-4">
+          <PassengerInfoCard />
+          <TripInfoCard />
+          <PriceDetailCard />
+        </div>
       </div>
 
-      <!-- CENTER -->
-      <div class="col-span-4">
-        <PaymentQRCode :amount="400000" :expire="1199" method="FUTAPAY" />
-      </div>
-
-      <!-- RIGHT -->
-      <div class="col-span-4 space-y-4">
-        <PassengerInfoCard />
-        <TripInfoCard />
-        <PriceDetailCard />
-      </div>
+      <BankTransferConfirm :amount="75000" :expire="339" />
     </div>
 
-    <BankTransferConfirm :amount="75000" :expire="339" />
+    <div class="md:hidden">
+      <MobilePayment />
+    </div>
   </div>
 </template>
 

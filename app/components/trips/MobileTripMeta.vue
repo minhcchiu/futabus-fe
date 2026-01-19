@@ -1,4 +1,6 @@
-<script setup></script>
+<script setup lang="ts">
+
+</script>
 
 <template>
   <div class="text-gray mt-2 flex justify-between border-t py-1 md:hidden">
@@ -13,6 +15,6 @@
       </li>
     </ul>
 
-    <p class="text-lg font-bold text-green-600">400.000đ</p>
+    <span class="font-semibold text-green-600"> 400.000đ </span>
   </div>
 </template>

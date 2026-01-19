@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
     "@pinia/nuxt",
     "@nuxt/image",
+    "@nuxtjs/device",
   ],
   shadcn: {
     prefix: "",
@@ -51,11 +52,6 @@ export default defineNuxtConfig({
       path: "~/components",
       extensions: [".vue"],
       pathPrefix: false, // Tắt chế độ thêm tiền tố thư mục vào tên component
-    },
-    {
-      global: false,
-      path: "~/components/ui",
-      extensions: [".vue"],
     },
   ],
 
