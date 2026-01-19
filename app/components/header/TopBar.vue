@@ -4,10 +4,10 @@ const emit = defineEmits(["open-menu"]);
 
 <template>
   <div
-    class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6"
+    class="mx-auto flex max-w-7xl items-center justify-between px-10 sm:px-6"
   >
     <!-- LEFT: Hamburger + Flag -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3 md:mt-2">
       <!-- Hamburger (mobile) -->
       <button
         class="inline-flex items-center justify-center rounded-md p-2 text-white hover:bg-white/10 md:hidden"
@@ -36,7 +36,7 @@ const emit = defineEmits(["open-menu"]);
           src="https://futabus.vn/images/icons/vietnam.svg"
           alt="Vietnam"
           class="h-4 w-4"
-        >
+        />
         <span>VI</span>
         <svg
           class="h-4 w-4"
@@ -60,11 +60,11 @@ const emit = defineEmits(["open-menu"]);
         src="https://futabus.vn/_next/static/media/logo_new.8a0251b8.svg"
         alt="FUTA Bus Lines"
         class="h-8 object-contain sm:h-10"
-      >
+      />
     </div>
 
     <!-- RIGHT: Auth -->
-    <div class="flex items-center">
+    <div class="flex items-center md:mt-2">
       <button
         class="flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow hover:bg-gray-100 sm:px-4 sm:text-sm"
       >
