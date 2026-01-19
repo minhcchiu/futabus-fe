@@ -9,14 +9,15 @@ useHead({
   ],
 });
 const { isMenuOpen } = useOpenMenu();
+const { headerHeight } = useHeightHeader();
 const navRef = ref();
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-100">
     <header
-      class="relative z-30 h-56 bg-gradient-to-b from-green-300 via-green-400 to-green-500 px-4"
-      :class="{ 'z-[999]': isMenuOpen }"
+      class="relative z-30 bg-gradient-to-b from-green-300 via-green-400 to-green-500"
+      :class="[headerHeight, { 'z-[999]': isMenuOpen }]"
     >
       <TopBar @open-menu="navRef?.openMobileMenu()" />
 

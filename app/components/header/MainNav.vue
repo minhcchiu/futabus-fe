@@ -2,6 +2,7 @@
 import { useOpenMenu } from "~/composables/useOpenMenu";
 const route = useRoute();
 const { isMenuOpen, setIsMenuOpen } = useOpenMenu();
+const { setHeaderHeight } = useHeightHeader();
 
 const menus = [
   { key: "home", label: "Trang chủ", to: "/futabus" },
@@ -17,6 +18,25 @@ const menus = [
 const openMobileMenu = () => {
   setIsMenuOpen(true);
 };
+
+// if route.path === menus[0].to -> setHeight = "h-56"
+// if route.path === menus[1].to -> setHeight = "h-48"
+// if route.path === menus[2].to -> setHeight = "h-40"
+// if route.path === menus[3].to -> setHeight = "h-32"
+// if route.path === menus[4].to -> setHeight = "h-24"
+// if route.path === menus[5].to -> setHeight = "h-16"
+// if route.path === menus[6].to -> setHeight = "h-8"
+
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === menus[0]!.to) {
+      setHeaderHeight("h-56");
+    } else {
+      setHeaderHeight("h-20");
+    }
+  },
+);
 
 defineExpose({ openMobileMenu });
 </script>

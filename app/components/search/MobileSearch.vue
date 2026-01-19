@@ -36,12 +36,12 @@ const onOpenSearchResult = () => {
       <!-- Trip type -->
       <div class="mb-4 flex items-center gap-6 text-sm">
         <label class="flex cursor-pointer items-center gap-2 text-green-600">
-          <input type="radio" checked class="accent-green-500" >
+          <input type="radio" checked class="accent-green-500" />
           Một chiều
         </label>
 
         <label class="flex cursor-pointer items-center gap-2 text-gray-600">
-          <input type="radio" class="accent-green-500" >
+          <input type="radio" class="accent-green-500" />
           Khứ hồi
         </label>
       </div>
@@ -76,7 +76,7 @@ const onOpenSearchResult = () => {
             src="https://futabus.vn/images/icons/switch_location.svg"
             alt="Swap"
             class="h-6 w-6 transition-all duration-300 active:rotate-180"
-          >
+          />
         </button>
       </div>
 
@@ -97,25 +97,6 @@ const onOpenSearchResult = () => {
             <option>4</option>
             <option>5</option>
           </select>
-        </div>
-      </div>
-
-      <!-- RECENT -->
-      <div class="my-4">
-        <p class="mb-2 text-sm font-medium">Tìm kiếm gần đây</p>
-        <div class="flex gap-2 overflow-x-auto pb-1">
-          <div
-            v-for="item in [
-              { title: 'Đắk Lắk - Đà Nẵng', date: '22/01/2026' },
-              { title: 'Hà Nội - TP. Hồ Chí Minh', date: '09/01/2026' },
-              { title: 'An Giang - Bà Rịa - Vũng Tàu', date: '08/01/2026' },
-            ]"
-            :key="item.title"
-            class="min-w-[180px] rounded-lg border px-3 py-2"
-          >
-            <p class="text-xs font-semibold">{{ item.title }}</p>
-            <p class="text-[10px] text-gray-400">{{ item.date }}</p>
-          </div>
         </div>
       </div>
 

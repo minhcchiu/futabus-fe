@@ -4,7 +4,7 @@ const emit = defineEmits(["open-menu"]);
 
 <template>
   <div
-    class="mx-auto flex max-w-7xl items-center justify-between px-10 sm:px-6"
+    class="mx-auto flex max-w-7xl items-center justify-between px-6 md:px-10"
   >
     <!-- LEFT: Hamburger + Flag -->
     <div class="flex items-center gap-3 md:mt-2">

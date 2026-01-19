@@ -91,6 +91,27 @@ const onCloseMobileTripList = () => {
 
     <div class="block md:hidden">
       <MobileSearch @search="onSearch" />
+
+      <!-- RECENT -->
+      <div class="mt-10">
+        <p class="mb-2 text-center text-xl font-semibold text-green-600">
+          Tìm kiếm gần đây
+        </p>
+        <div class="flex gap-6 overflow-x-auto pb-1">
+          <div
+            v-for="item in [
+              { title: 'Đắk Lắk - Đà Nẵng', date: '22/01/2026' },
+              { title: 'Hà Nội - TP. Hồ Chí Minh', date: '09/01/2026' },
+              { title: 'An Giang - Bà Rịa - Vũng Tàu', date: '08/01/2026' },
+            ]"
+            :key="item.title"
+            class="min-w-[200px] rounded-lg border bg-white px-3 py-2"
+          >
+            <p class="text-sm font-semibold">{{ item.title }}</p>
+            <p class="mt-1 text-xs text-gray-400">{{ item.date }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="grid grid-cols-12 gap-x-6 px-4 py-6">
