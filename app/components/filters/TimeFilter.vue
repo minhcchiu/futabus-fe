@@ -1,6 +1,4 @@
-<script setup>
-import Checkbox from "~/components/ui/checkbox/Checkbox.vue";
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="border-b pb-4">
