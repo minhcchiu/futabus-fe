@@ -22,7 +22,7 @@ const ticket = ref<any>({
 function statusClass(status: string) {
   return status === "Đã thanh toán"
     ? "bg-green-100 text-green-700"
-    : "bg-yellow-100 text-yellow-700";
+    : "bg-green-100 text-green-700";
 }
 </script>
 

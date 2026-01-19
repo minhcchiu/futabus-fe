@@ -112,7 +112,7 @@ const onSave = (saveAction: ActionEnum) => {
       <Icon
         v-if="hasSaved"
         name="flowbite:star-solid"
-        class="size-5 text-yellow-400"
+        class="size-5 text-green-400"
       />
       <Icon v-else name="flowbite:star-outline" class="size-5" />
     </button>

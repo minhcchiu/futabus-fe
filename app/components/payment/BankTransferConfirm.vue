@@ -62,7 +62,7 @@ const time = computed(() => {
 
     <!-- SUBMIT -->
     <button
-      class="mt-8 w-full rounded-lg bg-yellow-500 py-4 text-center font-semibold text-white hover:bg-yellow-600"
+      class="mt-8 w-full rounded-lg bg-green-500 py-4 text-center font-semibold text-white hover:bg-green-600"
     >
       XÁC NHẬN ĐẶT
     </button>
