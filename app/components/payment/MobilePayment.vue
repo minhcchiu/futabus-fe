@@ -131,9 +131,15 @@ const methods = [
         class="fixed inset-0 z-[999] flex items-center justify-center bg-black/40"
       >
         <div class="w-[90%] max-w-sm rounded-2xl bg-white p-4">
+          <!-- Header -->
           <div class="mb-2 flex items-center justify-between">
             <h3 class="font-semibold">Thanh toán ví điện tử</h3>
-            <button @click="showQRModal = false">✕</button>
+            <button
+              class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              @click="showQRModal = false"
+            >
+              ✕
+            </button>
           </div>
 
           <PaymentQRCode
@@ -142,15 +148,25 @@ const methods = [
             :method="method || 'FUTAPAY'"
           />
 
-          <button
-            class="mt-4 w-full rounded-xl bg-orange-100 py-2 font-medium text-orange-600"
-            @click="
-              showQRModal = false;
-              showMethodSheet = true;
-            "
-          >
-            Chọn phương thức khác
-          </button>
+          <!-- Footer buttons -->
+          <div class="mt-4 space-y-2">
+            <button
+              class="w-full rounded-xl border border-gray-300 py-2 font-medium text-gray-600 hover:bg-gray-50"
+              @click="
+                showQRModal = false;
+                showMethodSheet = true;
+              "
+            >
+              Chọn phương thức khác
+            </button>
+
+            <button
+              class="w-full rounded-xl bg-green-100 py-2 font-medium text-green-600 hover:bg-orange-200"
+              @click="showQRModal = false"
+            >
+              Quay lại xác nhận
+            </button>
+          </div>
         </div>
       </div>
     </transition>
