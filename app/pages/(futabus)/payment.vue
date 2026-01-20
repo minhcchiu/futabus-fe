@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import type { Trip } from "~/validations/trip.validation";
 
-definePageMeta({ layout: "no-layout" });
-
 // const date = ref(fromDate(new Date(), getLocalTimeZone())) as Ref<DateValue>;
 // const tripType = ref("one-way");
 // const from = ref("dak-lak");

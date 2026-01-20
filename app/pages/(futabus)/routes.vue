@@ -1,6 +1,4 @@
 <script setup lang="ts">
-definePageMeta({ layout: "no-layout" });
-
 const routes = [
   [
     {

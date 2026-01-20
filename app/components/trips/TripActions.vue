@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const navigatoBooking = () => {
-  navigateTo("/futabus/booking");
+  navigateTo("/booking");
 };
 </script>
 

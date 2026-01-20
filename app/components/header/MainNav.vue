@@ -5,13 +5,13 @@ const { isMenuOpen, setIsMenuOpen } = useOpenMenu();
 const { setHeaderHeight } = useHeightHeader();
 
 const menus = [
-  { key: "home", label: "Trang chủ", to: "/futabus" },
-  { key: "schedule", label: "Lịch trình", to: "/futabus/routes" },
-  { key: "ticket", label: "Tra cứu vé", to: "/futabus/ticket-lookup" },
-  { key: "contact", label: "Liên hệ", to: "/futabus/contact-us" },
-  { key: "about", label: "Về chúng tôi", to: "/futabus/about-us" },
-  { key: "news", label: "Tin tức", to: "/futabus/#", disable: true },
-  { key: "invoice", label: "Hóa đơn", to: "/futabus/#", disable: true },
+  { key: "home", label: "Trang chủ", to: "/" },
+  { key: "schedule", label: "Lịch trình", to: "/routes" },
+  { key: "ticket", label: "Tra cứu vé", to: "/ticket-lookup" },
+  { key: "contact", label: "Liên hệ", to: "/contact-us" },
+  { key: "about", label: "Về chúng tôi", to: "/about-us" },
+  { key: "news", label: "Tin tức", to: "/#", disable: true },
+  { key: "invoice", label: "Hóa đơn", to: "/#", disable: true },
 ];
 
 // expose function for TopBar

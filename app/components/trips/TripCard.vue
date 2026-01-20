@@ -64,7 +64,7 @@ const policy = `<h3>Chính sách huỷ vé</h3>
 
 const selectTrip = () => {
   if (!isMobile) return;
-  navigateTo("/futabus/booking");
+  navigateTo("/booking");
 };
 </script>
 

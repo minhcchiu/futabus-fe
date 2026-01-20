@@ -1,37 +1,33 @@
 <script setup lang="ts">
 useHead({
-  title: "DevFlow",
+  title: "Mai Linh",
   meta: [
     {
-      name: "DevFlow",
-      content: "A community for developers, ask questions and get answers.",
+      name: "Mai Linh",
+      content: "Mai Linh - Book your bus ticket online",
     },
   ],
 });
-
-// const isMobile = useMediaQuery("(max-width: 1024px)");
+const { isMenuOpen } = useOpenMenu();
+const { headerHeight } = useHeightHeader();
+const navRef = ref();
 </script>
 
 <template>
-  <main class="bg-light850_dark100 relative">
-    <Navbar />
+  <div class="min-h-screen bg-gray-100">
+    <header
+      class="relative z-30 bg-gradient-to-b from-green-300 via-green-400 to-green-500"
+      :class="[headerHeight, { 'z-[999]': isMenuOpen }]"
+    >
+      <TopBar @open-menu="navRef?.openMobileMenu()" />
 
-    <div class="relative flex">
-      <div class="max-sm:hidden">
-        <LeftSidebar />
-      </div>
+      <MainNav ref="navRef" />
+    </header>
 
-      <section
-        class="flex min-h-screen flex-1 flex-col px-6 pb-6 pt-28 max-md:pb-14 sm:px-14 md:pt-36"
-      >
-        <div class="mx-auto w-full max-w-5xl">
-          <slot />
-        </div>
-      </section>
+    <main class="relative mx-auto max-w-7xl px-4 sm:px-6">
+      <slot />
+    </main>
 
-      <div class="max-sm:hidden">
-        <RightSidebar />
-      </div>
-    </div>
-  </main>
+    <Footer />
+  </div>
 </template>
