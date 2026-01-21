@@ -11,7 +11,6 @@ const selectMethod = (m: string) => {
   method.value = m;
   showMethodSheet.value = false;
   showQRModal.value = true;
-  console.log({ m });
 };
 
 const submitOrder = () => {

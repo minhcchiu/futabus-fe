@@ -14,7 +14,6 @@ const props = defineProps({
 
 const seconds = ref(props.expire);
 const filePayment = ref(null);
-const fileProof = ref(null);
 
 onMounted(() => {
   setInterval(() => {

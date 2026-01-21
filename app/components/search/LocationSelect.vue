@@ -86,7 +86,7 @@ onBeforeUnmount(() => {
         v-model="keyword"
         :placeholder="placeholder"
         class="w-full py-2 text-sm outline-none"
-      >
+      />
 
       <!-- Clear -->
       <button
@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
             v-model="keyword"
             placeholder="Chọn điểm đi"
             class="w-full rounded-lg border px-3 py-3 pr-10 outline-none focus:border-green-500"
-          >
+          />
 
           <!-- Clear button -->
           <button
@@ -128,9 +128,7 @@ onBeforeUnmount(() => {
 
       <!-- Province list -->
       <div class="max-h-60 overflow-y-auto">
-        <p class="px-4 py-2 text-xs font-semibold text-gray-500">
-          TỈNH/THÀNH PHỐ
-        </p>
+        <p class="px-4 py-2 text-xs font-bold text-gray-500">TỈNH/THÀNH PHỐ</p>
 
         <button
           v-for="item in filteredLocations"
@@ -151,7 +149,7 @@ onBeforeUnmount(() => {
 
       <!-- Recent -->
       <div class="border-t p-4">
-        <p class="mb-2 text-xs font-semibold text-gray-500">TÌM KIẾM GẦN ĐÂY</p>
+        <p class="mb-2 text-xs font-bold text-gray-500">TÌM KIẾM GẦN ĐÂY</p>
 
         <div class="flex flex-wrap gap-2">
           <button
