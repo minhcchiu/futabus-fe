@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between">
       <h1 class="text-xl font-semibold">Trips</h1>
       <button
-        class="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary-600"
+        class="hover:bg-primary-600 rounded-lg bg-primary px-4 py-2 text-white"
       >
         + Create Trip
       </button>
@@ -21,7 +21,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="border-t hover:bg-bg">
+          <tr class="hover:bg-bg border-t">
             <td class="p-2">TRIP001</td>
             <td class="p-2">Hà Nội → Đà Nẵng</td>
             <td class="p-2">51A-12345</td>

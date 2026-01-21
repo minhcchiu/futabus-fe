@@ -33,7 +33,7 @@ defineProps<{
         <MapPin v-if="stop.type === 'end'" class="h-4 w-4 text-green-500" />
         {{ stop.title }}
       </div>
-      <div class="text-sm text-muted-foreground">
+      <div class="text-muted-foreground text-sm">
         {{ stop.address }}
       </div>
     </div>

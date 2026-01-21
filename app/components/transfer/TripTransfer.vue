@@ -26,7 +26,7 @@ const defaultRules: TransferRule[] = [
         {{ rule.title }}
       </p>
 
-      <ul class="list-inside list-disc space-y-1 text-muted-foreground">
+      <ul class="text-muted-foreground list-inside list-disc space-y-1">
         <li v-for="(item, i) in rule.items" :key="i">
           {{ item }}
         </li>

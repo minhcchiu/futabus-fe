@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <div
-    class="sticky top-0 z-30 space-y-3 rounded-xl border-b bg-background px-4 py-3"
+    class="bg-background sticky top-0 z-30 space-y-3 rounded-xl border-b px-4 py-3"
   >
     <!-- Title -->
     <div class="flex items-center justify-between">

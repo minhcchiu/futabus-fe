@@ -3,14 +3,13 @@
     <div class="mb-6 text-xl font-bold text-primary">🚌 BusAdmin</div>
 
     <nav class="flex-1 space-y-2">
-      <SidebarItem label="Dashboard" active />
-      <SidebarItem label="Bus Companies" />
-      <SidebarItem label="Vehicles" />
-      <SidebarItem label="Routes & Stops" />
-      <SidebarItem label="Trips" />
-      <SidebarItem label="Bookings" badge="12" />
-      <SidebarItem label="Reports" />
-      <SidebarItem label="Settings" />
+      <SidebarItem label="Dashboard" active href="/admin/" />
+      <SidebarItem label="Bus Companies" href="/admin/bus-companies" />
+      <SidebarItem label="Vehicles" href="/admin/vehicles" />
+      <SidebarItem label="Routes & Stops" href="/admin/routes" />
+      <SidebarItem label="Trips" href="/admin/trips" />
+      <SidebarItem label="Bookings" badge="12" href="/admin/bookings" />
+      <SidebarItem label="Settings" href="/admin/" />
     </nav>
 
     <div class="mt-auto text-sm text-gray-500">

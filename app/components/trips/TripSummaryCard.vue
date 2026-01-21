@@ -38,7 +38,7 @@ defineProps<{
             </p>
           </div>
 
-          <div class="text-center text-xs text-muted-foreground">
+          <div class="text-muted-foreground text-center text-xs">
             {{ trip.duration }}
           </div>
 
@@ -56,7 +56,7 @@ defineProps<{
   <!-- Empty -->
   <div
     v-else
-    class="rounded-xl border bg-white p-4 text-sm text-muted-foreground"
+    class="text-muted-foreground rounded-xl border bg-white p-4 text-sm"
   >
     Chưa chọn chuyến nào
   </div>

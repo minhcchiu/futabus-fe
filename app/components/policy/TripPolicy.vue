@@ -10,7 +10,7 @@ defineProps<{
   >
     <!-- eslint-disable vue/no-v-html -->
     <div v-if="html" v-html="html" />
-    <p v-else class="italic text-muted-foreground">
+    <p v-else class="text-muted-foreground italic">
       Chưa có thông tin chính sách
     </p>
   </div>

@@ -7,7 +7,7 @@
         :key="v"
         class="w-full rounded bg-primary"
         :style="{ height: v + '%' }"
-      ></div>
+      />
     </div>
   </div>
 </template>

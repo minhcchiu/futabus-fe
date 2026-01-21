@@ -81,7 +81,7 @@ const selectTrip = () => {
       class="my-2 hidden items-center justify-between border-t md:flex md:flex-col"
     >
       <div class="flex w-full justify-between py-2">
-        <div class="flex gap-4 text-sm text-muted-foreground">
+        <div class="text-muted-foreground flex gap-4 text-sm">
           <button
             :class="
               activeTab === 'seat'

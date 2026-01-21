@@ -11,7 +11,7 @@ const onLocaleSelect = (language: Locale) => {
 
 <template>
   <div
-    class="bg-light900_dark200 h-screen w-screen overflow-y-auto text-foreground"
+    class="bg-light900_dark200 text-foreground h-screen w-screen overflow-y-auto"
   >
     <div class="flex h-full w-full flex-col space-y-8 lg:flex-row lg:space-y-0">
       <!-- Logo -->
