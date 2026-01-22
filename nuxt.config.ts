@@ -28,8 +28,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     app: {},
     public: {
-      apiBase: "",
-      tinyEditorApiKey: "",
+      apiBase: process.env.NUXT_PUBLIC_API_BASE,
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL,
+      tinyEditorKey: process.env.NUXT_PUBLIC_TINY_EDITOR_API_KEY,
       firebaseConfig: JSON.stringify({
         apiKey: "AIzaSyBbLtFYvYm4Hsi5-Wm2HkO02dPkpywB0uo",
         authDomain: "neste-e98ac.firebaseapp.com",

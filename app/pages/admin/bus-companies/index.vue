@@ -1,41 +1,45 @@
 <script setup lang="ts">
 import AdminTable from "@/components/admin/AdminTable.vue";
-import { computed, ref, watch } from "vue";
+import DeleteButton from "@/components/common/DeleteButton.vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useBusCompanyStore } from "~/stores/bus_company.store";
 
 definePageMeta({ layout: "admin" });
 
-const companies = DATA.BusCompany;
+const store = useBusCompanyStore();
 
 /* UI STATE */
 const keyword = ref("");
-const statusFilter = ref("ALL");
+const statusFilter = ref<"ALL" | "ACTIVE" | "INACTIVE">("ALL");
 const page = ref(1);
-const pageSize = 5;
+const pageSize = ref(5);
 
-/* FILTER + SEARCH */
-const filteredCompanies = computed(() => {
-  return companies.filter((c) => {
-    const matchKeyword =
-      c.name.toLowerCase().includes(keyword.value.toLowerCase()) ||
-      c.hotline.includes(keyword.value);
-
-    const matchStatus =
-      statusFilter.value === "ALL" || c.status === statusFilter.value;
-
-    return matchKeyword && matchStatus;
+/* FETCH DATA */
+const fetchData = async () => {
+  await store.fetchPaginate({
+    _page: page.value,
+    _limit: pageSize.value,
+    keyword: keyword.value || undefined,
+    _status: statusFilter.value !== "ALL" ? statusFilter.value : undefined,
   });
+};
+
+onMounted(fetchData);
+
+/* RESET PAGE WHEN FILTER CHANGE */
+watch([keyword, statusFilter, pageSize], () => {
+  page.value = 1;
+  fetchData();
 });
 
-/* PAGINATION */
-const pagedCompanies = computed(() => {
-  const start = (page.value - 1) * pageSize;
-  return filteredCompanies.value.slice(start, start + pageSize);
-});
+/* FETCH WHEN PAGE CHANGE */
+watch(page, fetchData);
 
-/* TOTAL PAGES */
-const totalPages = computed(() =>
-  Math.ceil(filteredCompanies.value.length / pageSize),
-);
+/* COMPUTED */
+const pagedCompanies = computed(() => store.paginate?.data || []);
+const pagination = computed(() => store.paginate?.paginationInfo);
+
+const totalPages = computed(() => pagination.value?._totalPages || 1);
 
 /* HANDLERS */
 function prevPage() {
@@ -46,10 +50,9 @@ function nextPage() {
   if (page.value < totalPages.value) page.value++;
 }
 
-/* RESET PAGE WHEN FILTER CHANGES */
-watch([keyword, statusFilter], () => {
-  page.value = 1;
-});
+async function handleDeleted() {
+  await fetchData();
+}
 </script>
 
 <template>
@@ -69,16 +72,14 @@ watch([keyword, statusFilter], () => {
       </NuxtLink>
     </div>
 
-    <!-- SEARCH + FILTER -->
-    <div class="mb-4 flex items-center gap-3">
-      <!-- Search -->
+    <!-- FILTER -->
+    <div class="mb-4 flex flex-wrap items-center gap-3">
       <input
         v-model="keyword"
         placeholder="Search company or hotline..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
       />
 
-      <!-- Filter -->
       <select
         v-model="statusFilter"
         class="rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -89,31 +90,43 @@ watch([keyword, statusFilter], () => {
       </select>
     </div>
 
+    <!-- LOADING -->
+    <div v-if="store.loading" class="py-10 text-center text-sm text-gray-500">
+      Loading data...
+    </div>
+
     <!-- TABLE -->
     <AdminTable
+      v-else
       :columns="['Name', 'Hotline', 'Status', 'Actions']"
       :data="pagedCompanies"
       :page="page"
-      :pageSize="pageSize"
+      :page-size="pageSize"
+      :total="store.paginate?.paginationInfo?._totalData"
+      :total-pages="totalPages"
       @prev="prevPage"
       @next="nextPage"
+      @go="page = $event"
+      @update:pageSize="
+        (val) => {
+          pageSize = val;
+          page = 1;
+        }
+      "
     >
       <tr
         v-for="c in pagedCompanies"
         :key="c._id"
-        class="border-b border-b-gray-100 transition hover:bg-gray-50"
+        class="border-b border-gray-100 transition hover:bg-gray-50"
       >
-        <!-- NAME -->
         <td class="px-4 py-3 font-medium text-gray-700">
           {{ c.name }}
         </td>
 
-        <!-- HOTLINE -->
         <td class="px-4 py-3 text-gray-600">
           {{ c.hotline }}
         </td>
 
-        <!-- STATUS -->
         <td class="px-4 py-3">
           <span
             :class="[
@@ -126,21 +139,28 @@ watch([keyword, statusFilter], () => {
           </span>
         </td>
 
-        <!-- ACTION -->
-        <td class="px-4 py-3 text-right">
+        <td class="space-x-3 px-4 py-3 text-right">
           <NuxtLink
             :to="`/admin/bus-companies/${c._id}`"
             class="text-sm font-medium text-primary hover:underline"
           >
             Edit
           </NuxtLink>
+
+          <DeleteButton
+            :on-delete="() => store.deleteById(c._id!)"
+            :disabled="store.loading"
+            success-message="Xoá nhà xe thành công"
+            error-message="Xoá nhà xe thất bại"
+            @deleted="handleDeleted"
+          />
         </td>
       </tr>
     </AdminTable>
 
-    <!-- EMPTY STATE -->
+    <!-- EMPTY -->
     <p
-      v-if="!pagedCompanies.length"
+      v-if="!store.loading && !pagedCompanies.length"
       class="mt-6 text-center text-sm text-gray-400"
     >
       No companies found

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { ZodError } from "zod";
 import { useBusCompanyStore } from "~/stores/bus_company.store";
 import {
@@ -10,8 +10,12 @@ import {
 
 definePageMeta({ layout: "admin" });
 
+const route = useRoute();
 const router = useRouter();
 const store = useBusCompanyStore();
+
+const loading = ref(true);
+const submitting = ref(false);
 
 /* FORM STATE */
 const form = reactive<CreateBusCompany>({
@@ -24,7 +28,23 @@ const form = reactive<CreateBusCompany>({
 });
 
 const errors = ref<Record<string, string>>({});
-const submitting = ref(false);
+
+/* FETCH DATA */
+onMounted(async () => {
+  const id = route.params.id as string;
+  const data = await store.fetchById(id);
+  if (data) {
+    Object.assign(form, {
+      name: data.name,
+      hotline: data.hotline,
+      hotlineList: data.hotlineList || [],
+      description: data.description || "",
+      policy: data.policy || "",
+      status: data.status,
+    });
+  }
+  loading.value = false;
+});
 
 /* VALIDATE */
 const validateForm = (): boolean => {
@@ -51,7 +71,13 @@ const submit = async () => {
   if (submitting.value) return;
 
   submitting.value = true;
-  const res = await store.create(form);
+  const id = route.params.id as string;
+
+  const res = await store.updateById(id, {
+    ...(store.selected as any),
+    ...form,
+  });
+
   submitting.value = false;
 
   if (res) {
@@ -64,12 +90,15 @@ const submit = async () => {
   <div class="max-w-xl space-y-6">
     <!-- HEADER -->
     <div>
-      <h1 class="text-2xl font-semibold">Create Bus Company</h1>
-      <p class="text-sm text-gray-500">Add a new bus operator</p>
+      <h1 class="text-2xl font-semibold">Edit Bus Company</h1>
+      <p class="text-sm text-gray-500">Update bus operator information</p>
     </div>
 
+    <!-- LOADING -->
+    <div v-if="loading" class="py-10 text-center text-gray-500">Loading...</div>
+
     <!-- FORM -->
-    <div class="space-y-4">
+    <div v-else class="space-y-4">
       <!-- NAME -->
       <div>
         <label class="mb-1 block text-sm font-medium">Company Name</label>
@@ -144,7 +173,7 @@ const submit = async () => {
           v-if="submitting || store.loading"
           class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
         />
-        <span>{{ submitting || store.loading ? "Saving..." : "Create" }}</span>
+        <span>{{ submitting || store.loading ? "Saving..." : "Update" }}</span>
       </button>
 
       <NuxtLink to="/admin/bus-companies" class="btn-secondary">

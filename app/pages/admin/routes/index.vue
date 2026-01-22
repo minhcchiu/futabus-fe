@@ -1,48 +1,49 @@
 <script setup lang="ts">
 import AdminTable from "@/components/admin/AdminTable.vue";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
+import { useBusCompanyStore } from "~/stores/bus_company.store";
+import { useRouteStore } from "~/stores/route.store";
 
 definePageMeta({ layout: "admin" });
 
-const routes = DATA.Route;
+const store = useRouteStore();
+const companyStore = useBusCompanyStore();
 
 /* UI STATE */
 const keyword = ref("");
-const companyFilter = ref("ALL");
+const companyFilter = ref<string | "ALL">("ALL");
 const page = ref(1);
-const pageSize = 5;
+const pageSize = ref(5);
 
-/* COMPANY LIST */
-const companies = computed(() => {
-  const map = new Map();
-  routes.forEach((r) => map.set(r.company._id, r.company.name));
-  return Array.from(map, ([id, name]) => ({ id, name }));
-});
-
-/* SEARCH + FILTER */
-const filteredRoutes = computed(() => {
-  return routes.filter((r) => {
-    const matchKeyword =
-      r.startStop.name.toLowerCase().includes(keyword.value.toLowerCase()) ||
-      r.endStop.name.toLowerCase().includes(keyword.value.toLowerCase());
-
-    const matchCompany =
-      companyFilter.value === "ALL" || r.company._id === companyFilter.value;
-
-    return matchKeyword && matchCompany;
+/* FETCH DATA */
+const fetchData = async () => {
+  await store.fetchPaginate({
+    _page: page.value,
+    _limit: pageSize.value,
+    keyword: keyword.value || undefined,
+    companyId: companyFilter.value !== "ALL" ? companyFilter.value : undefined,
   });
+};
+
+onMounted(async () => {
+  await companyStore.fetchAll(); // để filter theo company
+  await fetchData();
 });
 
-/* PAGINATION */
-const pagedRoutes = computed(() => {
-  const start = (page.value - 1) * pageSize;
-  return filteredRoutes.value.slice(start, start + pageSize);
+/* RESET PAGE WHEN FILTER CHANGE */
+watch([keyword, companyFilter, pageSize], () => {
+  page.value = 1;
+  fetchData();
 });
 
-/* TOTAL PAGES */
-const totalPages = computed(() =>
-  Math.ceil(filteredRoutes.value.length / pageSize),
-);
+/* FETCH WHEN PAGE CHANGE */
+watch(page, fetchData);
+
+/* COMPUTED */
+const pagedRoutes = computed(() => store.paginate?.data || []);
+const pagination = computed(() => store.paginate?.paginationInfo);
+const totalPages = computed(() => pagination.value?._totalPages || 1);
+const companies = computed(() => companyStore.list || []);
 
 /* HANDLERS */
 function prevPage() {
@@ -57,13 +58,22 @@ function nextPage() {
 <template>
   <div>
     <!-- HEADER -->
-    <div class="mb-6">
-      <h1 class="text-2xl font-semibold">Routes</h1>
-      <p class="text-sm text-gray-500">Manage all routes between locations</p>
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold">Routes</h1>
+        <p class="text-sm text-gray-500">Manage all routes between locations</p>
+      </div>
+
+      <NuxtLink
+        to="/admin/routes/create"
+        class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:opacity-90"
+      >
+        + Add Route
+      </NuxtLink>
     </div>
 
-    <!-- SEARCH + FILTER -->
-    <div class="mb-4 flex items-center gap-3">
+    <!-- FILTER -->
+    <div class="mb-4 flex flex-wrap items-center gap-3">
       <input
         v-model="keyword"
         placeholder="Search from / to..."
@@ -75,34 +85,49 @@ function nextPage() {
         class="rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
       >
         <option value="ALL">All Companies</option>
-        <option v-for="c in companies" :key="c.id" :value="c.id">
+        <option v-for="c in companies" :key="c._id" :value="c._id">
           {{ c.name }}
         </option>
       </select>
     </div>
 
+    <!-- LOADING -->
+    <div v-if="store.loading" class="py-10 text-center text-sm text-gray-500">
+      Loading routes...
+    </div>
+
     <!-- TABLE -->
     <AdminTable
+      v-else
       :columns="['From', 'To', 'Company']"
       :data="pagedRoutes"
       :page="page"
-      :pageSize="pageSize"
+      :page-size="pageSize"
+      :total="pagination?._totalData"
+      :total-pages="totalPages"
       @prev="prevPage"
       @next="nextPage"
+      @go="page = $event"
+      @update:pageSize="
+        (val) => {
+          pageSize = val;
+          page = 1;
+        }
+      "
     >
       <tr
         v-for="r in pagedRoutes"
         :key="r._id"
-        class="border-b border-b-gray-100 transition hover:bg-gray-50"
+        class="border-b border-gray-100 transition hover:bg-gray-50"
       >
         <!-- FROM -->
         <td class="px-4 py-3 font-medium text-gray-700">
-          {{ r.startStop.name }}
+          {{ r.startStopId?.name }}
         </td>
 
         <!-- TO -->
         <td class="px-4 py-3 font-medium text-gray-700">
-          {{ r.endStop.name }}
+          {{ r.endStopId?.name }}
         </td>
 
         <!-- COMPANY -->
@@ -110,15 +135,15 @@ function nextPage() {
           <span
             class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
           >
-            {{ r.company.name }}
+            {{ r.companyId?.name }}
           </span>
         </td>
       </tr>
     </AdminTable>
 
-    <!-- EMPTY STATE (nếu muốn custom hơn AdminTable) -->
+    <!-- EMPTY -->
     <p
-      v-if="!pagedRoutes.length"
+      v-if="!store.loading && !pagedRoutes.length"
       class="mt-6 text-center text-sm text-gray-400"
     >
       No routes found

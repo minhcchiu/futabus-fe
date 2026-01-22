@@ -24,7 +24,7 @@ const emit = defineEmits(["view"]);
       </thead>
 
       <tbody>
-        <tr v-for="row in rows" :key="row.id" class="border-t hover:bg-bg">
+        <tr v-for="row in rows" :key="row.id" class="hover:bg-bg border-t">
           <td v-for="col in columns" :key="col.key" class="p-3">
             <slot :name="`cell-${col.key}`" :row="row">
               {{ row[col.key] }}
