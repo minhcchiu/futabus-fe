@@ -1,13 +1,14 @@
-export type Province = {
-  _id?: string;
+import type { Province } from "~/validations/pre-built/province.validation";
+
+export type District = {
+  _id: string;
+  provinceId: Province;
   name: string;
   nameEn: string;
   fullName: string;
   fullNameEn: string;
   codeName: string;
-  position: number;
+  sortOrder: number;
   administrativeUnit?: string;
   administrativeUnitEn?: string;
-  administrativeRegion?: string;
-  administrativeRegionEn?: string;
 };

@@ -1,0 +1,208 @@
+<script setup lang="ts">
+import { onMounted, reactive, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import { ZodError } from "zod";
+import { useDistrictStore } from "~/stores/pre-built/district.store";
+import { useProvinceStore } from "~/stores/pre-built/province.store";
+import { useWardStore } from "~/stores/pre-built/ward.store";
+import { useStopLocationStore } from "~/stores/stop_location.store";
+import {
+  CreateStopLocationSchema,
+  type CreateStopLocation,
+} from "~/validations/admin/stop_location.validation";
+
+definePageMeta({ layout: "admin" });
+
+const router = useRouter();
+const store = useStopLocationStore();
+const provinceStore = useProvinceStore();
+const districtStore = useDistrictStore();
+const wardStore = useWardStore();
+
+/* FORM STATE */
+const form = reactive<CreateStopLocation>({
+  name: "",
+  address: "",
+  provinceId: "",
+  districtId: "",
+  wardId: "",
+});
+
+const errors = ref<Record<string, string>>({});
+
+/* SELECT DATA */
+const provinces = computed(() => provinceStore.list);
+const districts = computed(() => districtStore.list);
+const wards = computed(() => wardStore.list);
+
+/* FETCHERS */
+const fetchProvinces = async () => {
+  await provinceStore.fetchAll({
+    _sort: "name",
+  });
+};
+
+const fetchDistricts = async (provinceId: string) => {
+  if (!provinceId) return;
+  await districtStore.fetchAll({
+    provinceId,
+    _sort: "name",
+  });
+};
+
+const fetchWards = async (districtId: string) => {
+  if (!districtId) return;
+  await wardStore.fetchAll({
+    _sort: "name",
+    districtId,
+  });
+};
+
+/* WATCH CASCADING */
+watch(
+  () => form.provinceId,
+  async (val) => {
+    if (val) await fetchDistricts(val);
+  },
+);
+
+watch(
+  () => form.districtId,
+  async (val) => {
+    if (val) await fetchWards(val);
+  },
+);
+
+onMounted(fetchProvinces);
+
+/* VALIDATE */
+const validateForm = (): boolean => {
+  try {
+    CreateStopLocationSchema.parse(form);
+    errors.value = {};
+    return true;
+  } catch (err) {
+    if (err instanceof ZodError) {
+      const fieldErrors: Record<string, string> = {};
+      err.errors.forEach((e) => {
+        const field = e.path[0] as string;
+        fieldErrors[field] = e.message;
+      });
+      errors.value = fieldErrors;
+    }
+    return false;
+  }
+};
+
+/* SUBMIT */
+const submit = async () => {
+  if (!validateForm()) return;
+  const res = await store.create(form);
+  if (res) {
+    router.push("/admin/stop-locations");
+  }
+};
+</script>
+
+<template>
+  <div class="max-w-xl space-y-6">
+    <!-- HEADER -->
+    <div>
+      <h1 class="text-2xl font-semibold">Create Stop Location</h1>
+      <p class="text-sm text-gray-500">Add a new pickup / drop-off location</p>
+    </div>
+
+    <!-- FORM -->
+    <div class="space-y-4">
+      <!-- NAME -->
+      <div>
+        <label class="mb-1 block text-sm font-medium">Location Name</label>
+        <input v-model="form.name" class="input" />
+        <p v-if="errors.name" class="error">{{ errors.name }}</p>
+      </div>
+
+      <!-- ADDRESS -->
+      <div>
+        <label class="mb-1 block text-sm font-medium">Address</label>
+        <input v-model="form.address" class="input" />
+        <p v-if="errors.address" class="error">{{ errors.address }}</p>
+      </div>
+
+      <!-- PROVINCE -->
+      <div>
+        <label class="mb-1 block text-sm font-medium">Province</label>
+        <select v-model="form.provinceId" class="input">
+          <option value="">Select province</option>
+          <option v-for="p in provinces" :key="p._id" :value="p._id">
+            {{ p.name }}
+          </option>
+        </select>
+        <p v-if="errors.provinceId" class="error">{{ errors.provinceId }}</p>
+      </div>
+
+      <!-- DISTRICT -->
+      <div>
+        <label class="mb-1 block text-sm font-medium">District</label>
+        <select
+          v-model="form.districtId"
+          class="input"
+          :disabled="!form.provinceId"
+        >
+          <option value="">Select district</option>
+          <option v-for="d in districts" :key="d._id" :value="d._id">
+            {{ d.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- WARD -->
+      <div>
+        <label class="mb-1 block text-sm font-medium">Ward</label>
+        <select
+          v-model="form.wardId"
+          class="input"
+          :disabled="!form.districtId"
+        >
+          <option value="">Select ward</option>
+          <option v-for="w in wards" :key="w._id" :value="w._id">
+            {{ w.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ACTION -->
+    <div class="flex gap-3">
+      <button
+        :disabled="store.loading"
+        class="btn-primary flex items-center justify-center gap-2"
+        @click="submit"
+      >
+        <span
+          v-if="store.loading"
+          class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+        />
+        <span>{{ store.loading ? "Saving..." : "Create" }}</span>
+      </button>
+
+      <NuxtLink to="/admin/stop-locations" class="btn-secondary">
+        Cancel
+      </NuxtLink>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.input {
+  @apply w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100;
+}
+.error {
+  @apply mt-1 text-xs text-red-500;
+}
+.btn-primary {
+  @apply rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60;
+}
+.btn-secondary {
+  @apply rounded-lg border px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50;
+}
+</style>

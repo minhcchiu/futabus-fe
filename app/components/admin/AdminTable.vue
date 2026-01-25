@@ -136,11 +136,11 @@ const visiblePages = computed(() => {
         <button
           v-for="p in visiblePages"
           :key="p"
-          @click="emit('go', p)"
           :class="[
             'rounded border px-3 py-1',
             p === page ? 'bg-primary text-white' : 'hover:bg-gray-50',
           ]"
+          @click="emit('go', p)"
         >
           {{ p }}
         </button>
@@ -176,7 +176,7 @@ const visiblePages = computed(() => {
           @keydown.enter="
             emit('go', +($event.target as HTMLInputElement).value)
           "
-        />
+        >
       </div>
     </div>
   </div>

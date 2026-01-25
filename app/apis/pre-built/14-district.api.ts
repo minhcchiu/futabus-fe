@@ -1,8 +1,8 @@
 import type { PaginateResponse } from "~/types/paginate-response.type";
-import type { District } from "~/types/pre-built/14-district";
 import type { UpdateResult } from "~/types/update-result";
 import { authFetch, guestFetch } from "~/utils/fetch";
 import type { FetchOptions, PaginationParams } from "~/utils/types/fetch.types";
+import type { District } from "~/validations/pre-built/district.validation";
 
 const DISTRICT_URL = "/districts";
 export const districtApi = {

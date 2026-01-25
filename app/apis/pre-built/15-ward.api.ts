@@ -1,8 +1,8 @@
 import type { PaginateResponse } from "~/types/paginate-response.type";
-import type { Ward } from "~/types/pre-built/15-ward";
 import type { UpdateResult } from "~/types/update-result";
 import { authFetch, guestFetch } from "~/utils/fetch";
 import type { FetchOptions, PaginationParams } from "~/utils/types/fetch.types";
+import type { Ward } from "~/validations/pre-built/ward.validation";
 
 const WARD_URL = "/wards";
 export const wardApi = {

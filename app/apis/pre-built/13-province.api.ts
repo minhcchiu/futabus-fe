@@ -1,10 +1,10 @@
 import type { PaginateResponse } from "~/types/paginate-response.type";
-import type { Province } from "~/types/pre-built/13-province";
 import type { UpdateResult } from "~/types/update-result";
 import { authFetch, guestFetch } from "~/utils/fetch";
 import type { FetchOptions, PaginationParams } from "~/utils/types/fetch.types";
+import type { Province } from "~/validations/pre-built/province.validation";
 
-const PROVINCE_URL = "/districts";
+const PROVINCE_URL = "/provinces";
 export const provinceApi = {
   //  ----- Method: GET -----
   paginate: (

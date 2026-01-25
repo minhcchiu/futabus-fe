@@ -78,7 +78,7 @@ function nextPage() {
         v-model="keyword"
         placeholder="Search from / to..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      />
+      >
 
       <select
         v-model="companyFilter"
@@ -108,7 +108,7 @@ function nextPage() {
       @prev="prevPage"
       @next="nextPage"
       @go="page = $event"
-      @update:pageSize="
+      @update:page-size="
         (val) => {
           pageSize = val;
           page = 1;

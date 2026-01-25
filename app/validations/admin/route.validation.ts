@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { BusCompany } from "~/validations/admin/bus_company.validation";
-import type { StopLocation } from "~/validations/admin/StopLocation.validation";
+import type { StopLocation } from "~/validations/admin/stop_location.validation";
 
 export const CreateRouteSchema = z.object({
   companyId: z.string(),
