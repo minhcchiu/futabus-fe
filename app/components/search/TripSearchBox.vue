@@ -149,12 +149,12 @@ const onSubmit = () => {
         <!-- Trip type -->
         <div class="flex items-center gap-6 text-sm">
           <label class="flex cursor-pointer items-center gap-2 text-green-600">
-            <input type="radio" checked class="accent-green-500" />
+            <input type="radio" checked class="accent-green-500" >
             Một chiều
           </label>
 
           <label class="hidden cursor-pointer items-center gap-2 text-gray-600">
-            <input type="radio" class="accent-green-500" />
+            <input type="radio" class="accent-green-500" >
             Khứ hồi
           </label>
         </div>
@@ -175,7 +175,7 @@ const onSubmit = () => {
             placeholder="Chọn điểm đi"
             :open="openType === 'from'"
             :provinces="locationsFrom || []"
-            :modelValue="provinceFrom"
+            :model-value="provinceFrom"
             @open="openFrom"
             @close="closeAll"
             @select="selectProvinceFrom"
@@ -186,7 +186,7 @@ const onSubmit = () => {
             placeholder="Chọn điểm đến"
             :open="openType === 'to'"
             :provinces="locationsTo || []"
-            :modelValue="provinceTo"
+            :model-value="provinceTo"
             :disabled="!provinceFrom"
             @open="openTo"
             @close="closeAll"
@@ -202,7 +202,7 @@ const onSubmit = () => {
               src="https://futabus.vn/images/icons/switch_location.svg"
               alt="Swap"
               class="transition-all duration-300 ease-in-out group-hover:rotate-180 group-hover:scale-110"
-            />
+            >
           </button>
         </div>
 

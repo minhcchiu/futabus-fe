@@ -36,7 +36,7 @@ const emit = defineEmits(["open-menu"]);
           src="https://futabus.vn/images/icons/vietnam.svg"
           alt="Vietnam"
           class="h-4 w-4"
-        />
+        >
         <span>VI</span>
         <svg
           class="h-4 w-4"
@@ -56,7 +56,7 @@ const emit = defineEmits(["open-menu"]);
 
     <!-- CENTER LOGO -->
     <div class="flex flex-1 justify-center">
-      <img src="/logo.png" alt="FUTA Bus Lines" class="h-10 object-contain" />
+      <img src="/logo.png" alt="FUTA Bus Lines" class="h-10 object-contain" >
     </div>
 
     <!-- RIGHT: Auth -->
@@ -96,7 +96,7 @@ const emit = defineEmits(["open-menu"]);
           src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg"
           alt="Zalo"
           class="h-4 w-4 rounded-sm bg-white"
-        />
+        >
       </a>
     </div>
 

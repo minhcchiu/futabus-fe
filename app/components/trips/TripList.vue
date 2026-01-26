@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Trip } from "~/validations/trip.validation";
+import type { Trip } from "~/validations/admin/trip.validation";
 
 defineProps<{
   trips: Trip[];
@@ -16,6 +16,6 @@ defineProps<{
     <TripListHeader :route="routeName" :total="trips.length" />
 
     <!-- eslint-disable @typescript-eslint/no-unused-vars -->
-    <TripCard v-for="trip in trips" :key="trip.id" />
+    <TripCard v-for="trip in trips" :key="trip._id" :trip="trip" />
   </div>
 </template>

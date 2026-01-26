@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import type { TimelineStop } from "~/validations/trip.validation";
+import type { Trip } from "~/validations/admin/trip.validation";
 const { isMobile } = useDevice();
-
-const timeline: TimelineStop[] = [
+defineProps<{
+  trip: Trip;
+}>();
+const timeline: any[] = [
   {
     time: "16:50",
     title: "172 Lê Duẩn - Đắk Lắk",
@@ -71,8 +73,8 @@ const selectTrip = () => {
 <template>
   <div class="rounded-xl border bg-white p-4" @click="selectTrip">
     <div class="flex items-start gap-10">
-      <TripTime />
-      <TripMeta />
+      <TripTime :trip="trip" />
+      <TripMeta :trip="trip" />
     </div>
     <MobileTripMeta />
 

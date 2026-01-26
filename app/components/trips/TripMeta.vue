@@ -1,4 +1,11 @@
-<script setup></script>
+<script setup lang="ts">
+import { toCamelCase, toVnd } from "~/utils/helpers/data.helper";
+import type { Trip } from "~/validations/admin/trip.validation";
+
+defineProps<{
+  trip: Trip;
+}>();
+</script>
 
 <template>
   <div
@@ -7,14 +14,16 @@
     <ul class="flex justify-end gap-x-2">
       <li class="flex items-center gap-x-1 text-sm text-[#454647]">
         <div class="h-[6px] w-[6px] rounded-full bg-[#C8CCD3]" />
-        Limousine
+        {{ toCamelCase(trip.vehicleId.level) }}
       </li>
       <li class="flex items-center gap-x-1 text-sm text-[#00613D]">
         <div class="h-[6px] w-[6px] rounded-full bg-[#C8CCD3]" />
-        21 chỗ trống
+        {{ trip.emptySeat || 10 }} chỗ trống
       </li>
     </ul>
 
-    <p class="mt-5 text-lg font-bold text-green-600">400.000đ</p>
+    <p class="mt-5 text-lg font-bold text-green-600">
+      {{ toVnd(trip.price || trip.tripPrices?.[0]?.price || 500000) }}
+    </p>
   </div>
 </template>

@@ -19,6 +19,8 @@ export const CreateTripSchema = z.object({
   companyId: z.string(),
   vehicleId: z.string(),
   departureTime: z.number(),
+  arriveTime: z.number().optional(),
+  price: z.number().optional(),
   status: z.enum([
     TripStatus.CREATED,
     TripStatus.READY,
@@ -31,6 +33,7 @@ export const CreateTripSchema = z.object({
 });
 
 export type CreateTrip = z.infer<typeof CreateTripSchema>;
+
 export type UpdateTrip = z.infer<typeof CreateTripSchema>;
 export type Trip = {
   _id: string;
@@ -38,6 +41,9 @@ export type Trip = {
   companyId: BusCompany;
   vehicleId: Vehicle;
   departureTime: number;
+  arriveTime?: number;
+  price?: number;
+  emptySeat?: number;
   status: TripStatus;
   tripPrices: TripPrice[];
 };

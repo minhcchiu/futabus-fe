@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Trip } from "~/validations/trip.validation";
+import type { Trip } from "~/validations/admin/trip.validation";
 
 // const date = ref(fromDate(new Date(), getLocalTimeZone())) as Ref<DateValue>;
 // const tripType = ref("one-way");
@@ -7,62 +7,20 @@ import type { Trip } from "~/validations/trip.validation";
 // const to = ref("da-nang");
 // const tickets = ref(1);
 
+const tripStore = useTripStore();
 const selectedTrip = ref<Trip | null>(null);
 
-const trips: Trip[] = [
-  {
-    id: "1",
-    date: "Thứ 5, 22/01/2026",
-    route: "Đắk Nông - Đà Nẵng",
-    departTime: "15:00",
-    departStation: "Bến Xe Đắk Nông",
-    arriveTime: "06:00",
-    arriveStation: "Bến Xe Trung Tâm Đà Nẵng",
-    duration: "15 giờ",
-    vehicleType: "Limousine",
-    price: 400000,
-  },
-  {
-    id: "2",
-    date: "Thứ 5, 22/01/2026",
-    route: "Đắk Nông - Đà Nẵng",
-    departTime: "15:00",
-    departStation: "Bến Xe Đắk Nông",
-    arriveTime: "06:00",
-    arriveStation: "Bến Xe Trung Tâm Đà Nẵng",
-    duration: "15 giờ",
-    vehicleType: "Limousine",
-    price: 400000,
-  },
-  {
-    id: "3",
-    date: "Thứ 5, 22/01/2026",
-    route: "Đắk Nông - Đà Nẵng",
-    departTime: "15:00",
-    departStation: "Bến Xe Đắk Nông",
-    arriveTime: "06:00",
-    arriveStation: "Bến Xe Trung Tâm Đà Nẵng",
-    duration: "15 giờ",
-    vehicleType: "Limousine",
-    price: 400000,
-  },
-  {
-    id: "4",
-    date: "Thứ 5, 22/01/2026",
-    route: "Đắk Nông - Đà Nẵng",
-    departTime: "15:00",
-    departStation: "Bến Xe Đắk Nông",
-    arriveTime: "06:00",
-    arriveStation: "Bến Xe Trung Tâm Đà Nẵng",
-    duration: "15 giờ",
-    vehicleType: "Limousine",
-    price: 400000,
-  },
-];
-
-onMounted(() => {
-  selectedTrip.value = trips[0]!;
+onMounted(async () => {
+  await tripStore.fetchAll({
+    _sort: "departureTime",
+    _populate: "routeId.startStopId endStopId,vehicleId",
+    [`departureTime>=${Date.now()}`]: "",
+  });
 });
+
+// onMounted(() => {
+//   selectedTrip.value = trips[0]!;
+// });
 
 const openFilter = ref(false);
 const isOpenSearchResult = ref(false);
@@ -73,6 +31,8 @@ const onSearch = () => {
 const onCloseMobileTripList = () => {
   isOpenSearchResult.value = false;
 };
+
+const trips = computed(() => tripStore.list);
 </script>
 
 <template>
@@ -123,7 +83,7 @@ const onCloseMobileTripList = () => {
               alt="FUTA Bus Lines"
               class="h-full w-full object-cover"
             />
-            <div class="absolute inset-0 bg-black/30"></div>
+            <div class="absolute inset-0 bg-black/30" />
             <div class="absolute bottom-3 left-4 text-white">
               <h2 class="text-lg font-semibold">Liên hệ với chúng tôi</h2>
               <p class="text-xs opacity-90">FUTA Bus Lines</p>
