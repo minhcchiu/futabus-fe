@@ -1,32 +1,144 @@
 <script setup lang="ts">
-const from = ref("Cao Bằng");
-const to = ref("Đà Nẵng");
+import { useRouteStore } from "@/stores/route.store";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import type { Province } from "~/validations/pre-built/province.validation";
+
+const route = useRoute();
+const router = useRouter();
+const routeStore = useRouteStore();
+
+/* ========================
+   STATE
+======================== */
+const provinceFrom = ref<Province | null>(null);
+const provinceTo = ref<Province | null>(null);
 const openType = ref<"from" | "to" | null>(null);
 
-function openFrom() {
-  openType.value = "from";
-}
+/* ========================
+   COMPUTED LISTS
+======================== */
+const locationsFrom = computed(() => {
+  return routeStore.locationsFromTo
+    .filter(
+      (l) =>
+        !provinceTo.value ||
+        l.provincesTo.some((pt) => pt._id === provinceTo.value?._id),
+    )
+    .map((l) => l.provinceFrom);
+});
 
-function openTo() {
-  openType.value = "to";
-}
+const locationsTo = computed(() => {
+  return routeStore.locationsFromTo
+    .filter(
+      (l) =>
+        !provinceFrom.value || l.provinceFrom._id === provinceFrom.value?._id,
+    )
+    .flatMap((l) => l.provincesTo);
+});
 
-function closeAll() {
-  openType.value = null;
-}
+/* ========================
+   UI HANDLERS
+======================== */
+const openFrom = () => (openType.value = "from");
+const openTo = () => (openType.value = "to");
+const closeAll = () => (openType.value = null);
 
-/**
- * from | to | null
- */
-const activeDropdown = ref(null);
+/* ========================
+   SELECT HANDLERS
+======================== */
+const selectProvinceFrom = (province: Province | null) => {
+  provinceFrom.value = province;
+  provinceTo.value = null; // reset TO khi đổi FROM
 
-const swapLocation = () => {
-  const temp = from.value;
-  from.value = to.value;
-  to.value = temp;
-
-  activeDropdown.value = null;
   closeAll();
+};
+
+const selectProvinceTo = (province: Province | null) => {
+  provinceTo.value = province;
+  closeAll();
+};
+
+/* ========================
+   SYNC QUERY → FORM
+======================== */
+const syncFormFromQuery = () => {
+  const { from, to } = route.query;
+
+  // FROM
+  if (from) {
+    const foundFrom = routeStore.locationsFromTo.find(
+      (l) => l.provinceFrom._id === from,
+    )?.provinceFrom;
+
+    provinceFrom.value = foundFrom || null;
+  } else {
+    provinceFrom.value = null;
+  }
+
+  // TO (chỉ hợp lệ theo FROM)
+  if (to && provinceFrom.value) {
+    const foundTo = routeStore.locationsFromTo
+      .filter((l) => l.provinceFrom._id === provinceFrom.value!._id)
+      .flatMap((l) => l.provincesTo)
+      .find((p) => p._id === to);
+
+    provinceTo.value = foundTo || null;
+  } else {
+    provinceTo.value = null;
+  }
+
+  // OPTIONAL: Nếu chỉ có TO mà không có FROM
+  if (!from && to) {
+    const foundPair = routeStore.locationsFromTo.find((l) =>
+      l.provincesTo.some((p) => p._id === to),
+    );
+    if (foundPair) {
+      provinceFrom.value = foundPair.provinceFrom;
+      provinceTo.value = foundPair.provincesTo.find((p) => p._id === to)!;
+    }
+  }
+};
+
+/* ========================
+   LIFECYCLE
+======================== */
+onMounted(async () => {
+  await routeStore.getLocationsFromTo();
+  syncFormFromQuery();
+});
+
+watch(
+  () => route.query,
+  () => {
+    syncFormFromQuery();
+  },
+);
+
+/* ========================
+   Handle Date
+======================== */
+const travelDate = ref<Date>(
+  route.query.date ? new Date(+route.query.date) : new Date(),
+);
+
+const onDateChange = (date: Date) => {
+  travelDate.value = date;
+};
+
+// Handle ticket
+const ticketCount = ref<number>(+(route.query?.ticket || 1));
+
+const onSubmit = () => {
+  // set query
+  const query: Record<string, string | null> = {
+    from: provinceFrom.value?._id || null,
+    to: provinceTo.value?._id || null,
+    date: travelDate.value.getTime()?.toString() || null,
+    ticket: `${ticketCount.value}`,
+  };
+
+  router.replace({ query });
 };
 </script>
 <template>
@@ -62,24 +174,29 @@ const swapLocation = () => {
             label="Điểm đi"
             placeholder="Chọn điểm đi"
             :open="openType === 'from'"
+            :provinces="locationsFrom || []"
+            :modelValue="provinceFrom"
             @open="openFrom"
             @close="closeAll"
+            @select="selectProvinceFrom"
           />
 
-          <!-- Điểm đến -->
           <LocationSelect
             label="Điểm đến"
             placeholder="Chọn điểm đến"
             :open="openType === 'to'"
+            :provinces="locationsTo || []"
+            :modelValue="provinceTo"
+            :disabled="!provinceFrom"
             @open="openTo"
             @close="closeAll"
+            @select="selectProvinceTo"
           />
 
           <!-- Swap button -->
           <button
             type="button"
             class="group absolute left-1/2 top-1/2 z-20 mt-2 -translate-x-1/2 -translate-y-1/2"
-            @click="swapLocation"
           >
             <img
               src="https://futabus.vn/images/icons/switch_location.svg"
@@ -90,19 +207,16 @@ const swapLocation = () => {
         </div>
 
         <!-- Ngày đi -->
-        <DateSelect />
+        <DateSelect :value="travelDate" @change="onDateChange" />
 
         <!-- Số vé -->
         <div>
           <label class="mb-1 block text-sm font-medium">Số vé</label>
           <select
+            v-model="ticketCount"
             class="w-full rounded-lg border px-4 py-[18px] outline-none focus:border-green-500"
           >
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
+            <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
           </select>
         </div>
       </div>
@@ -122,6 +236,7 @@ const swapLocation = () => {
       <div class="mt-8 flex justify-center">
         <button
           class="rounded-full bg-green-500 px-12 py-3 font-semibold text-white hover:bg-green-600"
+          @click="onSubmit"
         >
           Tìm chuyến xe
         </button>

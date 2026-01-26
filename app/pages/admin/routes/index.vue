@@ -77,7 +77,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Search company or stop..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      >
+      />
     </div>
 
     <!-- TABLE -->

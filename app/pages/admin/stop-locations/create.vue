@@ -97,6 +97,10 @@ const validateForm = (): boolean => {
 /* SUBMIT */
 const submit = async () => {
   if (!validateForm()) return;
+  Object.keys(form).forEach((key) => {
+    // @ts-ignore
+    if (!form[key]) delete form[key];
+  });
   const res = await store.create(form);
   if (res) {
     router.push("/admin/stop-locations");
@@ -117,14 +121,14 @@ const submit = async () => {
       <!-- NAME -->
       <div>
         <label class="mb-1 block text-sm font-medium">Location Name</label>
-        <input v-model="form.name" class="input" >
+        <input v-model="form.name" class="input" />
         <p v-if="errors.name" class="error">{{ errors.name }}</p>
       </div>
 
       <!-- ADDRESS -->
       <div>
         <label class="mb-1 block text-sm font-medium">Address</label>
-        <input v-model="form.address" class="input" >
+        <input v-model="form.address" class="input" />
         <p v-if="errors.address" class="error">{{ errors.address }}</p>
       </div>
 

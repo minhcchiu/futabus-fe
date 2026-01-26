@@ -1,36 +1,40 @@
 <script setup lang="ts">
-defineProps<{
+import type { Province } from "~/validations/pre-built/province.validation";
+
+const props = defineProps<{
   label: string;
   placeholder?: string;
   open: boolean;
+  provinces: Province[];
+  disabled?: boolean;
+  modelValue?: Province | null;
 }>();
 
 const emit = defineEmits(["open", "close", "select"]);
 
 const keyword = ref("");
-const locations = [
-  "An Giang",
-  "Bà Rịa - Vũng Tàu",
-  "Bạc Liêu",
-  "Bắc Kạn",
-  "Bắc Giang",
-  "Đà Nẵng",
-  "Đắk Lắk",
-  "Hà Nội",
-  "TP. Hồ Chí Minh",
-];
-const recent = [
-  "Hà Nội",
-  "TP. Hồ Chí Minh",
-  "Đắk Lắk",
-  "Đà Nẵng",
-  "Bà Rịa - Vũng Tàu",
-  "An Giang",
-];
 
+/* =========================
+  SYNC MODEL -> INPUT
+========================= */
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) {
+      keyword.value = val.fullName;
+    } else {
+      keyword.value = "";
+    }
+  },
+  { immediate: true },
+);
+
+/* =========================
+  FILTER
+========================= */
 const filteredLocations = computed(() =>
-  locations.filter((l) =>
-    l.toLowerCase().includes(keyword.value.toLowerCase()),
+  props.provinces.filter((pro) =>
+    pro.name.toLowerCase().includes(keyword.value.toLowerCase()),
   ),
 );
 
@@ -38,17 +42,19 @@ function close() {
   emit("close");
 }
 
-function select(value: string) {
-  keyword.value = value;
+function select(value: Province) {
+  keyword.value = value.fullName;
   emit("select", value);
   close();
 }
 
 function clear() {
   keyword.value = "";
+  emit("select", null); // reset value bên ngoài
 }
 
 const dropdownWrapper = ref<any>();
+
 const openDropdown = () => {
   emit("open");
 };
@@ -78,15 +84,18 @@ onBeforeUnmount(() => {
     <!-- Input box -->
     <div
       class="flex cursor-text items-center rounded-lg border bg-white px-4 py-3"
-      :class="open ? 'border-green-500 ring-1 ring-green-300' : ''"
+      :class="[
+        open ? 'border-green-500 ring-1 ring-green-300' : '',
+        disabled ? 'pointer-events-none opacity-50' : '',
+      ]"
       @click.stop="openDropdown"
-      @focus="openDropdown"
     >
       <input
         v-model="keyword"
         :placeholder="placeholder"
         class="w-full py-2 text-sm outline-none"
-      >
+        readonly
+      />
 
       <!-- Clear -->
       <button
@@ -110,9 +119,9 @@ onBeforeUnmount(() => {
         <div class="relative">
           <input
             v-model="keyword"
-            placeholder="Chọn điểm đi"
+            placeholder="Tìm tỉnh/thành"
             class="w-full rounded-lg border px-3 py-3 pr-10 outline-none focus:border-green-500"
-          >
+          />
 
           <!-- Clear button -->
           <button
@@ -132,11 +141,11 @@ onBeforeUnmount(() => {
 
         <button
           v-for="item in filteredLocations"
-          :key="item"
+          :key="item._id"
           class="flex w-full items-center border-b border-gray-200 px-4 py-2 text-sm last:border-b-0 hover:bg-green-50"
           @click="select(item)"
         >
-          {{ item }}
+          {{ item.fullName }}
         </button>
 
         <p
@@ -145,22 +154,6 @@ onBeforeUnmount(() => {
         >
           Không tìm thấy địa điểm
         </p>
-      </div>
-
-      <!-- Recent -->
-      <div class="border-t p-4">
-        <p class="mb-2 text-xs font-bold text-gray-500">TÌM KIẾM GẦN ĐÂY</p>
-
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="item in recent"
-            :key="item"
-            class="rounded-lg border px-3 py-1 text-sm hover:border-green-400"
-            @click="select(item)"
-          >
-            {{ item }}
-          </button>
-        </div>
       </div>
     </div>
   </div>

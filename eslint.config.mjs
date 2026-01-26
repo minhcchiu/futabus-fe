@@ -24,6 +24,8 @@ export default withNuxt([
         "error",
         { varsIgnorePattern: "^_$" },
       ],
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/no-dynamic-delete": "off",
     },
   },
 ]);

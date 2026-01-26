@@ -75,7 +75,7 @@ const methods = [
             v-if="method"
             :src="methods.find((m) => m.key === method)?.icon"
             class="h-6 w-6"
-          >
+          />
           <div>
             <p class="text-sm text-gray-500">Phương thức thanh toán</p>
             <p class="font-medium">

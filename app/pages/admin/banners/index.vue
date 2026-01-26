@@ -13,7 +13,7 @@ definePageMeta({
 
     <div class="grid grid-cols-4 gap-4">
       <div v-for="b in banners" :key="b._id" class="rounded border p-2">
-        <img :src="b.image" class="h-32 w-full rounded object-cover" >
+        <img :src="b.image" class="h-32 w-full rounded object-cover" />
         <p class="font-semibold">{{ b.title }}</p>
         <p>{{ b.isShow ? "Visible" : "Hidden" }}</p>
       </div>

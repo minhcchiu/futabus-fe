@@ -3,6 +3,7 @@ import type { PaginateResponse } from "~/types/paginate-response.type";
 import type { PaginationParams } from "~/utils/types/fetch.types";
 import type {
   CreateRoute,
+  LocationsFromTo,
   Route,
   UpdateRoute,
 } from "~/validations/admin/route.validation";
@@ -65,6 +66,17 @@ export const useRouteStore = defineStore("route", () => {
     }
   };
 
+  const locationsFromTo = ref<LocationsFromTo[]>([]);
+  const getLocationsFromTo = async () => {
+    loading.value = true;
+    try {
+      locationsFromTo.value = await routeApi.getLocationsFromTo();
+      return list.value;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     loading,
     list,
@@ -76,5 +88,8 @@ export const useRouteStore = defineStore("route", () => {
     create,
     updateById,
     deleteManyByIds,
+
+    locationsFromTo,
+    getLocationsFromTo,
   };
 });

@@ -4,36 +4,42 @@ import {
   getLocalTimeZone,
   type DateValue,
 } from "@internationalized/date";
-import { Solar } from "lunar-typescript";
 import { computed, ref } from "vue";
+
+/* props: nhận Date thường */
+const props = defineProps<{
+  value?: Date;
+}>();
+
+const emit = defineEmits<{
+  (e: "change", value: Date): void;
+}>();
+
 const isOpen = ref(false);
-const selectedDate = ref(
-  fromDate(new Date(), getLocalTimeZone()),
+
+/* convert Date -> DateValue */
+const toDateValue = (d: Date) => fromDate(d, getLocalTimeZone()) as DateValue;
+
+/* state nội bộ */
+const selectedDate = ref<DateValue>(
+  props.value ? toDateValue(props.value) : toDateValue(new Date()),
 ) as Ref<DateValue>;
 
 const formattedDate = computed(() => {
   const d = selectedDate.value;
-  return `${d.day.toString().padStart(2, "0")}/${(d.month + 1).toString().padStart(2, "0")}/${d.year}`;
+  return `${d.day.toString().padStart(2, "0")}/${(d.month + 1)
+    .toString()
+    .padStart(2, "0")}/${d.year}`;
 });
 
 const dayOfWeek = computed(() => {
-  const d = selectedDate.value;
-  if (d.toDate("vi-VN").getDay() === 0) return "Chủ Nhật";
-  return `Thứ ${d.toDate("vi-VN").getDay()}`;
+  const d = selectedDate.value.toDate("vi-VN");
+  if (d.getDay() === 0) return "Chủ Nhật";
+  return `Thứ ${d.getDay() + 1}`;
 });
 
-// Function to get lunar display
-const getLunarDisplay = (date: Date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const day = date.getDate();
-  const solar = Solar.fromYmd(year, month, day);
-
-  if (solar.getDay() === 1) {
-    return `${solar.getLunar().getDay()}/${solar.getLunar().getMonth()}`;
-  } else {
-    return solar.getLunar().getDay();
-  }
+const onChangeDate = (v: any) => {
+  emit("change", new Date(v.year, v.month - 1, v.day));
 };
 </script>
 <template>
@@ -61,6 +67,7 @@ const getLunarDisplay = (date: Date) => {
           :min-date="fromDate(new Date(), getLocalTimeZone())"
           locale="vi-VN"
           :first-day-of-week="1"
+          @update:model-value="onChangeDate"
         >
           <template #header="{ month, year, previousMonth, nextMonth }">
             <div class="flex items-center justify-between px-2 py-1">
@@ -80,9 +87,6 @@ const getLunarDisplay = (date: Date) => {
           <template #day="{ date }">
             <div class="text-center">
               <div>{{ date.getDate() }}</div>
-              <div class="text-xs text-gray-500">
-                {{ getLunarDisplay(date) }} xxxx
-              </div>
             </div>
           </template>
         </Calendar>

@@ -211,7 +211,7 @@ const saveEditName = async () => {
     >
       <div class="col-span-2">
         <label class="label">Template name</label>
-        <input v-model="form.name" class="input" >
+        <input v-model="form.name" class="input" />
       </div>
       <div>
         <label class="label">Floors</label>
@@ -220,11 +220,11 @@ const saveEditName = async () => {
           type="number"
           min="1"
           class="input"
-        >
+        />
       </div>
       <div>
         <label class="label">Rows</label>
-        <input v-model.number="form.rows" type="number" min="1" class="input" >
+        <input v-model.number="form.rows" type="number" min="1" class="input" />
       </div>
       <div>
         <label class="label">Columns</label>
@@ -233,7 +233,7 @@ const saveEditName = async () => {
           type="number"
           min="1"
           class="input"
-        >
+        />
       </div>
 
       <div class="col-span-5">
@@ -322,7 +322,7 @@ const saveEditName = async () => {
               class="input"
               placeholder="VD: Ghế VIP 01"
               autofocus
-            >
+            />
           </div>
 
           <div class="flex justify-end gap-3 pt-3">
