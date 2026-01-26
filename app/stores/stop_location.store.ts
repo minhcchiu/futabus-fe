@@ -13,10 +13,10 @@ export const useStopLocationStore = defineStore("stop_location", () => {
   const paginate = ref<PaginateResponse<StopLocation> | null>(null);
   const selected = ref<StopLocation | null>(null);
 
-  const fetchAll = async () => {
+  const fetchAll = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      list.value = await stopLocationApi.getAll();
+      list.value = await stopLocationApi.getAll(query);
       return list.value;
     } finally {
       loading.value = false;

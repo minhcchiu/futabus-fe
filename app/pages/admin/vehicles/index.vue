@@ -132,7 +132,12 @@ async function handleDeleted() {
 
         <!-- SEATS -->
         <td class="px-4 py-3 text-gray-600">
-          {{ v.totalSeat }}
+          <NuxtLink
+            :to="`/admin/vehicles/${v._id}/seats`"
+            class="text-sm font-medium text-primary hover:underline"
+          >
+            {{ v.seats?.length || 0 }}
+          </NuxtLink>
         </td>
 
         <!-- STATUS -->

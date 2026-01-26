@@ -20,6 +20,7 @@ const fetchData = async () => {
     _limit: pageSize.value,
     keyword: keyword.value || undefined,
     _status: statusFilter.value !== "ALL" ? statusFilter.value : undefined,
+    _populate: "provinceId,districtId,wardId",
   });
 };
 

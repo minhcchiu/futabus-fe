@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AdminTable from "@/components/admin/AdminTable.vue";
+import DeleteButton from "@/components/common/DeleteButton.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useBusCompanyStore } from "~/stores/bus_company.store";
 import { useRouteStore } from "~/stores/route.store";
@@ -11,47 +12,45 @@ const companyStore = useBusCompanyStore();
 
 /* UI STATE */
 const keyword = ref("");
-const companyFilter = ref<string | "ALL">("ALL");
 const page = ref(1);
 const pageSize = ref(5);
 
-/* FETCH DATA */
+/* FETCH */
 const fetchData = async () => {
   await store.fetchPaginate({
     _page: page.value,
     _limit: pageSize.value,
     keyword: keyword.value || undefined,
-    companyId: companyFilter.value !== "ALL" ? companyFilter.value : undefined,
+    _populate: "companyId,startStopId,endStopId",
   });
 };
 
 onMounted(async () => {
-  await companyStore.fetchAll(); // để filter theo company
+  await companyStore.fetchAll();
   await fetchData();
 });
 
-/* RESET PAGE WHEN FILTER CHANGE */
-watch([keyword, companyFilter, pageSize], () => {
+/* WATCH */
+watch([keyword, pageSize], () => {
   page.value = 1;
   fetchData();
 });
-
-/* FETCH WHEN PAGE CHANGE */
 watch(page, fetchData);
 
 /* COMPUTED */
-const pagedRoutes = computed(() => store.paginate?.data || []);
+const routes = computed(() => store.paginate?.data || []);
 const pagination = computed(() => store.paginate?.paginationInfo);
 const totalPages = computed(() => pagination.value?._totalPages || 1);
-const companies = computed(() => companyStore.list || []);
 
 /* HANDLERS */
 function prevPage() {
   if (page.value > 1) page.value--;
 }
-
 function nextPage() {
   if (page.value < totalPages.value) page.value++;
+}
+async function handleDeleted() {
+  await fetchData();
 }
 </script>
 
@@ -61,7 +60,7 @@ function nextPage() {
     <div class="mb-6 flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-semibold">Routes</h1>
-        <p class="text-sm text-gray-500">Manage all routes between locations</p>
+        <p class="text-sm text-gray-500">Manage bus routes</p>
       </div>
 
       <NuxtLink
@@ -72,81 +71,44 @@ function nextPage() {
       </NuxtLink>
     </div>
 
-    <!-- FILTER -->
-    <div class="mb-4 flex flex-wrap items-center gap-3">
+    <!-- SEARCH -->
+    <div class="mb-4 flex items-center gap-3">
       <input
         v-model="keyword"
-        placeholder="Search from / to..."
-        class="w-64 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      >
-
-      <select
-        v-model="companyFilter"
-        class="rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      >
-        <option value="ALL">All Companies</option>
-        <option v-for="c in companies" :key="c._id" :value="c._id">
-          {{ c.name }}
-        </option>
-      </select>
-    </div>
-
-    <!-- LOADING -->
-    <div v-if="store.loading" class="py-10 text-center text-sm text-gray-500">
-      Loading routes...
+        placeholder="Search company or stop..."
+        class="w-64 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
+      />
     </div>
 
     <!-- TABLE -->
     <AdminTable
-      v-else
-      :columns="['From', 'To', 'Company']"
-      :data="pagedRoutes"
+      :columns="['Company', 'Start Stop', 'End Stop', 'Actions']"
+      :data="routes"
       :page="page"
       :page-size="pageSize"
-      :total="pagination?._totalData"
       :total-pages="totalPages"
       @prev="prevPage"
       @next="nextPage"
-      @go="page = $event"
-      @update:page-size="
-        (val) => {
-          pageSize = val;
-          page = 1;
-        }
-      "
     >
-      <tr
-        v-for="r in pagedRoutes"
-        :key="r._id"
-        class="border-b border-gray-100 transition hover:bg-gray-50"
-      >
-        <!-- FROM -->
-        <td class="px-4 py-3 font-medium text-gray-700">
-          {{ r.startStopId?.name }}
-        </td>
+      <tr v-for="r in routes" :key="r._id" class="border-b hover:bg-gray-50">
+        <td class="px-4 py-3">{{ r.companyId?.name || "-" }}</td>
+        <td class="px-4 py-3">{{ r.startStopId?.name || "-" }}</td>
+        <td class="px-4 py-3">{{ r.endStopId?.name || "-" }}</td>
 
-        <!-- TO -->
-        <td class="px-4 py-3 font-medium text-gray-700">
-          {{ r.endStopId?.name }}
-        </td>
-
-        <!-- COMPANY -->
-        <td class="px-4 py-3">
-          <span
-            class="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+        <td class="space-x-3 px-4 py-3 text-right">
+          <NuxtLink
+            :to="`/admin/routes/${r._id}`"
+            class="text-sm text-primary hover:underline"
           >
-            {{ r.companyId?.name }}
-          </span>
+            Edit
+          </NuxtLink>
+
+          <DeleteButton
+            :on-delete="() => store.deleteManyByIds([r._id])"
+            @deleted="handleDeleted"
+          />
         </td>
       </tr>
     </AdminTable>
-
-    <!-- EMPTY -->
-    <p
-      v-if="!store.loading && !pagedRoutes.length"
-      class="mt-6 text-center text-sm text-gray-400"
-    >
-      No routes found
-    </p>
   </div>
 </template>

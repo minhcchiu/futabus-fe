@@ -13,10 +13,10 @@ export const useVehicleStore = defineStore("vehicle", () => {
   const paginate = ref<PaginateResponse<Vehicle> | null>(null);
   const selected = ref<Vehicle | null>(null);
 
-  const fetchAll = async () => {
+  const fetchAll = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      list.value = await vehicleApi.getAll();
+      list.value = await vehicleApi.getAll(query);
       return list.value;
     } finally {
       loading.value = false;

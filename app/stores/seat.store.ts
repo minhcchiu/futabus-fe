@@ -1,22 +1,22 @@
-import { routeApi } from "~/apis/futabus/route.api";
+import { seatApi } from "~/apis/futabus/seat.api";
 import type { PaginateResponse } from "~/types/paginate-response.type";
 import type { PaginationParams } from "~/utils/types/fetch.types";
 import type {
-  CreateRoute,
-  Route,
-  UpdateRoute,
-} from "~/validations/admin/route.validation";
+  CreateSeat,
+  Seat,
+  UpdateSeat,
+} from "~/validations/admin/seat.validation";
 
-export const useRouteStore = defineStore("route", () => {
+export const useSeatStore = defineStore("seat", () => {
   const loading = ref(false);
-  const list = ref<Route[]>([]);
-  const paginate = ref<PaginateResponse<Route> | null>(null);
-  const selected = ref<Route | null>(null);
+  const list = ref<Seat[]>([]);
+  const paginate = ref<PaginateResponse<Seat> | null>(null);
+  const selected = ref<Seat | null>(null);
 
   const fetchAll = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      list.value = await routeApi.getAll(query);
+      list.value = await seatApi.getAll(query);
       return list.value;
     } finally {
       loading.value = false;
@@ -26,7 +26,7 @@ export const useRouteStore = defineStore("route", () => {
   const fetchPaginate = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      paginate.value = await routeApi.paginate(query);
+      paginate.value = await seatApi.paginate(query);
       return paginate.value;
     } finally {
       loading.value = false;
@@ -34,23 +34,32 @@ export const useRouteStore = defineStore("route", () => {
   };
 
   const fetchById = async (id: string) => {
-    selected.value = await routeApi.getById(id);
+    selected.value = await seatApi.getById(id);
     return selected.value;
   };
 
-  const create = async (input: CreateRoute) => {
+  const createMany = async (input: CreateSeat[]) => {
     loading.value = true;
     try {
-      return await routeApi.create(input);
+      return await seatApi.createMany(input);
     } finally {
       loading.value = false;
     }
   };
 
-  const updateById = async (id: string, input: UpdateRoute) => {
+  const updateMany = async (input: UpdateSeat[]) => {
     loading.value = true;
     try {
-      return await routeApi.updateById(id, input);
+      return await seatApi.updateMany(input);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const updateById = async (id: string, input: UpdateSeat) => {
+    loading.value = true;
+    try {
+      return await seatApi.updateById(id, input);
     } finally {
       loading.value = false;
     }
@@ -59,7 +68,7 @@ export const useRouteStore = defineStore("route", () => {
   const deleteManyByIds = async (ids: string[]) => {
     loading.value = true;
     try {
-      return await routeApi.deleteManyByIds(ids);
+      return await seatApi.deleteManyByIds(ids);
     } finally {
       loading.value = false;
     }
@@ -73,7 +82,8 @@ export const useRouteStore = defineStore("route", () => {
     fetchAll,
     fetchPaginate,
     fetchById,
-    create,
+    createMany,
+    updateMany,
     updateById,
     deleteManyByIds,
   };

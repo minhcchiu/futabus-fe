@@ -16,7 +16,6 @@ definePageMeta({ layout: "admin" });
 /* ROUTER */
 const route = useRoute();
 const router = useRouter();
-const isEdit = computed(() => !!route.params.id);
 
 /* STORES */
 const store = useStopLocationStore();
@@ -84,8 +83,6 @@ watch(
 
 /* FETCH DETAIL */
 const fetchDetail = async () => {
-  if (!isEdit.value) return;
-
   isHydrating.value = true;
 
   const res: any = await store.fetchById(route.params.id as string);
@@ -131,9 +128,7 @@ const validateForm = (): boolean => {
 const submit = async () => {
   if (!validateForm()) return;
 
-  const res = isEdit.value
-    ? await store.updateById(route.params.id as string, form)
-    : await store.create(form);
+  const res = await store.updateById(route.params.id as string, form);
 
   if (res) {
     router.push("/admin/stop-locations");
@@ -151,16 +146,8 @@ onMounted(async () => {
   <div class="max-w-xl space-y-6">
     <!-- HEADER -->
     <div>
-      <h1 class="text-2xl font-semibold">
-        {{ isEdit ? "Edit Stop Location" : "Create Stop Location" }}
-      </h1>
-      <p class="text-sm text-gray-500">
-        {{
-          isEdit
-            ? "Update stop location information"
-            : "Add a new pickup / drop-off location"
-        }}
-      </p>
+      <h1 class="text-2xl font-semibold">Edit Stop Location</h1>
+      <p class="text-sm text-gray-500">Update stop location information</p>
     </div>
 
     <!-- FORM -->
@@ -236,7 +223,7 @@ onMounted(async () => {
           class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
         />
         <span>
-          {{ store.loading ? "Saving..." : isEdit ? "Update" : "Create" }}
+          {{ store.loading ? "Saving..." : "Update" }}
         </span>
       </button>
 

@@ -1,65 +1,64 @@
-import { busCompanyApi } from "~/apis/futabus/bus_company.api";
+import { tripApi } from "~/apis/futabus/trip.api";
 import type { PaginateResponse } from "~/types/paginate-response.type";
 import type { PaginationParams } from "~/utils/types/fetch.types";
 import type {
-  BusCompany,
-  CreateBusCompany,
-  UpdateBusCompany,
-} from "~/validations/admin/bus_company.validation";
+  CreateTrip,
+  Trip,
+  UpdateTrip,
+} from "~/validations/admin/trip.validation";
 
-export const useBusCompanyStore = defineStore("busCompany", () => {
+export const useTripStore = defineStore("trip", () => {
   const loading = ref(false);
-  const list = ref<BusCompany[]>([]);
-  const paginate = ref<PaginateResponse<BusCompany> | null>(null);
-  const selected = ref<BusCompany | null>(null);
+  const list = ref<Trip[]>([]);
+  const paginate = ref<PaginateResponse<Trip> | null>(null);
+  const selected = ref<Trip | null>(null);
 
   const fetchAll = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      list.value = await busCompanyApi.getAll(query);
+      list.value = await tripApi.getAll(query);
       return list.value;
     } finally {
       loading.value = false;
     }
   };
-
   const fetchPaginate = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      paginate.value = await busCompanyApi.paginate(query);
+      paginate.value = await tripApi.paginate(query);
       return paginate.value;
     } finally {
       loading.value = false;
     }
   };
 
-  const fetchById = async (id: string) => {
-    selected.value = await busCompanyApi.getById(id);
+  const fetchById = async (id: string, query?: PaginationParams) => {
+    selected.value = await tripApi.getById(id, query);
     return selected.value;
   };
 
-  const create = async (input: CreateBusCompany) => {
+  const create = async (input: CreateTrip) => {
     loading.value = true;
     try {
-      return await busCompanyApi.create(input);
+      return await tripApi.create(input);
     } finally {
       loading.value = false;
     }
   };
 
-  const updateById = async (id: string, input: UpdateBusCompany) => {
+  const updateById = async (id: string, input: UpdateTrip) => {
     loading.value = true;
     try {
-      return await busCompanyApi.updateById(id, input);
+      return await tripApi.updateById(id, input);
     } finally {
       loading.value = false;
     }
   };
 
-  const deleteById = async (id: string) => {
+  const deleteManyByIds = async (ids: string[]) => {
     loading.value = true;
     try {
-      return await busCompanyApi.deleteById(id);
+      return await tripApi.deleteManyByIds(ids);
     } finally {
       loading.value = false;
     }
@@ -75,6 +74,6 @@ export const useBusCompanyStore = defineStore("busCompany", () => {
     fetchById,
     create,
     updateById,
-    deleteById,
+    deleteManyByIds,
   };
 });

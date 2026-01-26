@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { ZodError } from "zod";
 import { useBusCompanyStore } from "~/stores/bus_company.store";
 import { useRouteStore } from "~/stores/route.store";
@@ -13,11 +13,12 @@ import {
 definePageMeta({ layout: "admin" });
 
 const router = useRouter();
+const route = useRoute();
+
 const store = useRouteStore();
 const companyStore = useBusCompanyStore();
 const stopStore = useStopLocationStore();
 
-/* FORM */
 const form = reactive<CreateRoute>({
   companyId: "",
   startStopId: "",
@@ -26,10 +27,22 @@ const form = reactive<CreateRoute>({
 
 const errors = ref<Record<string, string>>({});
 
-/* INIT */
+/* FETCH */
+const fetchDetail = async () => {
+  const res: any = await store.fetchById(route.params.id as string);
+  if (!res) return;
+
+  Object.assign(form, {
+    companyId: res.companyId,
+    startStopId: res.startStopId,
+    endStopId: res.endStopId,
+  });
+};
+
 onMounted(async () => {
   await companyStore.fetchAll();
   await stopStore.fetchAll();
+  await fetchDetail();
 });
 
 /* VALIDATE */
@@ -54,71 +67,50 @@ const validateForm = () => {
 const submit = async () => {
   if (!validateForm()) return;
 
-  const res = await store.create(form);
+  const res = await store.updateById(route.params.id as string, form);
   if (res) router.push("/admin/routes");
 };
 </script>
 
 <template>
   <div class="max-w-xl space-y-6">
-    <h1 class="text-2xl font-semibold">Create Route</h1>
+    <h1 class="text-2xl font-semibold">Edit Route</h1>
 
     <div class="space-y-4">
       <!-- COMPANY -->
       <div>
-        <label class="block text-sm font-medium">Company</label>
+        <label>Company</label>
         <select v-model="form.companyId" class="input">
-          <option value="">Select company</option>
           <option v-for="c in companyStore.list" :key="c._id" :value="c._id">
             {{ c.name }}
           </option>
         </select>
-        <p class="error">{{ errors.companyId }}</p>
       </div>
 
       <!-- START -->
       <div>
-        <label class="block text-sm font-medium">Start Stop</label>
+        <label>Start Stop</label>
         <select v-model="form.startStopId" class="input">
-          <option value="">Select start stop</option>
           <option v-for="s in stopStore.list" :key="s._id" :value="s._id">
             {{ s.name }}
           </option>
         </select>
-        <p class="error">{{ errors.startStopId }}</p>
       </div>
 
       <!-- END -->
       <div>
-        <label class="block text-sm font-medium">End Stop</label>
+        <label>End Stop</label>
         <select v-model="form.endStopId" class="input">
-          <option value="">Select end stop</option>
           <option v-for="s in stopStore.list" :key="s._id" :value="s._id">
             {{ s.name }}
           </option>
         </select>
-        <p class="error">{{ errors.endStopId }}</p>
       </div>
     </div>
 
     <div class="flex gap-3">
-      <button class="btn-primary" @click="submit">Create</button>
+      <button class="btn-primary" @click="submit">Update</button>
       <NuxtLink to="/admin/routes" class="btn-secondary">Cancel</NuxtLink>
     </div>
   </div>
 </template>
-
-<style scoped>
-.input {
-  @apply w-full rounded-lg border px-3 py-2 text-sm;
-}
-.error {
-  @apply mt-1 text-xs text-red-500;
-}
-.btn-primary {
-  @apply rounded-lg bg-primary px-4 py-2 text-white;
-}
-.btn-secondary {
-  @apply rounded-lg border !bg-red-400 px-4 py-2 text-white;
-}
-</style>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Seat } from "~/validations/admin/seat.validation";
 import type { BusCompany } from "./bus_company.validation";
 
 export enum VehicleStatusEnum {
@@ -33,6 +34,7 @@ export type Vehicle = {
   hasUpperDeck: boolean;
   status: VehicleStatusEnum;
   amenities: string[];
+  seats: Seat[];
   createdAt: string;
   updatedAt: string;
 };
