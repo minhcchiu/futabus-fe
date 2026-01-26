@@ -127,14 +127,14 @@ const submit = async () => {
     <!-- ARRIVAL -->
     <div>
       <label class="mb-1 block text-sm font-medium">Arrival Time</label>
-      <input type="datetime-local" v-model="arrivalInput" class="input" />
+      <input v-model="arrivalInput" type="datetime-local" class="input" >
       <p class="error">{{ errors.arrivalTime }}</p>
     </div>
 
     <!-- DEPARTURE -->
     <div>
       <label class="mb-1 block text-sm font-medium">Departure Time</label>
-      <input type="datetime-local" v-model="departureInput" class="input" />
+      <input v-model="departureInput" type="datetime-local" class="input" >
       <p class="error">{{ errors.departureTime }}</p>
     </div>
 

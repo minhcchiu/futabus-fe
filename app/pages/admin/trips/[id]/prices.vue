@@ -174,7 +174,7 @@ const getSeatPrice = (seatId: string) => {
             min="0"
             class="input"
             placeholder="VD: 150000"
-          />
+          >
 
           <!-- HIỂN THỊ TIỀN VIỆT -->
           <div
@@ -190,9 +190,9 @@ const getSeatPrice = (seatId: string) => {
       <div class="mt-2 text-sm text-gray-500">
         Selected seats:
         <span
-          class="font-semibold"
           v-for="seat in selectedSeats"
           :key="seat._id"
+          class="font-semibold"
         >
           {{ seat.name }},
         </span>

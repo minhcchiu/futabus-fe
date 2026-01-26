@@ -83,7 +83,7 @@ const backToList = async () => {
       <!-- FORM -->
       <TripStopForm
         v-if="activeTab === 'form'"
-        :tripId="props.trip._id"
+        :trip-id="props.trip._id"
         :model="editingStop"
         @success="backToList"
         @cancel="activeTab = 'list'"
