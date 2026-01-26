@@ -91,7 +91,7 @@ const onCloseMobileTripList = () => {
       <MobileSearch @search="onSearch" />
 
       <!-- RECENT -->
-      <div class="mt-10">
+      <div class="mt-10 hidden">
         <p class="mb-2 text-center text-xl font-semibold text-green-600">
           Tìm kiếm gần đây
         </p>
@@ -114,8 +114,89 @@ const onCloseMobileTripList = () => {
 
     <div class="grid grid-cols-12 gap-x-6 px-4 py-6">
       <!-- Sidebar -->
-      <aside class="col-span-4 hidden md:block">
-        <FilterSidebar />
+      <aside class="col-span-4 space-y-4">
+        <div class="overflow-hidden rounded-xl bg-white shadow">
+          <!-- IMAGE / BANNER -->
+          <div class="relative h-36 w-full">
+            <img
+              src="/images/contact-banner.png"
+              alt="FUTA Bus Lines"
+              class="h-full w-full object-cover"
+            />
+            <div class="absolute inset-0 bg-black/30"></div>
+            <div class="absolute bottom-3 left-4 text-white">
+              <h2 class="text-lg font-semibold">Liên hệ với chúng tôi</h2>
+              <p class="text-xs opacity-90">FUTA Bus Lines</p>
+            </div>
+          </div>
+
+          <!-- CONTENT -->
+          <div class="space-y-4 p-4 text-sm">
+            <!-- Company -->
+            <div>
+              <p class="text-xs uppercase text-gray-400">Đơn vị vận hành</p>
+              <p class="mt-1 font-semibold text-green-600">
+                CÔNG TY CỔ PHẦN XE KHÁCH PHƯƠNG TRANG<br />
+                FUTA BUS LINES
+              </p>
+            </div>
+
+            <!-- Address -->
+            <div class="flex items-start gap-2 text-gray-600">
+              <span>📍</span>
+              <p>
+                486-486A Lê Văn Lương, Phường Tân Hưng,<br />
+                TPHCM, Việt Nam
+              </p>
+            </div>
+
+            <!-- Contact -->
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                📞
+                <a href="tel:19006067" class="font-medium text-green-600">
+                  1900 6067
+                </a>
+              </div>
+              <div class="flex items-center gap-2">
+                ✉️
+                <a
+                  href="mailto:hotro@futa.vn"
+                  class="text-blue-600 hover:underline"
+                >
+                  hotro@futa.vn
+                </a>
+              </div>
+              <div class="flex items-center gap-2">
+                🌐
+                <a
+                  href="https://futabus.vn"
+                  target="_blank"
+                  class="text-blue-600 hover:underline"
+                >
+                  futabus.vn
+                </a>
+              </div>
+            </div>
+
+            <!-- Quick actions -->
+            <div class="grid grid-cols-2 gap-2 pt-2">
+              <a
+                href="tel:19006067"
+                class="flex items-center justify-center gap-1 rounded-lg bg-green-500 py-2 text-white hover:bg-green-600"
+              >
+                📞 Gọi ngay
+              </a>
+              <a
+                href="https://zalo.me/19006067"
+                target="_blank"
+                class="flex items-center justify-center gap-1 rounded-lg bg-blue-500 py-2 text-white hover:bg-blue-600"
+              >
+                💬 Chat Zalo
+              </a>
+            </div>
+          </div>
+        </div>
       </aside>
 
       <!-- Content -->

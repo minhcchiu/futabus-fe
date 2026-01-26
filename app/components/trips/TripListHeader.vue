@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <div
-    class="bg-background sticky top-0 z-30 space-y-3 rounded-xl border-b px-4 py-3"
+    class="sticky top-0 z-30 space-y-3 rounded-xl border-b bg-white px-4 py-3"
   >
     <!-- Title -->
     <div class="flex items-center justify-between">
@@ -21,7 +21,7 @@ defineProps<{
     </div>
 
     <!-- Filter chips -->
-    <div class="flex flex-wrap gap-2">
+    <div class="hidden flex-wrap gap-2">
       <Button
         size="sm"
         variant="outline"
