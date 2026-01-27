@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Trip } from "~/validations/admin/trip.validation";
+
+const router = useRouter();
 const { isMobile } = useDevice();
-defineProps<{
+const prop = defineProps<{
   trip: Trip;
 }>();
 const timeline: any[] = [
@@ -65,13 +67,28 @@ const policy = `<h3>Chính sách huỷ vé</h3>
 `;
 
 const selectTrip = () => {
+  router.push({
+    path: "/booking",
+    query: {
+      trip_id: prop.trip._id,
+    },
+  });
+};
+
+const selectTripInMobile = () => {
   if (!isMobile) return;
-  navigateTo("/booking");
+
+  router.push({
+    path: "/booking",
+    query: {
+      trip_id: prop.trip._id,
+    },
+  });
 };
 </script>
 
 <template>
-  <div class="rounded-xl border bg-white p-4" @click="selectTrip">
+  <div class="rounded-xl border bg-white p-4" @click="selectTripInMobile">
     <div class="flex items-start gap-10">
       <TripTime :trip="trip" />
       <TripMeta :trip="trip" />
@@ -126,7 +143,7 @@ const selectTrip = () => {
             Chính sách
           </button>
         </div>
-        <TripActions />
+        <TripActions @select="selectTrip" />
       </div>
 
       <SeatSelector v-if="activeTab === 'seat'" />

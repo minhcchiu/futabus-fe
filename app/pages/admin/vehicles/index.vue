@@ -78,7 +78,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Search plate or company..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      >
+      />
 
       <select
         v-model="statusFilter"
@@ -136,7 +136,7 @@ async function handleDeleted() {
             :to="`/admin/vehicles/${v._id}/seats`"
             class="text-sm font-medium text-primary hover:underline"
           >
-            {{ v.seats?.length || 0 }}
+            {{ v.totalSeats || 0 }}
           </NuxtLink>
         </td>
 

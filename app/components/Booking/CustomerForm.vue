@@ -1,12 +1,35 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
-const form = ref({
-  name: "",
-  phone: "",
-  email: "",
-  accepted: false,
-});
+const props = defineProps<{
+  modelValue: {
+    name: string;
+    phone: string;
+    email: string;
+    note: string;
+    accepted: boolean;
+  };
+}>();
+
+const emit = defineEmits(["update:modelValue"]);
+
+const form = ref({ ...props.modelValue });
+
+watch(
+  form,
+  (val) => {
+    emit("update:modelValue", val);
+  },
+  { deep: true },
+);
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    form.value = { ...val };
+  },
+  { deep: true },
+);
 </script>
 
 <template>
@@ -25,9 +48,9 @@ const form = ref({
             <input
               v-model="form.name"
               type="text"
-              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-500 focus:ring-green-500"
+              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-400 focus:ring-green-400"
               placeholder="Nhập họ và tên"
-            >
+            />
             <button
               v-if="form.name"
               class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
@@ -47,9 +70,9 @@ const form = ref({
             <input
               v-model="form.phone"
               type="tel"
-              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-500 focus:ring-green-500"
+              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-400 focus:ring-green-400"
               placeholder="Nhập số điện thoại"
-            >
+            />
             <button
               v-if="form.phone"
               class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
@@ -69,13 +92,33 @@ const form = ref({
             <input
               v-model="form.email"
               type="email"
-              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-500 focus:ring-green-500"
+              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-400 focus:ring-green-400"
               placeholder="Nhập email"
-            >
+            />
             <button
               v-if="form.email"
               class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
               @click="form.email = ''"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Note -->
+        <div class="mb-4">
+          <label class="mb-1 block text-sm"> Ghi chú </label>
+          <div class="relative">
+            <Textarea
+              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-400 focus:ring-green-400"
+              v-model="form.note"
+              placeholder="Đón ở bến xe Đà Nẵng..."
+            />
+
+            <button
+              v-if="form.note"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+              @click="form.note = ''"
             >
               ✕
             </button>
@@ -126,7 +169,7 @@ const form = ref({
         v-model="form.accepted"
         type="checkbox"
         class="mt-1 accent-green-500"
-      >
+      />
       <span>
         <span class="text-green-500">Chấp nhận điều khoản</span>
         đặt vé & chính sách bảo mật thông tin của FUTA Bus Lines

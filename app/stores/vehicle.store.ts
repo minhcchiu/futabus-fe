@@ -33,8 +33,8 @@ export const useVehicleStore = defineStore("vehicle", () => {
     }
   };
 
-  const fetchById = async (id: string) => {
-    selected.value = await vehicleApi.getById(id);
+  const fetchById = async (id: string, query?: PaginationParams) => {
+    selected.value = await vehicleApi.getById(id, query);
     return selected.value;
   };
 

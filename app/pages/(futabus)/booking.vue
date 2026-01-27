@@ -1,18 +1,14 @@
 <script setup lang="ts">
 import { BOOKING_STEPS } from "~/utils/enums";
-import type { Trip } from "~/validations/trip.validation";
+import type { Seat } from "~/validations/admin/seat.validation";
 
-// const date = ref(fromDate(new Date(), getLocalTimeZone())) as Ref<DateValue>;
-// const tripType = ref("one-way");
-// const from = ref("dak-lak");
-// const to = ref("da-nang");
-// const tickets = ref(1);
-
-const selectedTrip = ref<Trip | null>(null);
+const tripStore = useTripStore();
+const route = useRoute();
+const trip = computed(() => tripStore.selected);
 
 const totalPrice = computed(() => {
-  if (!selectedTrip.value) return 0;
-  return selectedTrip.value.price;
+  if (!trip.value) return 0;
+  return trip.value.price;
 });
 
 const canPay = computed(() => {
@@ -26,23 +22,12 @@ const onPayment = () => {
 
 const onCancel = () => {};
 
-const trips: Trip[] = [
-  {
-    id: "1",
-    date: "Thứ 5, 22/01/2026",
-    route: "Đắk Nông - Đà Nẵng",
-    departTime: "15:00",
-    departStation: "Bến Xe Đắk Nông",
-    arriveTime: "06:00",
-    arriveStation: "Bến Xe Trung Tâm Đà Nẵng",
-    duration: "15 giờ",
-    vehicleType: "Limousine",
-    price: 400000,
-  },
-];
+onMounted(async () => {
+  const tripId = route.query.trip_id as string;
 
-onMounted(() => {
-  selectedTrip.value = trips[0]!;
+  await tripStore.fetchById(tripId!, {
+    _populate: "routeId.startStopId endStopId,vehicleId",
+  });
 });
 
 const currentStep = ref(BOOKING_STEPS.SEAT);
@@ -61,7 +46,20 @@ const prevStep = () => {
   }
 };
 
-const selectedSeats = ["A1", "B1"];
+const selectedSeats = ref<string[]>([]);
+
+const selectSeats = (seats: Seat[]) => {
+  selectedSeats.value = seats.map((s) => s.code);
+};
+
+// Handle booking
+const customerForm = ref({
+  name: "",
+  phone: "",
+  email: "",
+  note: "",
+  accepted: false,
+});
 </script>
 
 <template>
@@ -69,12 +67,16 @@ const selectedSeats = ["A1", "B1"];
     <div class="mx-auto hidden grid-cols-12 gap-6 py-6 md:grid">
       <!-- LEFT -->
       <div class="col-span-8 space-y-6">
-        <SeatBookingSelector />
-        <CustomerForm />
+        <SeatBookingSelector
+          v-if="trip"
+          :vehicle-id="trip.vehicleId._id"
+          @select-seats="selectSeats"
+        />
+        <CustomerForm v-model="customerForm" />
         <PickupDropoffBox />
 
         <BookingFooter
-          :amount="totalPrice"
+          :amount="totalPrice || 10000"
           :can-pay="canPay"
           @cancel="onCancel"
           @submit="onPayment"
@@ -120,8 +122,11 @@ const selectedSeats = ["A1", "B1"];
 
       <!-- STEP CONTENT -->
       <div class="h-full flex-1 space-y-4 overflow-y-auto p-4">
-        <SeatBookingSelector v-if="currentStep === 0" />
-        <CustomerForm v-if="currentStep === 1" />
+        <SeatBookingSelector
+          v-if="currentStep === 0 && trip"
+          :vehicle-id="trip.vehicleId._id"
+        />
+        <CustomerForm v-model="customerForm" v-if="currentStep === 1" />
         <PickupDropoffBox v-if="currentStep === 2" />
 
         <div v-if="currentStep === 3" class="space-y-4">
@@ -135,7 +140,7 @@ const selectedSeats = ["A1", "B1"];
         <MobileBookingBottom
           :step="currentStep"
           :seats="selectedSeats"
-          :total="totalPrice"
+          :total="trip?.price || 10000"
           @next="nextStep"
           @prev="prevStep"
           @submit="onPayment"

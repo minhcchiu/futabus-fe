@@ -82,7 +82,7 @@ const trips = computed(() => tripStore.list);
               src="/images/contact-banner.png"
               alt="FUTA Bus Lines"
               class="h-full w-full object-cover"
-            />
+            >
             <div class="absolute inset-0 bg-black/30" />
             <div class="absolute bottom-3 left-4 text-white">
               <h2 class="text-lg font-semibold">Liên hệ với chúng tôi</h2>
@@ -96,7 +96,7 @@ const trips = computed(() => tripStore.list);
             <div>
               <p class="text-xs uppercase text-gray-400">Đơn vị vận hành</p>
               <p class="mt-1 font-semibold text-green-600">
-                CÔNG TY CỔ PHẦN XE KHÁCH PHƯƠNG TRANG<br />
+                CÔNG TY CỔ PHẦN XE KHÁCH PHƯƠNG TRANG<br >
                 FUTA BUS LINES
               </p>
             </div>
@@ -105,7 +105,7 @@ const trips = computed(() => tripStore.list);
             <div class="flex items-start gap-2 text-gray-600">
               <span>📍</span>
               <p>
-                486-486A Lê Văn Lương, Phường Tân Hưng,<br />
+                486-486A Lê Văn Lương, Phường Tân Hưng,<br >
                 TPHCM, Việt Nam
               </p>
             </div>

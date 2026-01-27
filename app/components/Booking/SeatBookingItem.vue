@@ -1,25 +1,32 @@
 <script setup lang="ts">
-defineProps<{
-  seat: any;
-  selectedSeats: string[];
+import type { Seat } from "~/validations/admin/seat.validation";
+
+const props = defineProps<{
+  seat: Seat;
+  selectedSeats: Seat[];
 }>();
 
-defineEmits(["toggle"]);
+const isSelected = computed(() =>
+  props.selectedSeats.some(
+    (s) => s.code === props.seat.code && s.floor === props.seat.floor,
+  ),
+);
 </script>
 
 <template>
   <button
-    class="h-10 rounded-md border text-xs font-medium"
-    :class="{
-      'cursor-not-allowed bg-gray-300 text-gray-500': seat.status === 'sold',
-      'border-green-400 bg-green-100 text-green-600': selectedSeats.includes(
-        seat.code,
-      ),
-      'border-blue-400 bg-blue-100 text-blue-700':
-        seat.status === 'empty' && !selectedSeats.includes(seat.code),
-    }"
+    class="flex h-14 w-12 flex-col items-center justify-center rounded-lg border text-xs"
+    :class="[
+      seat.isVip ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300',
+      !seat.isActive
+        ? 'cursor-not-allowed bg-gray-200'
+        : 'hover:border-green-500',
+      isSelected ? 'border-green-500 bg-green-100' : '',
+    ]"
+    :disabled="!seat.isActive"
     @click="$emit('toggle', seat)"
   >
-    {{ seat.code }}
+    <span class="font-semibold">{{ seat.code }}</span>
+    <span v-if="seat.isVip" class="text-[10px] text-yellow-600">VIP</span>
   </button>
 </template>
