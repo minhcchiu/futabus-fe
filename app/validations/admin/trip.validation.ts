@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { BusCompany } from "~/validations/admin/bus_company.validation";
 import type { Route } from "~/validations/admin/route.validation";
 import type { TripPrice } from "~/validations/admin/trip_price.validation";
+import type { TripStop } from "~/validations/admin/trip_stop.validation";
 import type { Vehicle } from "~/validations/admin/vehicle.validation";
 
 export enum TripStatus {
@@ -46,4 +47,5 @@ export type Trip = {
   emptySeat?: number;
   status: TripStatus;
   tripPrices: TripPrice[];
+  tripStops: TripStop[];
 };

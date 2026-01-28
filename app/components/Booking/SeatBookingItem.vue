@@ -11,6 +11,8 @@ const isSelected = computed(() =>
     (s) => s.code === props.seat.code && s.floor === props.seat.floor,
   ),
 );
+
+defineEmits(["toggle"]);
 </script>
 
 <template>

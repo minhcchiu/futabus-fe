@@ -1,16 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-
-type Location = {
-  id: string;
-  label: string;
-  address: string;
-  time?: string;
-};
+import { formatTime } from "~/utils/helpers/data.helper";
+import type { TripStop } from "~/validations/admin/trip_stop.validation";
 
 const props = defineProps<{
   modelValue?: string;
-  options: Location[];
+  options: TripStop[];
   placeholder?: string;
 }>();
 
@@ -22,13 +17,13 @@ const selected = ref(props.modelValue);
 
 const filtered = computed(() =>
   props.options.filter((o) =>
-    o.label.toLowerCase().includes(keyword.value.toLowerCase()),
+    o.stopId.name.toLowerCase().includes(keyword.value.toLowerCase()),
   ),
 );
 
-function select(item: Location) {
-  selected.value = item.id;
-  emit("update:modelValue", item.id);
+function select(item: TripStop) {
+  selected.value = item._id;
+  emit("update:modelValue", item._id);
   open.value = false;
 }
 </script>
@@ -43,7 +38,7 @@ function select(item: Location) {
     >
       <span class="truncate">
         {{
-          options.find((o) => o.id === selected)?.label ||
+          options.find((o) => o._id === selected)?.stopId.name ||
           placeholder ||
           "Chọn địa điểm"
         }}
@@ -60,28 +55,31 @@ function select(item: Location) {
         v-model="keyword"
         placeholder="Nhập tên bến xe, văn phòng"
         class="mb-3 w-full rounded-md border px-3 py-2 text-sm"
-      >
+      />
 
       <div class="max-h-60 space-y-3 overflow-auto">
         <div
           v-for="item in filtered"
-          :key="item.id"
+          :key="item._id"
           class="flex cursor-pointer gap-3"
           @click="select(item)"
         >
           <input
             type="radio"
             class="mt-1 accent-green-500"
-            :checked="selected === item.id"
-          >
+            :checked="selected === item._id"
+          />
 
           <div class="flex-1">
             <div class="flex justify-between text-sm font-medium">
-              <span>{{ item.time }} - {{ item.label }}</span>
+              <span
+                >{{ formatTime(item.departureTime || item.arrivalTime) }} -
+                {{ item.stopId.name }}</span
+              >
               <span class="text-xs text-green-500">Xem vị trí</span>
             </div>
             <p class="text-xs text-gray-500">
-              {{ item.address }}
+              {{ item.stopId.address }}
             </p>
           </div>
         </div>

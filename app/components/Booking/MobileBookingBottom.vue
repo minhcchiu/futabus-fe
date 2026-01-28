@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import { formatMoney } from "~/utils/helpers/data.helper";
+import type { Seat } from "~/validations/admin/seat.validation";
+
 defineProps<{
   step: number;
-  seats: string[];
+  seats: Seat[];
   total: number;
 }>();
 
 const emit = defineEmits(["next", "prev", "submit"]);
-
-const formatMoney = (v: number) => v.toLocaleString("vi-VN") + "đ";
 </script>
 
 <template>
@@ -19,7 +20,7 @@ const formatMoney = (v: number) => v.toLocaleString("vi-VN") + "đ";
       <div class="flex justify-between">
         <span class="text-gray-500"> Vé chiều đi ({{ seats.length }}) </span>
         <span class="font-medium text-gray-800">
-          {{ seats.join(", ") || "--" }}
+          {{ seats.map((seat) => seat.name).join(", ") || "--" }}
         </span>
       </div>
 

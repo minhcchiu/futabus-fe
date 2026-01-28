@@ -1,14 +1,23 @@
 <script setup lang="ts">
 import { BOOKING_STEPS } from "~/utils/enums";
+import { formatDateTime } from "~/utils/helpers/data.helper";
 import type { Seat } from "~/validations/admin/seat.validation";
 
 const tripStore = useTripStore();
+const tripPriceStore = useTripPriceStore();
 const route = useRoute();
 const trip = computed(() => tripStore.selected);
 
 const totalPrice = computed(() => {
   if (!trip.value) return 0;
-  return trip.value.price;
+  if (!selectedSeats.value.length) return 0;
+
+  const seatsPrices = tripPriceStore.list.filter((tp) =>
+    // @ts-ignore
+    selectedSeats.value.some((s) => s._id === tp.seatId),
+  );
+
+  return seatsPrices.reduce((total, seatPrice) => total + seatPrice.price, 0);
 });
 
 const canPay = computed(() => {
@@ -28,6 +37,9 @@ onMounted(async () => {
   await tripStore.fetchById(tripId!, {
     _populate: "routeId.startStopId endStopId,vehicleId",
   });
+  await tripPriceStore.fetchAll({
+    tripId: tripId,
+  });
 });
 
 const currentStep = ref(BOOKING_STEPS.SEAT);
@@ -46,10 +58,10 @@ const prevStep = () => {
   }
 };
 
-const selectedSeats = ref<string[]>([]);
+const selectedSeats = ref<Seat[]>([]);
 
 const selectSeats = (seats: Seat[]) => {
-  selectedSeats.value = seats.map((s) => s.code);
+  selectedSeats.value = seats;
 };
 
 // Handle booking
@@ -60,6 +72,23 @@ const customerForm = ref({
   note: "",
   accepted: false,
 });
+
+// Handle pickup / dropOff
+const pickupDropoff = ref<{
+  pickupTripStopId: string;
+  dropoffTripStopId: string;
+  pickupType: "station" | "transfer";
+  dropoffType: "station" | "transfer";
+}>({
+  pickupTripStopId: "",
+  dropoffTripStopId: "",
+  pickupType: "station",
+  dropoffType: "station",
+});
+
+const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
+  pickupDropoff.value = data;
+};
 </script>
 
 <template>
@@ -72,11 +101,14 @@ const customerForm = ref({
           :vehicle-id="trip.vehicleId._id"
           @select-seats="selectSeats"
         />
-        <CustomerForm v-model="customerForm" />
-        <PickupDropoffBox />
+        <CustomerForm :form="customerForm" @change="customerForm = $event" />
+        <PickupDropoffBox
+          :trip-stops="trip?.tripStops || []"
+          @change="onPickupDropoffChange"
+        />
 
         <BookingFooter
-          :amount="totalPrice || 10000"
+          :amount="totalPrice"
           :can-pay="canPay"
           @cancel="onCancel"
           @submit="onPayment"
@@ -85,8 +117,21 @@ const customerForm = ref({
 
       <!-- RIGHT -->
       <div class="col-span-4 space-y-4">
-        <TripBookingSummary />
-        <PriceSummary />
+        <TripBookingSummary
+          :trip="trip"
+          :seats="selectedSeats"
+          :pickupDropOff="pickupDropoff"
+          :total-price="totalPrice"
+        />
+
+        <ContactSummary
+          :customer-form="customerForm"
+          :trip="trip"
+          :seats="selectedSeats"
+          :pickupDropOff="pickupDropoff"
+          :total-price="totalPrice"
+        />
+        <PriceSummary :total-price="totalPrice" />
       </div>
     </div>
 
@@ -100,8 +145,13 @@ const customerForm = ref({
         >
           <button @click="$router.back()">←</button>
           <div class="text-center">
-            <p class="font-semibold">Đà Nẵng - Đăk Lăk</p>
-            <p class="text-xs opacity-80">Thứ 2, 19/01</p>
+            <p class="font-semibold">
+              {{ trip?.routeId.startStopId.name }} -
+              {{ trip?.routeId.endStopId.name }}
+            </p>
+            <p class="text-xs opacity-80">
+              {{ formatDateTime(trip?.departureTime) }}
+            </p>
           </div>
           <div />
         </div>
@@ -126,12 +176,32 @@ const customerForm = ref({
           v-if="currentStep === 0 && trip"
           :vehicle-id="trip.vehicleId._id"
         />
-        <CustomerForm v-model="customerForm" v-if="currentStep === 1" />
-        <PickupDropoffBox v-if="currentStep === 2" />
+        <CustomerForm
+          v-if="currentStep === 1"
+          :form="customerForm"
+          @change="customerForm = $event"
+        />
+        <PickupDropoffBox
+          v-if="currentStep === 2"
+          :trip-stops="trip?.tripStops || []"
+          @change="onPickupDropoffChange"
+        />
 
         <div v-if="currentStep === 3" class="space-y-4">
-          <TripBookingSummary />
-          <PriceSummary />
+          <TripBookingSummary
+            :trip="trip"
+            :seats="selectedSeats"
+            :pickupDropOff="pickupDropoff"
+            :total-price="totalPrice"
+          />
+          <ContactSummary
+            :customer-form="customerForm"
+            :trip="trip"
+            :seats="selectedSeats"
+            :pickupDropOff="pickupDropoff"
+            :total-price="totalPrice"
+          />
+          <PriceSummary :total-price="totalPrice" />
         </div>
       </div>
 
@@ -140,7 +210,7 @@ const customerForm = ref({
         <MobileBookingBottom
           :step="currentStep"
           :seats="selectedSeats"
-          :total="trip?.price || 10000"
+          :total="totalPrice"
           @next="nextStep"
           @prev="prevStep"
           @submit="onPayment"

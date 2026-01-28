@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { formatMoney } from "~/utils/helpers/data.helper";
+
 defineProps<{
-  amount: number | string;
+  amount: number;
   canPay: boolean;
 }>();
 
@@ -18,7 +20,9 @@ defineEmits(["cancel", "submit"]);
           VNPAY
         </span>
 
-        <span class="text-xl font-semibold text-gray-900"> {{ amount }}đ </span>
+        <span class="text-xl font-semibold text-gray-900">
+          {{ formatMoney(amount) }}
+        </span>
       </div>
 
       <!-- Right: Actions -->

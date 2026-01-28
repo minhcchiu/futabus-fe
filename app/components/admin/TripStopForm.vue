@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { ZodError } from "zod";
+import { useStopLocationStore } from "~/stores/stop_location.store";
 import { useTripStopStore } from "~/stores/trip_stop.store";
 import {
   CreateTripStopSchema,
@@ -9,14 +10,13 @@ import {
 
 const props = defineProps<{
   tripId: string;
-  model?: any; // nếu edit
+  model?: any;
 }>();
 
 const emit = defineEmits(["success", "cancel"]);
 
 const tripStopStore = useTripStopStore();
-const routeStore = useRouteStore();
-
+const stopLocationStore = useStopLocationStore();
 const errors = ref<Record<string, string>>({});
 
 /* =========================
@@ -24,47 +24,83 @@ const errors = ref<Record<string, string>>({});
 ========================= */
 const form = reactive<CreateTripStop>({
   tripId: props.tripId,
-  routeId: "",
-  arrivalTime: Date.now(),
-  departureTime: Date.now(),
+  stopId: "",
+  arrivalTime: null,
+  departureTime: null,
 });
+
+const stopType = ref<"PICK_UP" | "DROP_OFF">("PICK_UP");
+
+/* =========================
+  BASE DATE (NGÀY HIỆN TẠI)
+========================= */
+const baseDate = ref(new Date()); // bạn có thể đổi thành trip.date sau
+
+const buildTimestampFromTime = (time: string) => {
+  const [hour, minute] = time.split(":").map(Number);
+  const d = new Date(baseDate.value);
+  d.setHours(hour!, minute, 0, 0);
+  return d.getTime();
+};
 
 /* =========================
   INIT DATA
 ========================= */
 onMounted(async () => {
-  await routeStore.fetchAll({
-    _sort: "name",
-    _populate: "startStopId,endStopId",
-  });
+  await stopLocationStore.fetchAll({ _sort: "name" });
 
   if (props.model) {
-    form.routeId = props.model.routeId?._id || "";
-    form.arrivalTime = props.model.arrivalTime || null;
-    form.departureTime = props.model.departureTime || null;
+    form.stopId = props.model.stopId?._id || "";
+
+    if (props.model.departureTime) {
+      stopType.value = "PICK_UP";
+      form.departureTime = props.model.departureTime;
+    }
+
+    if (props.model.arrivalTime) {
+      stopType.value = "DROP_OFF";
+      form.arrivalTime = props.model.arrivalTime;
+    }
   }
 });
 
 /* =========================
-  DATETIME COMPUTED
+  WATCH STOP TYPE
+========================= */
+watch(stopType, (type) => {
+  if (type === "PICK_UP") {
+    form.arrivalTime = null;
+  } else {
+    form.departureTime = null;
+  }
+});
+
+/* =========================
+  TIME COMPUTED (HH:mm)
 ========================= */
 const arrivalInput = computed({
-  get: () =>
-    form.arrivalTime
-      ? new Date(form.arrivalTime).toISOString().slice(0, 16)
-      : "",
+  get: () => {
+    if (!form.arrivalTime) return "";
+    const d = new Date(form.arrivalTime);
+    return `${String(d.getHours()).padStart(2, "0")}:${String(
+      d.getMinutes(),
+    ).padStart(2, "0")}`;
+  },
   set: (val: string) => {
-    form.arrivalTime = val ? new Date(val).getTime() : Date.now();
+    form.arrivalTime = val ? buildTimestampFromTime(val) : null;
   },
 });
 
 const departureInput = computed({
-  get: () =>
-    form.departureTime
-      ? new Date(form.departureTime).toISOString().slice(0, 16)
-      : "",
+  get: () => {
+    if (!form.departureTime) return "";
+    const d = new Date(form.departureTime);
+    return `${String(d.getHours()).padStart(2, "0")}:${String(
+      d.getMinutes(),
+    ).padStart(2, "0")}`;
+  },
   set: (val: string) => {
-    form.departureTime = val ? new Date(val).getTime() : Date.now();
+    form.departureTime = val ? buildTimestampFromTime(val) : null;
   },
 });
 
@@ -74,6 +110,17 @@ const departureInput = computed({
 const validateForm = () => {
   try {
     CreateTripStopSchema.parse(form);
+
+    if (stopType.value === "PICK_UP" && !form.departureTime) {
+      errors.value.departureTime = "Departure time is required";
+      return false;
+    }
+
+    if (stopType.value === "DROP_OFF" && !form.arrivalTime) {
+      errors.value.arrivalTime = "Arrival time is required";
+      return false;
+    }
+
     errors.value = {};
     return true;
   } catch (err) {
@@ -95,11 +142,18 @@ const validateForm = () => {
 const submit = async () => {
   if (!validateForm()) return;
 
+  const payload: CreateTripStop = {
+    tripId: form.tripId,
+    stopId: form.stopId,
+    arrivalTime: stopType.value === "DROP_OFF" ? form.arrivalTime : null,
+    departureTime: stopType.value === "PICK_UP" ? form.departureTime : null,
+  };
+
   let res;
   if (props.model?._id) {
-    res = await tripStopStore.updateById(props.model._id, form);
+    res = await tripStopStore.updateById(props.model._id, payload);
   } else {
-    res = await tripStopStore.create(form);
+    res = await tripStopStore.create(payload);
   }
 
   if (res) emit("success");
@@ -109,32 +163,57 @@ const submit = async () => {
 <template>
   <div class="space-y-5">
     <h3 class="text-lg font-semibold">
-      {{ props.model ? "Edit Route" : "Add Route" }}
+      {{ props.model ? "Edit Trip Stop" : "Add Trip Stop" }}
     </h3>
 
-    <!-- ROUTE -->
+    <!-- STOP -->
     <div>
-      <label class="mb-1 block text-sm font-medium">Route</label>
-      <select v-model="form.routeId" class="input">
+      <label class="mb-1 block text-sm font-medium">Stop</label>
+      <select v-model="form.stopId" class="input">
         <option value="">Select stop</option>
-        <option v-for="s in routeStore.list" :key="s._id" :value="s._id">
-          {{ s.startStopId?.name }} → {{ s.endStopId?.name }}
+        <option v-for="s in stopLocationStore.list" :key="s._id" :value="s._id">
+          {{ s.name }}
         </option>
       </select>
-      <p class="error">{{ errors.routeId }}</p>
+      <p class="error">{{ errors.stopId }}</p>
+    </div>
+
+    <!-- STOP TYPE -->
+    <div>
+      <label class="mb-1 block text-sm font-medium">Stop Type</label>
+      <div class="flex gap-6">
+        <label class="flex cursor-pointer items-center gap-2">
+          <input
+            type="radio"
+            value="PICK_UP"
+            v-model="stopType"
+            class="accent-primary"
+          />
+          🚏 Điểm đón
+        </label>
+        <label class="flex cursor-pointer items-center gap-2">
+          <input
+            type="radio"
+            value="DROP_OFF"
+            v-model="stopType"
+            class="accent-primary"
+          />
+          🏁 Điểm trả
+        </label>
+      </div>
     </div>
 
     <!-- ARRIVAL -->
-    <div>
+    <div v-if="stopType === 'DROP_OFF'">
       <label class="mb-1 block text-sm font-medium">Arrival Time</label>
-      <input v-model="arrivalInput" type="datetime-local" class="input" >
+      <input v-model="arrivalInput" type="time" class="input" />
       <p class="error">{{ errors.arrivalTime }}</p>
     </div>
 
     <!-- DEPARTURE -->
-    <div>
+    <div v-if="stopType === 'PICK_UP'">
       <label class="mb-1 block text-sm font-medium">Departure Time</label>
-      <input v-model="departureInput" type="datetime-local" class="input" >
+      <input v-model="departureInput" type="time" class="input" />
       <p class="error">{{ errors.departureTime }}</p>
     </div>
 

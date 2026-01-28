@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed } from "vue";
 
 const props = defineProps<{
-  modelValue: {
+  form: {
     name: string;
     phone: string;
     email: string;
@@ -11,25 +11,16 @@ const props = defineProps<{
   };
 }>();
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["change"]);
 
-const form = ref({ ...props.modelValue });
-
-watch(
-  form,
-  (val) => {
-    emit("update:modelValue", val);
+const form = computed({
+  get() {
+    return props.form;
   },
-  { deep: true },
-);
-
-watch(
-  () => props.modelValue,
-  (val) => {
-    form.value = { ...val };
+  set(val) {
+    emit("change", val);
   },
-  { deep: true },
-);
+});
 </script>
 
 <template>
@@ -110,8 +101,8 @@ watch(
           <label class="mb-1 block text-sm"> Ghi chú </label>
           <div class="relative">
             <Textarea
-              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-400 focus:ring-green-400"
               v-model="form.note"
+              class="w-full rounded-md border px-3 py-2 pr-8 focus:border-green-400 focus:ring-green-400"
               placeholder="Đón ở bến xe Đà Nẵng..."
             />
 
