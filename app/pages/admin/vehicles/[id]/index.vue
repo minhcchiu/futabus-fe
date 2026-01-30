@@ -23,8 +23,6 @@ const form = reactive<CreateVehicle>({
   companyId: "",
   plateNumber: "",
   level: "SLEEPER",
-  totalSeat: 0,
-  hasUpperDeck: false,
   status: "ACTIVE",
   amenities: [],
 });
@@ -47,8 +45,6 @@ onMounted(async () => {
     companyId: vehicle.companyId,
     plateNumber: vehicle.plateNumber,
     level: vehicle.level,
-    totalSeat: vehicle.totalSeat,
-    hasUpperDeck: vehicle.hasUpperDeck,
     status: vehicle.status,
     amenities: vehicle.amenities || [],
   });
@@ -61,7 +57,6 @@ const validateForm = (): boolean => {
   try {
     CreateVehicleSchema.parse({
       ...form,
-      totalSeat: Number(form.totalSeat),
     });
     errors.value = {};
     return true;
@@ -107,17 +102,17 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
     <template v-else>
       <!-- HEADER -->
       <div>
-        <h1 class="text-2xl font-semibold">Update Vehicle</h1>
-        <p class="text-sm text-gray-500">Edit vehicle information</p>
+        <h1 class="text-2xl font-semibold">Cập nhật xe</h1>
+        <p class="text-sm text-gray-500">Cập nhật thông tin xe</p>
       </div>
 
       <!-- FORM -->
       <div class="space-y-4">
         <!-- COMPANY -->
         <div>
-          <label class="mb-1 block text-sm font-medium">Bus Company</label>
+          <label class="mb-1 block text-sm font-medium">Nhà Xe</label>
           <select v-model="form.companyId" class="input">
-            <option value="">Select company</option>
+            <option value="">Chọn nhà xe</option>
             <option v-for="c in companyStore.list" :key="c._id" :value="c._id">
               {{ c.name }}
             </option>
@@ -127,8 +122,8 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
 
         <!-- PLATE -->
         <div>
-          <label class="mb-1 block text-sm font-medium">Plate Number</label>
-          <input v-model="form.plateNumber" class="input" >
+          <label class="mb-1 block text-sm font-medium">Biển số</label>
+          <input v-model="form.plateNumber" class="input" />
           <p v-if="errors.plateNumber" class="error">
             {{ errors.plateNumber }}
           </p>
@@ -136,7 +131,7 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
 
         <!-- LEVEL -->
         <div>
-          <label class="mb-1 block text-sm font-medium">Vehicle Level</label>
+          <label class="mb-1 block text-sm font-medium">Loại xe</label>
           <select v-model="form.level" class="input">
             <option value="SLEEPER">Sleeper</option>
             <option value="SEAT">Seat</option>
@@ -144,32 +139,9 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
           </select>
         </div>
 
-        <!-- TOTAL SEAT -->
-        <div>
-          <label class="mb-1 block text-sm font-medium">Total Seats</label>
-          <input
-            v-model.number="form.totalSeat"
-            type="number"
-            min="1"
-            class="input"
-          >
-          <p v-if="errors.totalSeat" class="error">{{ errors.totalSeat }}</p>
-        </div>
-
-        <!-- UPPER DECK -->
-        <div class="flex items-center gap-2">
-          <input
-            id="upperDeck"
-            v-model="form.hasUpperDeck"
-            type="checkbox"
-            class="rounded border"
-          >
-          <label for="upperDeck" class="text-sm"> Has Upper Deck </label>
-        </div>
-
         <!-- AMENITIES -->
         <div>
-          <label class="mb-1 block text-sm font-medium">Amenities</label>
+          <label class="mb-1 block text-sm font-medium">Tính năng</label>
 
           <div
             v-for="(a, i) in form.amenities"
@@ -180,7 +152,7 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
               v-model="form.amenities[i]"
               placeholder="wifi, tv..."
               class="input flex-1"
-            >
+            />
             <button
               type="button"
               class="text-sm text-red-500"
@@ -201,11 +173,10 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
 
         <!-- STATUS -->
         <div>
-          <label class="mb-1 block text-sm font-medium">Status</label>
+          <label class="mb-1 block text-sm font-medium">Trạng thái</label>
           <select v-model="form.status" class="input">
             <option value="ACTIVE">Active</option>
             <option value="INACTIVE">Inactive</option>
-            <option value="MAINTENANCE">Maintenance</option>
           </select>
         </div>
       </div>
@@ -241,8 +212,5 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
 }
 .btn-primary {
   @apply rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60;
-}
-.btn-secondary {
-  @apply rounded-lg border px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50;
 }
 </style>

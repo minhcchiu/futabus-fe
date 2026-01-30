@@ -95,7 +95,7 @@ onBeforeUnmount(() => {
         :placeholder="placeholder"
         class="w-full py-2 text-sm outline-none"
         readonly
-      >
+      />
 
       <!-- Clear -->
       <button
@@ -121,7 +121,7 @@ onBeforeUnmount(() => {
             v-model="keyword"
             placeholder="Tìm tỉnh/thành"
             class="w-full rounded-lg border px-3 py-3 pr-10 outline-none focus:border-green-500"
-          >
+          />
 
           <!-- Clear button -->
           <button

@@ -59,7 +59,10 @@ export const useVehicleStore = defineStore("vehicle", () => {
   const deleteByIds = async (ids: string[]) => {
     loading.value = true;
     try {
-      return await vehicleApi.deleteManyByIds(ids);
+      const deleted = await vehicleApi.deleteManyByIds(ids);
+      list.value = list.value.filter((v) => !ids.includes(v._id!));
+
+      return deleted;
     } finally {
       loading.value = false;
     }

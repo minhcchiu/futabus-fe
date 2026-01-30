@@ -1,48 +1,67 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import BankTransferConfirm from "~/components/payment/BankTransferConfirm.vue";
+import { METHODS_DATA } from "~/utils/data";
+import {
+  PaymentMethod,
+  type Booking,
+} from "~/validations/admin/booking.validation";
 
-const method = ref<string | null>(null);
+const props = defineProps<{
+  booked: Booking;
+  isSubmitting: boolean;
+}>();
+const emit = defineEmits<{
+  (
+    e: "payment",
+    input: {
+      filePayment: File | null;
+      bookingId: string;
+      paymentMethod: PaymentMethod;
+    },
+  ): void;
+}>();
+const submitting = computed(() => props.isSubmitting);
+const method = ref<PaymentMethod | null>(
+  props.booked.paymentInfo.method || null,
+);
 
 const showMethodSheet = ref(false);
 const showQRModal = ref(false);
 
-const selectMethod = (m: string) => {
+const selectMethod = (m: PaymentMethod) => {
   method.value = m;
   showMethodSheet.value = false;
   showQRModal.value = true;
 };
 
-const submitOrder = () => {
-  // TODO: Implement order submission
+const paymentMethod = ref<PaymentMethod>(
+  props.booked?.paymentInfo.method || PaymentMethod.BANK_TRANSFER,
+);
+
+const isExpired = ref(false);
+let timer: number | undefined;
+
+const checkExpire = () => {
+  isExpired.value = Date.now() >= props.booked!.expireAt;
 };
 
-const methods = [
-  {
-    key: "VNPay",
-    label: "Thanh toán VietQR",
-    icon: "https://storage.googleapis.com/futa-busline-web-cms-prod/VNPAY_payment_f70a6c71dc/VNPAY_payment_f70a6c71dc.png",
-    note: "Nhập VNPAYFUTA26 - Giảm 15K đơn từ 300K, giảm 30K đơn từ 750K",
-  },
-  {
-    key: "ZaloPay",
-    label: "ZaloPay",
-    icon: "https://storage.googleapis.com/futa-busline-web-cms-prod/zalopay_fcfdae0580/zalopay_fcfdae0580.svg",
-    note: "Giảm 25% tối đa 20k cho khách hàng lần đầu thanh toán; giảm 10k cho cho tất cả các giao dịch.",
-  },
-  {
-    key: "MAI_LINH",
-    label: "Mai Linh",
-    icon: "https://storage.googleapis.com/futa-busline-web-cms-prod/futapay_db8da73dc3/futapay_db8da73dc3.svg",
-    note: "Thanh toán qua Mai Linh",
-  },
-  {
-    key: "MBBANK",
-    label: "MB Bank",
-    icon: "https://storage.googleapis.com/futa-busline-web-cms-prod/viet_QR_e6b170910a/viet_QR_e6b170910a.png",
-    note: "QR chuyển khoản, quét mã thanh toán an toàn và tiện lợi.",
-  },
-];
+onMounted(() => {
+  checkExpire();
+  timer = window.setInterval(checkExpire, 1000);
+});
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
+
+const onPayment = (data: {
+  filePayment: File | null;
+  bookingId: string;
+  paymentMethod: PaymentMethod;
+}) => {
+  emit("payment", data);
+};
 </script>
 
 <template>
@@ -62,20 +81,25 @@ const methods = [
     <!-- CONTENT -->
     <div class="h-full flex-1 space-y-4 overflow-y-auto p-4 pb-32">
       <h3 class="text-center text-lg font-semibold">Thông tin thanh toán</h3>
-      <PassengerInfoCard />
-      <TripInfoCard />
-      <PriceDetailCard />
+      <PassengerInfoCard :customer-info="booked?.customerInfo" />
+      <TripInfoCard v-if="booked" :booked="booked" />
+      <PriceDetailCard v-if="booked" :booked="booked" />
 
       <div
         class="flex cursor-pointer items-center justify-between rounded-xl border bg-white p-4"
-        @click="showMethodSheet = true"
+        @click="
+          () => {
+            if (isExpired) return;
+            showMethodSheet = true;
+          }
+        "
       >
         <div class="flex items-center gap-3">
           <img
             v-if="method"
-            :src="methods.find((m) => m.key === method)?.icon"
+            :src="METHODS_DATA.find((m) => m.key === method)?.icon"
             class="h-6 w-6"
-          >
+          />
           <div>
             <p class="text-sm text-gray-500">Phương thức thanh toán</p>
             <p class="font-medium">
@@ -87,17 +111,16 @@ const methods = [
         <span class="text-gray-400">›</span>
       </div>
 
-      <BankTransferConfirm :amount="75000" :expire="339" />
-    </div>
-
-    <!-- BOTTOM CONFIRM -->
-    <div class="fixed bottom-0 left-0 right-0 z-30 bg-green-500 px-4 py-3">
-      <button
-        class="w-full rounded-xl py-3 font-bold text-white"
-        @click="submitOrder"
-      >
-        XÁC NHẬN ĐẶT
-      </button>
+      <BankTransferConfirm
+        v-if="booked"
+        :amount="booked?.amount"
+        :expire="booked.expireAt"
+        :disabled="isExpired"
+        :bookingId="booked._id"
+        :payment-method="paymentMethod"
+        @payment="onPayment"
+        :is-submitting="submitting"
+      />
     </div>
 
     <!-- PAYMENT METHOD SHEET -->
@@ -142,15 +165,17 @@ const methods = [
           </div>
 
           <PaymentQRCode
-            :amount="400000"
-            :expire="1199"
-            :method="method || 'FUTAPAY'"
+            v-if="booked && !isExpired"
+            :amount="booked?.amount"
+            :expire="booked.expireAt"
+            :method="paymentMethod"
           />
 
           <!-- Footer buttons -->
           <div class="mt-4 space-y-2">
             <button
               class="w-full rounded-xl border border-gray-300 py-2 font-medium text-gray-600 hover:bg-gray-50"
+              :disabled="isExpired"
               @click="
                 showQRModal = false;
                 showMethodSheet = true;

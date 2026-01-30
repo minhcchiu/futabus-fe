@@ -5,7 +5,7 @@
       <button
         class="hover:bg-primary-600 rounded-lg bg-primary px-4 py-2 text-white"
       >
-        + Create Trip
+        + Tạo Trip
       </button>
     </div>
 

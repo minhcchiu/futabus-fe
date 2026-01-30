@@ -27,4 +27,5 @@ export type Seat = {
   isVip: boolean;
   isActive: boolean;
   editing?: boolean;
+  isBooked?: boolean;
 };

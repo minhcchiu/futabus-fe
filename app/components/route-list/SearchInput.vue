@@ -4,11 +4,11 @@
       src="https://futabus.vn/images/icons/search.svg"
       alt=""
       class="mr-2 h-4 w-4"
-    >
+    />
     <input
       :placeholder="placeholder"
       class="w-full border-none text-sm outline-none"
-    >
+    />
   </div>
 </template>
 

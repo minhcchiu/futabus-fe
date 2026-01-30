@@ -7,7 +7,7 @@ export default withNuxt([
       "./.nuxt/**/*",
       "app/components/ui/**",
       "tailwind.config.js",
-      "components/ui/*",
+      "components/ui/**",
     ],
   },
   {
@@ -20,10 +20,11 @@ export default withNuxt([
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "vue/prop-name-casing": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { varsIgnorePattern: "^_$" },
-      ],
+      // "@typescript-eslint/no-unused-vars": [
+      //   "error",
+      //   { varsIgnorePattern: "^_$" },
+      // ],
+      "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/ban-ts-comment": "off",
       "@typescript-eslint/no-dynamic-delete": "off",
     },

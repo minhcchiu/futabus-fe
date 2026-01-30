@@ -90,7 +90,7 @@ const submit = async () => {
   <div class="max-w-xl space-y-6">
     <!-- HEADER -->
     <div>
-      <h1 class="text-2xl font-semibold">Edit Bus Company</h1>
+      <h1 class="text-2xl font-semibold">Edit Nhà Xe</h1>
       <p class="text-sm text-gray-500">Update bus operator information</p>
     </div>
 
@@ -102,14 +102,14 @@ const submit = async () => {
       <!-- NAME -->
       <div>
         <label class="mb-1 block text-sm font-medium">Company Name</label>
-        <input v-model="form.name" class="input" >
+        <input v-model="form.name" class="input" />
         <p v-if="errors.name" class="error">{{ errors.name }}</p>
       </div>
 
       <!-- HOTLINE -->
       <div>
         <label class="mb-1 block text-sm font-medium">Hotline</label>
-        <input v-model="form.hotline" class="input" >
+        <input v-model="form.hotline" class="input" />
         <p v-if="errors.hotline" class="error">{{ errors.hotline }}</p>
       </div>
 
@@ -121,7 +121,7 @@ const submit = async () => {
           :key="i"
           class="mb-2 flex gap-2"
         >
-          <input v-model="form.hotlineList[i]" class="input flex-1" >
+          <input v-model="form.hotlineList[i]" class="input flex-1" />
           <button
             type="button"
             class="text-sm text-red-500"
@@ -192,8 +192,5 @@ const submit = async () => {
 }
 .btn-primary {
   @apply rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60;
-}
-.btn-secondary {
-  @apply rounded-lg border px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50;
 }
 </style>

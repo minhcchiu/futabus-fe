@@ -184,18 +184,18 @@ const submit = async () => {
       <div class="flex gap-6">
         <label class="flex cursor-pointer items-center gap-2">
           <input
+            v-model="stopType"
             type="radio"
             value="PICK_UP"
-            v-model="stopType"
             class="accent-primary"
           />
           🚏 Điểm đón
         </label>
         <label class="flex cursor-pointer items-center gap-2">
           <input
+            v-model="stopType"
             type="radio"
             value="DROP_OFF"
-            v-model="stopType"
             class="accent-primary"
           />
           🏁 Điểm trả
@@ -240,8 +240,5 @@ const submit = async () => {
 }
 .btn-primary {
   @apply rounded-lg bg-primary px-4 py-2 text-white hover:opacity-90 disabled:opacity-60;
-}
-.btn-secondary {
-  @apply rounded-lg border px-4 py-2 text-gray-600 hover:bg-gray-50;
 }
 </style>

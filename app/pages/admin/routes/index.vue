@@ -59,15 +59,15 @@ async function handleDeleted() {
     <!-- HEADER -->
     <div class="mb-6 flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-semibold">Routes</h1>
-        <p class="text-sm text-gray-500">Manage bus routes</p>
+        <h1 class="text-2xl font-semibold">Tuyến đường</h1>
+        <p class="text-sm text-gray-500">Quản lý các tuyển đường</p>
       </div>
 
       <NuxtLink
         to="/admin/routes/create"
         class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:opacity-90"
       >
-        + Add Route
+        + Thêm tuyến đường
       </NuxtLink>
     </div>
 
@@ -75,14 +75,14 @@ async function handleDeleted() {
     <div class="mb-4 flex items-center gap-3">
       <input
         v-model="keyword"
-        placeholder="Search company or stop..."
+        placeholder="Tìm kiếm..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      >
+      />
     </div>
 
     <!-- TABLE -->
     <AdminTable
-      :columns="['Company', 'Start Stop', 'End Stop', 'Actions']"
+      :columns="['Nhà xe', 'Điểm bắt đầu', 'Điểm kết thúc', 'Actions']"
       :data="routes"
       :page="page"
       :page-size="pageSize"
@@ -100,7 +100,7 @@ async function handleDeleted() {
             :to="`/admin/routes/${r._id}`"
             class="text-sm text-primary hover:underline"
           >
-            Edit
+            Sửa
           </NuxtLink>
 
           <DeleteButton

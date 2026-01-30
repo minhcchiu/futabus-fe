@@ -1,38 +1,146 @@
 <script setup lang="ts">
+import { endOfDay, format, startOfDay } from "date-fns";
 import type { Trip } from "~/validations/admin/trip.validation";
 
-// const date = ref(fromDate(new Date(), getLocalTimeZone())) as Ref<DateValue>;
-// const tripType = ref("one-way");
-// const from = ref("dak-lak");
-// const to = ref("da-nang");
-// const tickets = ref(1);
-
 const tripStore = useTripStore();
+const routeStore = useRouteStore();
+
 const selectedTrip = ref<Trip | null>(null);
 
-onMounted(async () => {
-  await tripStore.fetchAll({
+const route = useRoute();
+const from = computed(() => route.query.from as string | undefined);
+const to = computed(() => route.query.to as string | undefined);
+const ticket = computed(() => route.query.ticket as string | undefined);
+const date = computed(() => {
+  const d = route.query.date as string | undefined;
+
+  if (!d) return Date.now();
+
+  const [day, month, year] = d.split("-");
+  return new Date(+year!, +month! - 1, +day!).getTime();
+});
+
+const trips = computed(() => tripStore.list);
+const locationsFromTo = computed(() => routeStore.locationsFromTo);
+
+const getProvinceId = (name: string) => {
+  return locationsFromTo.value.find((l) => l.provinceFrom.name === name)
+    ?.provinceFrom._id;
+};
+
+const getProvinceToId = (name: string) => {
+  return locationsFromTo.value
+    .find((l) => l.provincesTo.some((p) => p.name === name))
+    ?.provincesTo.find((p) => p.name === name)?._id;
+};
+
+const fetchTrips = async (query: {
+  from?: string | null;
+  to?: string | null;
+  date: number;
+  ticket?: number;
+}) => {
+  let startAt = Date.now();
+  let endAt = endOfDay(Date.now()).getTime();
+  if (query.date) {
+    startAt = startOfDay(new Date(query.date)).getTime();
+    endAt = endOfDay(startAt).getTime();
+  }
+
+  const filter = {
     _sort: "departureTime",
     _populate: "routeId.startStopId endStopId,vehicleId",
-    [`departureTime>=${Date.now()}`]: "",
+    [`departureTime>=${startAt}`]: "",
+    [`departureTime<=${endAt}`]: "",
+  };
+
+  if (query.from) {
+    // const provinceFromId = getProvinceId(query.from);
+    // Object.assign(filter, {
+    // provinceFromId,
+    // });
+  }
+
+  if (query.to) {
+    // const provinceToId = getProvinceToId(query.to);
+    //    Object.assign(filter, {
+    // provinceToId,
+    // });
+  }
+
+  const list = await tripStore.fetchAll(filter);
+
+  return list.length;
+};
+
+onMounted(async () => {
+  await routeStore.getLocationsFromTo();
+  await fetchTrips({
+    date: date.value,
+    ticket: ticket.value ? +ticket.value : undefined,
+    from: from.value,
+    to: to.value,
   });
 });
 
-// onMounted(() => {
-//   selectedTrip.value = trips[0]!;
-// });
+const searchOnDesktop = async (query: {
+  from: string | null;
+  to: string | null;
+  date: string;
+  ticket: string;
+}) => {
+  const d = query.date as string | undefined;
+  let dateTime = Date.now();
+  if (d) {
+    const [day, month, year] = d.split("-");
+    dateTime = new Date(+year!, +month! - 1, +day!).getTime();
+  }
+
+  await fetchTrips({
+    from: query.from,
+    to: query.to,
+    date: dateTime,
+    ticket: query.ticket ? +query.ticket : undefined,
+  });
+};
 
 const openFilter = ref(false);
 const isOpenSearchResult = ref(false);
-const onSearch = () => {
-  isOpenSearchResult.value = true;
+const showEmptyModal = ref(false);
+
+const searchOnMobile = async (query: {
+  from: string | null;
+  to: string | null;
+  date: string;
+  ticket: string;
+}) => {
+  showEmptyModal.value = false;
+  isOpenSearchResult.value = false;
+
+  const d = query.date as string | undefined;
+  let dateTime = Date.now();
+  if (d) {
+    const [day, month, year] = d.split("-");
+    dateTime = new Date(+year!, +month! - 1, +day!).getTime();
+  }
+
+  const total = await fetchTrips({
+    from: query.from,
+    to: query.to,
+    date: dateTime,
+    ticket: query.ticket ? +query.ticket : undefined,
+  });
+
+  if (total === 0) {
+    showEmptyModal.value = true;
+  } else {
+    isOpenSearchResult.value = true;
+  }
 };
 
 const onCloseMobileTripList = () => {
   isOpenSearchResult.value = false;
 };
-
-const trips = computed(() => tripStore.list);
 </script>
 
 <template>
@@ -44,11 +152,19 @@ const trips = computed(() => tripStore.list);
     />
 
     <div class="hidden md:block">
-      <TripSearchBox />
+      <TripSearchBox
+        v-if="!routeStore.loading"
+        :locations-from-to="locationsFromTo"
+        @search="searchOnDesktop"
+      />
     </div>
 
     <div class="block md:hidden">
-      <MobileSearch @search="onSearch" />
+      <MobileSearch
+        v-if="!routeStore.loading"
+        :locations-from-to="locationsFromTo"
+        @search="searchOnMobile"
+      />
 
       <!-- RECENT -->
       <div class="mt-10 hidden">
@@ -74,7 +190,7 @@ const trips = computed(() => tripStore.list);
 
     <div class="grid grid-cols-12 gap-x-6 px-4 py-6">
       <!-- Sidebar -->
-      <aside class="col-span-4 space-y-4">
+      <aside class="col-span-12 space-y-4 md:col-span-4">
         <div class="overflow-hidden rounded-xl bg-white shadow">
           <!-- IMAGE / BANNER -->
           <div class="relative h-36 w-full">
@@ -82,7 +198,7 @@ const trips = computed(() => tripStore.list);
               src="/images/contact-banner.png"
               alt="FUTA Bus Lines"
               class="h-full w-full object-cover"
-            >
+            />
             <div class="absolute inset-0 bg-black/30" />
             <div class="absolute bottom-3 left-4 text-white">
               <h2 class="text-lg font-semibold">Liên hệ với chúng tôi</h2>
@@ -96,7 +212,7 @@ const trips = computed(() => tripStore.list);
             <div>
               <p class="text-xs uppercase text-gray-400">Đơn vị vận hành</p>
               <p class="mt-1 font-semibold text-green-600">
-                CÔNG TY CỔ PHẦN XE KHÁCH PHƯƠNG TRANG<br >
+                CÔNG TY CỔ PHẦN XE KHÁCH PHƯƠNG TRANG<br />
                 FUTA BUS LINES
               </p>
             </div>
@@ -105,7 +221,7 @@ const trips = computed(() => tripStore.list);
             <div class="flex items-start gap-2 text-gray-600">
               <span>📍</span>
               <p>
-                486-486A Lê Văn Lương, Phường Tân Hưng,<br >
+                486-486A Lê Văn Lương, Phường Tân Hưng,<br />
                 TPHCM, Việt Nam
               </p>
             </div>
@@ -163,8 +279,10 @@ const trips = computed(() => tripStore.list);
       <main class="col-span-8 hidden md:block">
         <TripList
           :trips="trips"
-          route-name="Đắk Lắk - Đà Nẵng"
           @select="selectedTrip = $event"
+          :pickup-province="from"
+          :dropoff-province="to"
+          :date-label="format(date, 'dd/MM/yyyy')"
         />
       </main>
     </div>
@@ -177,7 +295,9 @@ const trips = computed(() => tripStore.list);
       <div>
         <MobileTripList
           :trips="trips"
-          route-name="Đắk Lắk - Đà Nẵng"
+          :pickup-province="from"
+          :dropoff-province="to"
+          :date-label="format(date, 'dd/MM/yyyy')"
           @open-filter="openFilter = true"
           @select="selectedTrip = $event"
           @back="onCloseMobileTripList"
@@ -186,6 +306,45 @@ const trips = computed(() => tripStore.list);
 
       <MobileFilterModal v-model="openFilter" />
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="showEmptyModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6 md:hidden"
+      >
+        <div
+          class="w-full max-w-sm rounded-2xl bg-white px-6 py-7 text-center shadow-xl"
+        >
+          <img
+            src="/images/empty_list.svg"
+            alt="Không có chuyến xe"
+            class="mx-auto mb-4 h-20 opacity-80"
+          />
+
+          <p class="text-lg font-semibold">Không có chuyến xe</p>
+
+          <p class="text-muted-foreground mt-1 text-sm">
+            Thử chọn ngày hoặc tuyến khác
+          </p>
+
+          <div class="mt-6 flex gap-3">
+            <button
+              class="flex-1 rounded-full border px-4 py-2 text-sm"
+              @click="showEmptyModal = false"
+            >
+              Đóng
+            </button>
+
+            <button
+              class="flex-1 rounded-full bg-green-500 px-4 py-2 text-sm font-semibold text-white"
+              @click="showEmptyModal = false"
+            >
+              Đổi tìm kiếm
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 

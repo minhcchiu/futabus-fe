@@ -1,22 +1,22 @@
-import { routeApi } from "~/apis/futabus/route.api";
+import { bookingApi } from "~/apis/futabus/booking.api";
 import type { PaginateResponse } from "~/types/paginate-response.type";
 import type { PaginationParams } from "~/utils/types/fetch.types";
 import type {
-  CreateRoute,
-  Route,
-  UpdateRoute,
-} from "~/validations/admin/route.validation";
+  Booking,
+  CreateBooking,
+  UpdateBooking,
+} from "~/validations/admin/booking.validation";
 
-export const useRouteStore = defineStore("route", () => {
+export const useBookingStore = defineStore("booking", () => {
   const loading = ref(false);
-  const list = ref<Route[]>([]);
-  const paginate = ref<PaginateResponse<Route> | null>(null);
-  const selected = ref<Route | null>(null);
+  const list = ref<Booking[]>([]);
+  const paginate = ref<PaginateResponse<Booking> | null>(null);
+  const selected = ref<Booking | null>(null);
 
   const fetchAll = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      list.value = await routeApi.getAll(query);
+      list.value = await bookingApi.getAll(query);
       return list.value;
     } finally {
       loading.value = false;
@@ -26,31 +26,39 @@ export const useRouteStore = defineStore("route", () => {
   const fetchPaginate = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      paginate.value = await routeApi.paginate(query);
+      paginate.value = await bookingApi.paginate(query);
       return paginate.value;
     } finally {
       loading.value = false;
     }
   };
 
-  const fetchById = async (id: string) => {
-    selected.value = await routeApi.getById(id);
+  const fetchById = async (id: string, query?: PaginationParams) => {
+    selected.value = await bookingApi.getById(id, query);
     return selected.value;
   };
 
-  const create = async (input: CreateRoute) => {
+  const create = async (input: CreateBooking) => {
     loading.value = true;
     try {
-      return await routeApi.create(input);
+      return await bookingApi.create(input);
     } finally {
       loading.value = false;
     }
   };
 
-  const updateById = async (id: string, input: UpdateRoute) => {
+  const updateStatus = async (id: string, input: UpdateBooking) => {
     loading.value = true;
     try {
-      return await routeApi.updateById(id, input);
+      return await bookingApi.updateStatus(id, input);
+    } finally {
+      loading.value = false;
+    }
+  };
+  const updateById = async (id: string, input: UpdateBooking) => {
+    loading.value = true;
+    try {
+      return await bookingApi.updateById(id, input);
     } finally {
       loading.value = false;
     }
@@ -59,7 +67,20 @@ export const useRouteStore = defineStore("route", () => {
   const deleteById = async (id: string) => {
     loading.value = true;
     try {
-      return await routeApi.deleteById(id);
+      return await bookingApi.deleteById(id);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const seatIdsBooked = ref<string[]>([]);
+  const getSeatsBooked = async (query?: PaginationParams) => {
+    loading.value = true;
+    try {
+      const res = await bookingApi.getSeatsBooked(query);
+
+      seatIdsBooked.value = res;
+      return res;
     } finally {
       loading.value = false;
     }
@@ -76,5 +97,8 @@ export const useRouteStore = defineStore("route", () => {
     create,
     updateById,
     deleteById,
+    updateStatus,
+    seatIdsBooked,
+    getSeatsBooked,
   };
 });

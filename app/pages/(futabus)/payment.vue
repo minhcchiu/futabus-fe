@@ -1,47 +1,84 @@
 <script setup lang="ts">
-import type { Trip } from "~/validations/trip.validation";
+import { toast } from "vue-sonner";
+import { useUploadStore } from "~/stores/pre-built/upload.store";
+import {
+  BookingStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from "~/validations/admin/booking.validation";
 
-// const date = ref(fromDate(new Date(), getLocalTimeZone())) as Ref<DateValue>;
-// const tripType = ref("one-way");
-// const from = ref("dak-lak");
-// const to = ref("da-nang");
-// const tickets = ref(1);
+const router = useRouter();
+const route = useRoute();
+const bookingStore = useBookingStore();
+const uploadStore = useUploadStore();
 
-const selectedTrip = ref<Trip | null>(null);
+const booked = computed(() => bookingStore.selected);
 
-// const totalPrice = computed(() => {
-//   if (!selectedTrip.value) return 0;
-//   return selectedTrip.value.price;
-// });
+onMounted(async () => {
+  const bookingId = route.query.booking_id as string;
+  await bookingStore.fetchById(bookingId!, {
+    _populate:
+      "fromStopId,toStopId,tripId,tripId.routeId,tripId.routeId.startStopId endStopId,seatIds",
+  });
 
-// const canPay = computed(() => {
-//   return totalPrice.value > 0;
-// });
-
-// const onPayment = () => {};
-
-// const onCancel = () => {};
-
-const trips: Trip[] = [
-  {
-    id: "1",
-    date: "Thứ 5, 22/01/2026",
-    route: "Đắk Nông - Đà Nẵng",
-    departTime: "15:00",
-    departStation: "Bến Xe Đắk Nông",
-    arriveTime: "06:00",
-    arriveStation: "Bến Xe Trung Tâm Đà Nẵng",
-    duration: "15 giờ",
-    vehicleType: "Limousine",
-    price: 400000,
-  },
-];
-
-onMounted(() => {
-  selectedTrip.value = trips[0]!;
+  checkExpire();
+  timer = window.setInterval(checkExpire, 1000);
 });
 
-const method = ref("FUTAPAY");
+const paymentMethod = ref<PaymentMethod>(
+  booked.value?.paymentInfo.method || PaymentMethod.BANK_TRANSFER,
+);
+
+const isExpired = ref(false);
+
+let timer: number | undefined;
+
+const checkExpire = () => {
+  isExpired.value = Date.now() >= booked.value!.expireAt;
+};
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
+
+const onPayment = async (input: {
+  filePayment: File | null;
+  bookingId: string;
+  paymentMethod: PaymentMethod;
+}) => {
+  if (booked.value?.status === BookingStatus.CONFIRMED) {
+    toast.error("Chuyến đi đã được xác nhận");
+    return;
+  }
+  // TODO: Implement confirm logic
+  if (!input.filePayment) {
+    toast.error("Vui lòng tải hình thanh toán");
+    return;
+  }
+
+  const res = await uploadStore.uploadFile({
+    file: input.filePayment!,
+  });
+
+  const confirmed = await bookingStore.updateStatus(input.bookingId, {
+    status: BookingStatus.CONFIRMED,
+    paymentInfo: {
+      status: PaymentStatus.PAID,
+      amount: booked.value!.amount,
+      method: input.paymentMethod,
+      image: res.url,
+    },
+  });
+
+  toast.success("Đã xác nhận chuyến đi");
+
+  router.push({
+    path: "/ticket-lookup",
+    query: {
+      phone: confirmed?.customerInfo.phone,
+    },
+  });
+};
 </script>
 
 <template>
@@ -50,29 +87,54 @@ const method = ref("FUTAPAY");
       <div class="grid grid-cols-12 gap-6">
         <!-- LEFT -->
         <div class="col-span-4 space-y-4 rounded-xl bg-white">
-          <PaymentMethodList v-model="method" />
+          <PaymentMethodList v-model="paymentMethod" />
         </div>
 
         <!-- CENTER -->
         <div class="col-span-4">
-          <PaymentQRCode :amount="400000" :expire="1199" method="FUTAPAY" />
+          <PaymentQRCode
+            v-if="booked && !isExpired"
+            :amount="booked?.amount"
+            :expire="booked.expireAt"
+            :method="paymentMethod"
+          />
+
+          <div v-else class="rounded-xl bg-red-50 p-6 text-center text-red-600">
+            ⛔ Thời gian thanh toán đã hết hiệu lực
+            <br />
+            Vui lòng đặt vé lại
+          </div>
         </div>
 
         <!-- RIGHT -->
         <div class="col-span-4 space-y-4">
-          <PassengerInfoCard />
-          <TripInfoCard />
-          <PriceDetailCard />
+          <PassengerInfoCard :customer-info="booked?.customerInfo" />
+          <TripInfoCard v-if="booked" :booked="booked" />
+          <PriceDetailCard v-if="booked" :booked="booked" />
         </div>
       </div>
 
-      <BankTransferConfirm :amount="75000" :expire="339" />
+      <BankTransferConfirm
+        v-if="booked"
+        :amount="booked?.amount"
+        :expire="booked.expireAt"
+        :disabled="isExpired"
+        :bookingId="booked._id"
+        :payment-method="paymentMethod"
+        @payment="onPayment"
+        :is-submitting="bookingStore.loading"
+      />
     </div>
 
     <div
       class="fixed inset-0 z-[99] flex min-h-screen flex-col bg-gray-100 md:hidden"
     >
-      <MobilePayment />
+      <MobilePayment
+        v-if="booked"
+        :booked="booked"
+        @payment="onPayment"
+        :is-submitting="bookingStore.loading"
+      />
     </div>
   </div>
 </template>

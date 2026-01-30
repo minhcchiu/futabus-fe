@@ -143,14 +143,14 @@ const getStopType = (ts: TripStop) => {
               <!-- Actions -->
               <td class="flex items-center justify-end gap-2 px-4 py-3">
                 <button
-                  @click="editStop(ts)"
                   class="hover:bg-muted inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-primary transition"
+                  @click="editStop(ts)"
                 >
                   ✏️
                 </button>
                 <button
-                  @click="deleteStop(ts)"
                   class="hover:bg-muted inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-red-500 transition"
+                  @click="deleteStop(ts)"
                 >
                   ✖
                 </button>

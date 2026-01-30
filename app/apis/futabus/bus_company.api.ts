@@ -54,8 +54,4 @@ export const busCompanyApi = {
   deleteManyByIds: (ids: string[]): Promise<UpdateResult> => {
     return authFetch.delete(`${BUS_COMPANY_URL}/${ids.join(",")}/bulk`);
   },
-
-  deleteById: (id: string): Promise<BusCompany> => {
-    return authFetch.delete(`${BUS_COMPANY_URL}/${id}`);
-  },
 };

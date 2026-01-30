@@ -25,6 +25,6 @@ pnpm-lock.yaml
 !.env.example
 
 # shadcn ui
-app/components/ui/*
+app/components/ui/**
 tailwind.config.js
-components/ui/*
+components/ui/**

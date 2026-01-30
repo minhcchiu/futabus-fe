@@ -5,3 +5,28 @@
 /* body {
   @apply bg-bgSoft text-gray-800;
 } */
+
+/* Toàn bộ toast */
+[data-sonner-toast] {
+  background-color: #111827 !important; /* slate-900 */
+  color: #f9fafb !important;
+  border: 1px solid #374151;
+}
+
+/* Success */
+[data-sonner-toast][data-type="success"] {
+  background-color: #064e3b !important; /* green-900 */
+  border-color: #10b981;
+}
+
+/* Error */
+[data-sonner-toast][data-type="error"] {
+  background-color: #7f1d1d !important; /* red-900 */
+  border-color: #ef4444;
+}
+
+/* Warning */
+[data-sonner-toast][data-type="warning"] {
+  background-color: #78350f !important; /* amber-900 */
+  border-color: #f59e0b;
+}

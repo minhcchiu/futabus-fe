@@ -1,12 +1,43 @@
 <script setup lang="ts">
+import { toast } from "vue-sonner";
 import { BOOKING_STEPS } from "~/utils/enums";
 import { formatDateTime } from "~/utils/helpers/data.helper";
+import { handleApiError } from "~/utils/helpers/error-handler.helper";
+import {
+  BookingStatus,
+  PaymentMethod,
+} from "~/validations/admin/booking.validation";
 import type { Seat } from "~/validations/admin/seat.validation";
 
-const tripStore = useTripStore();
-const tripPriceStore = useTripPriceStore();
 const route = useRoute();
+const router = useRouter();
+const tripStore = useTripStore();
+const bookingStore = useBookingStore();
+const tripPriceStore = useTripPriceStore();
 const trip = computed(() => tripStore.selected);
+const seatIdsBooked = ref<string[]>([]);
+
+const date = ref<number>(Date.now());
+
+onMounted(async () => {
+  const tripId = route.query.trip_id as string;
+  date.value = +((route.query.date as string) || Date.now());
+
+  seatIdsBooked.value = await bookingStore.getSeatsBooked({
+    tripId,
+    [`expireAt>${date.value}`]: "",
+    status: BookingStatus.PENDING,
+  });
+
+  await Promise.all([
+    tripStore.fetchById(tripId!, {
+      _populate: "routeId.startStopId endStopId,vehicleId",
+    }),
+    tripPriceStore.fetchAll({
+      tripId,
+    }),
+  ]);
+});
 
 const totalPrice = computed(() => {
   if (!trip.value) return 0;
@@ -20,33 +51,29 @@ const totalPrice = computed(() => {
   return seatsPrices.reduce((total, seatPrice) => total + seatPrice.price, 0);
 });
 
-const canPay = computed(() => {
-  // return totalPrice.value > 0 ;
-  return true;
-});
-
-const onPayment = () => {
-  navigateTo("/payment");
-};
-
-const onCancel = () => {};
-
-onMounted(async () => {
-  const tripId = route.query.trip_id as string;
-
-  await tripStore.fetchById(tripId!, {
-    _populate: "routeId.startStopId endStopId,vehicleId",
-  });
-  await tripPriceStore.fetchAll({
-    tripId: tripId,
-  });
-});
-
 const currentStep = ref(BOOKING_STEPS.SEAT);
 
 const totalSteps = 4;
 
+const checkNextStep = (step: number) => {
+  switch (step) {
+    case BOOKING_STEPS.SEAT:
+      return checkSelectedSeats();
+    case BOOKING_STEPS.CUSTOMER:
+      return checkCustomerInfo();
+    case BOOKING_STEPS.PICKUP:
+      return checkPickupDropoff();
+    case BOOKING_STEPS.PAYMENT:
+      return canPay();
+    default:
+      return true;
+  }
+};
 const nextStep = () => {
+  if (!checkNextStep(currentStep.value)) {
+    return;
+  }
+
   if (currentStep.value < totalSteps - 1) {
     currentStep.value++;
   }
@@ -76,10 +103,12 @@ const customerForm = ref({
 // Handle pickup / dropOff
 const pickupDropoff = ref<{
   pickupTripStopId: string;
+  departureTime?: number;
   dropoffTripStopId: string;
   pickupType: "station" | "transfer";
   dropoffType: "station" | "transfer";
 }>({
+  departureTime: undefined,
   pickupTripStopId: "",
   dropoffTripStopId: "",
   pickupType: "station",
@@ -89,10 +118,107 @@ const pickupDropoff = ref<{
 const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
   pickupDropoff.value = data;
 };
+
+const checkSelectedSeats = () => {
+  if (selectedSeats.value.length === 0) {
+    toast.error("Vui lòng chọn ghế");
+    return false;
+  }
+  return true;
+};
+
+const checkCustomerInfo = () => {
+  if (
+    !customerForm.value.name ||
+    !customerForm.value.phone ||
+    !customerForm.value.email
+  ) {
+    toast.error(`Vui lòng nhập đầy đủ thông tin: Tên, Số điện thoại, Email`);
+    return false;
+  }
+
+  if (!customerForm.value.accepted) {
+    toast.error("Vui lòng đồng ý với điều khoản và điều kiện");
+    return false;
+  }
+
+  return true;
+};
+
+const checkPickupDropoff = () => {
+  if (
+    !pickupDropoff.value.pickupTripStopId ||
+    !pickupDropoff.value.dropoffTripStopId
+  ) {
+    toast.error("Vui lòng chọn điểm đón và trả");
+    return false;
+  }
+
+  return true;
+};
+
+const canPay = () => {
+  if (!checkSelectedSeats()) {
+    return false;
+  }
+  if (!checkCustomerInfo()) {
+    return false;
+  }
+  if (!checkPickupDropoff()) {
+    return false;
+  }
+
+  return true;
+};
+
+const onPayment = async () => {
+  if (!canPay()) return;
+
+  try {
+    const pickupTime = new Date(pickupDropoff.value.departureTime!);
+    const booked = await bookingStore.create({
+      tripId: trip.value!._id,
+      seatIds: selectedSeats.value.map((s) => s._id),
+      fromStopId: pickupDropoff.value.pickupTripStopId,
+      toStopId: pickupDropoff.value.dropoffTripStopId,
+      status: BookingStatus.PENDING,
+      amount: totalPrice.value,
+      paymentInfo: {
+        method: PaymentMethod.BANK_TRANSFER,
+        status: BookingStatus.PENDING,
+        amount: totalPrice.value,
+      },
+      customerInfo: {
+        name: customerForm.value.name,
+        phone: customerForm.value.phone,
+        email: customerForm.value.email,
+        note: customerForm.value.note,
+      },
+      departureTime: new Date(trip.value!.departureTime).setHours(
+        pickupTime.getHours(),
+        pickupTime.getMinutes(),
+        0,
+        0,
+      ),
+    });
+
+    router.push({
+      name: "payment",
+      query: {
+        booking_id: booked._id,
+      },
+    });
+  } catch (error: any) {
+    toast({ ...handleApiError(error), variant: "destructive" });
+  }
+};
+
+const onCancel = () => {};
 </script>
 
 <template>
   <div>
+    <!-- DESKTOP UI -->
     <div class="mx-auto hidden grid-cols-12 gap-6 py-6 md:grid">
       <!-- LEFT -->
       <div class="col-span-8 space-y-6">
@@ -100,6 +226,7 @@ const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
           v-if="trip"
           :vehicle-id="trip.vehicleId._id"
           @select-seats="selectSeats"
+          :seatIdsBooked="seatIdsBooked"
         />
         <CustomerForm :form="customerForm" @change="customerForm = $event" />
         <PickupDropoffBox
@@ -109,7 +236,6 @@ const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
 
         <BookingFooter
           :amount="totalPrice"
-          :can-pay="canPay"
           @cancel="onCancel"
           @submit="onPayment"
         />
@@ -120,7 +246,7 @@ const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
         <TripBookingSummary
           :trip="trip"
           :seats="selectedSeats"
-          :pickupDropOff="pickupDropoff"
+          :pickup-drop-off="pickupDropoff"
           :total-price="totalPrice"
         />
 
@@ -128,13 +254,14 @@ const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
           :customer-form="customerForm"
           :trip="trip"
           :seats="selectedSeats"
-          :pickupDropOff="pickupDropoff"
+          :pickup-drop-off="pickupDropoff"
           :total-price="totalPrice"
         />
         <PriceSummary :total-price="totalPrice" />
       </div>
     </div>
 
+    <!-- MOBILE UI -->
     <div
       class="fixed inset-0 z-[99] flex min-h-screen flex-col bg-gray-100 md:hidden"
     >
@@ -150,7 +277,7 @@ const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
               {{ trip?.routeId.endStopId.name }}
             </p>
             <p class="text-xs opacity-80">
-              {{ formatDateTime(trip?.departureTime) }}
+              {{ formatDateTime(trip?.departureTime || Date.now()) }}
             </p>
           </div>
           <div />
@@ -175,6 +302,8 @@ const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
         <SeatBookingSelector
           v-if="currentStep === 0 && trip"
           :vehicle-id="trip.vehicleId._id"
+          @select-seats="selectSeats"
+          :seatIdsBooked="seatIdsBooked"
         />
         <CustomerForm
           v-if="currentStep === 1"
@@ -191,14 +320,14 @@ const onPickupDropoffChange = (data: typeof pickupDropoff.value) => {
           <TripBookingSummary
             :trip="trip"
             :seats="selectedSeats"
-            :pickupDropOff="pickupDropoff"
+            :pickup-drop-off="pickupDropoff"
             :total-price="totalPrice"
           />
           <ContactSummary
             :customer-form="customerForm"
             :trip="trip"
             :seats="selectedSeats"
-            :pickupDropOff="pickupDropoff"
+            :pickup-drop-off="pickupDropoff"
             :total-price="totalPrice"
           />
           <PriceSummary :total-price="totalPrice" />

@@ -1,6 +1,6 @@
-import type { Menu } from "~/types/pre-built/7-menu";
-import type { ImageSize } from "~/utils/enums/enums";
-import { authFetch } from "~/utils/fetch";
+import type { FileUploaded, UploadedResult } from "~/types/pre-built/11-upload";
+import type { ImageSize } from "~/utils/enums";
+import { authFetch, guestFetch } from "~/utils/fetch";
 import type { FetchOptions } from "~/utils/types/fetch.types";
 
 const UPLOAD_URL = "/uploads";
@@ -12,7 +12,7 @@ export const uploadApi = {
       imageSizes?: ImageSize[];
     },
     options?: FetchOptions,
-  ): Promise<Menu> => {
+  ): Promise<UploadedResult> => {
     const formData = new FormData();
 
     input.file.forEach((file) => {
@@ -23,7 +23,7 @@ export const uploadApi = {
       formData.append("imageSizes", imageSize);
     });
 
-    return authFetch.post(UPLOAD_URL, formData, options);
+    return authFetch.post(`${UPLOAD_URL}/files`, formData, options);
   },
 
   uploadFile: (
@@ -32,13 +32,13 @@ export const uploadApi = {
       imageSizes?: ImageSize[];
     },
     options?: FetchOptions,
-  ): Promise<Menu> => {
+  ): Promise<FileUploaded> => {
     const formData = new FormData();
     formData.append("file", input.file);
 
     input.imageSizes?.forEach((imageSize) => {
       formData.append("imageSizes", imageSize);
     });
-    return authFetch.post(UPLOAD_URL, formData, options);
+    return guestFetch.post(`${UPLOAD_URL}/file`, formData, options);
   },
 };

@@ -19,15 +19,20 @@ const isOpen = ref(false);
 
 /* convert Date -> DateValue */
 const toDateValue = (d: Date) => fromDate(d, getLocalTimeZone()) as DateValue;
-
 /* state nội bộ */
-const selectedDate = ref<DateValue>(
-  props.value ? toDateValue(props.value) : toDateValue(new Date()),
-) as Ref<DateValue>;
+const selectedDate = ref<DateValue>(toDateValue(new Date())) as Ref<DateValue>;
+watch(
+  () => props.value,
+  () => {
+    selectedDate.value = props.value
+      ? toDateValue(props.value)
+      : toDateValue(new Date());
+  },
+);
 
 const formattedDate = computed(() => {
   const d = selectedDate.value;
-  return `${d.day.toString().padStart(2, "0")}/${(d.month + 1)
+  return `${d.day.toString().padStart(2, "0")}/${d.month
     .toString()
     .padStart(2, "0")}/${d.year}`;
 });

@@ -1,31 +1,60 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import type { PaymentMethod } from "~/validations/admin/booking.validation";
 
-const props = defineProps({
-  amount: {
-    type: Number,
-    default: 75000,
-  },
-  expire: {
-    type: Number,
-    default: 339, // giây
-  },
-});
+const props = defineProps<{
+  amount: number;
+  expire: number; // timestamp ms
+  bookingId: string;
+  paymentMethod: PaymentMethod;
+  isSubmitting: boolean;
+}>();
 
-const seconds = ref(props.expire);
-const filePayment = ref(null);
+const emit = defineEmits<{
+  (
+    e: "payment",
+    input: {
+      filePayment: File | null;
+      bookingId: string;
+      paymentMethod: PaymentMethod;
+    },
+  ): void;
+}>();
+
+const submitting = computed(() => props.isSubmitting);
+const remainingSeconds = ref(0);
+const filePayment = ref<File | null>(null);
+let timer: number | undefined;
+
+const updateRemaining = () => {
+  const diff = props.expire - Date.now();
+  remainingSeconds.value = Math.max(Math.floor(diff / 1000), 0);
+};
 
 onMounted(() => {
-  setInterval(() => {
-    if (seconds.value > 0) seconds.value--;
-  }, 1000);
+  updateRemaining();
+  timer = window.setInterval(updateRemaining, 1000);
 });
 
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
+
+const isExpired = computed(() => remainingSeconds.value === 0);
+
 const time = computed(() => {
-  const m = Math.floor(seconds.value / 60);
-  const s = seconds.value % 60;
+  const m = Math.floor(remainingSeconds.value / 60);
+  const s = remainingSeconds.value % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 });
+
+const onConfirm = async () => {
+  emit("payment", {
+    filePayment: filePayment.value,
+    bookingId: props.bookingId,
+    paymentMethod: props.paymentMethod!,
+  });
+};
 </script>
 
 <template>
@@ -35,25 +64,42 @@ const time = computed(() => {
       <div class="text-sm text-gray-600">
         Đơn của bạn còn được giữ chỗ trong
       </div>
-      <div class="mt-1 text-xl font-bold text-gray-900">
-        {{ time }}
+
+      <div
+        class="mt-1 text-xl font-bold"
+        :class="isExpired ? 'text-red-500' : 'text-gray-900'"
+      >
+        {{ isExpired ? "00:00" : time }}
+      </div>
+
+      <div v-if="isExpired" class="mt-2 text-sm text-red-500">
+        ⛔ Thời gian thanh toán đã hết hiệu lực
       </div>
     </div>
 
-    <!-- UPLOAD AREA -->
+    <!-- UPLOAD -->
     <div class="mx-auto mb-8 max-w-xl">
       <UploadBox
         label="Nhấn vào để tải hình thanh toán (*)"
-        required
-        @change="filePayment = $event"
+        v-model="filePayment"
+        :disabled="isExpired"
       />
     </div>
 
     <!-- SUBMIT -->
     <button
-      class="mt-8 hidden w-full rounded-lg bg-green-500 py-4 text-center font-semibold text-white hover:bg-green-600 md:block"
+      class="mt-8 w-full rounded-lg py-4 text-center font-semibold text-white"
+      :class="
+        isExpired
+          ? 'cursor-not-allowed bg-gray-400'
+          : 'bg-green-500 hover:bg-green-600'
+      "
+      :disabled="isExpired || submitting"
+      @click="onConfirm"
     >
-      XÁC NHẬN ĐẶT
+      {{
+        submitting ? "XÁC NHẬN..." : isExpired ? "ĐÃ HẾT HẠN" : "XÁC NHẬN ĐẶT"
+      }}
     </button>
   </div>
 </template>

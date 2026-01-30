@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 import { ZodError } from "zod";
 import { useBusCompanyStore } from "~/stores/bus_company.store";
 import { useRouteStore } from "~/stores/route.store";
@@ -55,20 +56,22 @@ const submit = async () => {
   if (!validateForm()) return;
 
   const res = await store.create(form);
+
+  toast.success("Tạo tuyến đường thành công");
   if (res) router.push("/admin/routes");
 };
 </script>
 
 <template>
   <div class="max-w-xl space-y-6">
-    <h1 class="text-2xl font-semibold">Create Route</h1>
+    <h1 class="text-2xl font-semibold">Tạo tuyến đường</h1>
 
     <div class="space-y-4">
       <!-- COMPANY -->
       <div>
-        <label class="block text-sm font-medium">Company</label>
+        <label class="block text-sm font-medium">Nhà xe</label>
         <select v-model="form.companyId" class="input">
-          <option value="">Select company</option>
+          <option value="">Chọn nhà xe</option>
           <option v-for="c in companyStore.list" :key="c._id" :value="c._id">
             {{ c.name }}
           </option>
@@ -78,9 +81,9 @@ const submit = async () => {
 
       <!-- START -->
       <div>
-        <label class="block text-sm font-medium">Start Stop</label>
+        <label class="block text-sm font-medium">Điểm bắt đầu</label>
         <select v-model="form.startStopId" class="input">
-          <option value="">Select start stop</option>
+          <option value="">Chọn điểm bắt đầu</option>
           <option v-for="s in stopStore.list" :key="s._id" :value="s._id">
             {{ s.name }}
           </option>
@@ -90,9 +93,9 @@ const submit = async () => {
 
       <!-- END -->
       <div>
-        <label class="block text-sm font-medium">End Stop</label>
+        <label class="block text-sm font-medium">Điểm kết thúc</label>
         <select v-model="form.endStopId" class="input">
-          <option value="">Select end stop</option>
+          <option value="">Chọn điểm kết thúc</option>
           <option v-for="s in stopStore.list" :key="s._id" :value="s._id">
             {{ s.name }}
           </option>
@@ -102,8 +105,8 @@ const submit = async () => {
     </div>
 
     <div class="flex gap-3">
-      <button class="btn-primary" @click="submit">Create</button>
-      <NuxtLink to="/admin/routes" class="btn-secondary">Cancel</NuxtLink>
+      <button class="btn-primary" @click="submit">Tạo</button>
+      <NuxtLink to="/admin/routes" class="btn-secondary">Hủy</NuxtLink>
     </div>
   </div>
 </template>
@@ -114,11 +117,5 @@ const submit = async () => {
 }
 .error {
   @apply mt-1 text-xs text-red-500;
-}
-.btn-primary {
-  @apply rounded-lg bg-primary px-4 py-2 text-white;
-}
-.btn-secondary {
-  @apply rounded-lg border !bg-red-400 px-4 py-2 text-white;
 }
 </style>

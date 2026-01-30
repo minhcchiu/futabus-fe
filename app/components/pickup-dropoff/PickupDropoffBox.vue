@@ -12,6 +12,7 @@ const emit = defineEmits<{
     payload: {
       pickupTripStopId: string;
       dropoffTripStopId: string;
+      departureTime?: number;
       pickupType: "station" | "transfer";
       dropoffType: "station" | "transfer";
     },
@@ -45,6 +46,9 @@ watch(
   [pickupTripStopId, dropoffTripStopId, pickupType, dropoffType],
   () => {
     emit("change", {
+      departureTime: props.tripStops.find(
+        (ts) => ts._id === pickupTripStopId.value,
+      )?.departureTime,
       pickupTripStopId: pickupTripStopId.value,
       dropoffTripStopId: dropoffTripStopId.value,
       pickupType: pickupType.value,

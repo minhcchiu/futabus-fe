@@ -1,22 +1,22 @@
-import { busCompanyApi } from "~/apis/futabus/bus_company.api";
+import { settingApi } from "~/apis/futabus/setting.api";
 import type { PaginateResponse } from "~/types/paginate-response.type";
 import type { PaginationParams } from "~/utils/types/fetch.types";
 import type {
-  BusCompany,
-  CreateBusCompany,
-  UpdateBusCompany,
-} from "~/validations/admin/bus_company.validation";
+  CreateSetting,
+  Setting,
+  UpdateSetting,
+} from "~/validations/admin/setting.validation";
 
-export const useBusCompanyStore = defineStore("busCompany", () => {
+export const useSettingStore = defineStore("setting", () => {
   const loading = ref(false);
-  const list = ref<BusCompany[]>([]);
-  const paginate = ref<PaginateResponse<BusCompany> | null>(null);
-  const selected = ref<BusCompany | null>(null);
+  const list = ref<Setting[]>([]);
+  const paginate = ref<PaginateResponse<Setting> | null>(null);
+  const selected = ref<Setting | null>(null);
 
   const fetchAll = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      list.value = await busCompanyApi.getAll(query);
+      list.value = await settingApi.getAll(query);
       return list.value;
     } finally {
       loading.value = false;
@@ -26,7 +26,7 @@ export const useBusCompanyStore = defineStore("busCompany", () => {
   const fetchPaginate = async (query?: PaginationParams) => {
     loading.value = true;
     try {
-      paginate.value = await busCompanyApi.paginate(query);
+      paginate.value = await settingApi.paginate(query);
       return paginate.value;
     } finally {
       loading.value = false;
@@ -34,24 +34,28 @@ export const useBusCompanyStore = defineStore("busCompany", () => {
   };
 
   const fetchById = async (id: string) => {
-    selected.value = await busCompanyApi.getById(id);
+    selected.value = await settingApi.getById(id);
     return selected.value;
   };
 
-  const create = async (input: CreateBusCompany) => {
+  const fetchOne = async () => {
+    selected.value = await settingApi.getOne();
+    return selected.value;
+  };
+
+  const create = async (input: CreateSetting) => {
     loading.value = true;
     try {
-      return await busCompanyApi.create(input);
+      return await settingApi.create(input);
     } finally {
       loading.value = false;
     }
   };
 
-  const updateById = async (id: string, input: UpdateBusCompany) => {
+  const updateById = async (id: string, input: UpdateSetting) => {
     loading.value = true;
     try {
-      list.value = list.value.filter((v) => v._id !== id);
-      return await busCompanyApi.updateById(id, input);
+      return await settingApi.updateById(id, input);
     } finally {
       loading.value = false;
     }
@@ -60,9 +64,7 @@ export const useBusCompanyStore = defineStore("busCompany", () => {
   const deleteManyByIds = async (ids: string[]) => {
     loading.value = true;
     try {
-      const deleted = await busCompanyApi.deleteManyByIds(ids);
-      list.value = list.value.filter((v) => !ids.includes(v._id!));
-      return deleted;
+      return await settingApi.deleteManyByIds(ids);
     } finally {
       loading.value = false;
     }
@@ -76,6 +78,7 @@ export const useBusCompanyStore = defineStore("busCompany", () => {
     fetchAll,
     fetchPaginate,
     fetchById,
+    fetchOne,
     create,
     updateById,
     deleteManyByIds,

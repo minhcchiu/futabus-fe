@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 import { useSeatStore } from "~/stores/seat.store";
 
 definePageMeta({ layout: "admin" });
@@ -30,13 +31,29 @@ type SeatUI = {
   FORM
 ========================= */
 const form = ref({
-  name: "",
   floors: 1,
   rows: 10,
   columns: 4,
 });
 
 const seats = ref<SeatUI[]>([]);
+
+onMounted(async () => {
+  const data = await seatStore.fetchAll({ vehicleId, _sort: "code" });
+  if (!data?.length) return;
+
+  seats.value = data.map((s) => ({
+    ...s,
+    _id: s._id || "",
+    vehicleId: s.vehicleId || "",
+    name: s.name || "",
+    floor: s.floor || 1,
+    row: s.row || 1,
+    column: s.column || 1,
+    isActive: s.isActive || false,
+    isVip: s.isVip || false,
+  }));
+});
 
 /* =========================
   LOAD EXIST SEATS
@@ -45,20 +62,7 @@ const loadSeatsByVehicle = async () => {
   const data = await seatStore.fetchAll({ vehicleId, _sort: "code" });
   if (!data?.length) return;
 
-  seats.value = data.map((s: any) => ({
-    _id: s._id,
-    vehicleId: s.vehicleId,
-    code: s.code,
-    name: s.name || s.code,
-    floor: s.floor,
-    row: s.row,
-    column: s.column,
-    isVip: s.isVip,
-    isActive: s.isActive,
-  }));
-
   form.value = {
-    name: `Vehicle ${vehicleId} seats`,
     floors: Math.max(...seats.value.map((s) => s.floor)),
     rows: Math.max(...seats.value.map((s) => s.row)),
     columns: Math.max(...seats.value.map((s) => s.column)),
@@ -70,17 +74,31 @@ onMounted(loadSeatsByVehicle);
 /* =========================
   GENERATE SEATS (CODE FIXED)
 ========================= */
+
+const numberToLetters = (num: number) => {
+  let str = "";
+  while (num > 0) {
+    num--;
+    str = String.fromCharCode(65 + (num % 26)) + str;
+    num = Math.floor(num / 26);
+  }
+  return str;
+};
+
 const generateSeats = () => {
   seats.value = [];
 
-  for (let f = 1; f <= form.value.floors; f++) {
-    for (let r = 1; r <= form.value.rows; r++) {
-      for (let c = 1; c <= form.value.columns; c++) {
+  for (let r = 1; r <= form.value.rows; r++) {
+    for (let c = 1; c <= form.value.columns; c++) {
+      const columnLetter = numberToLetters(c); // A, B, C...
+
+      for (let f = 1; f <= form.value.floors; f++) {
+        const seatNumber = (r - 1) * form.value.floors + f;
         const code = `F${f}-R${r}-C${c}`;
 
         seats.value.push({
           code,
-          name: `Seat ${r}-${c}`,
+          name: `${columnLetter}${seatNumber}`, // 👈 A1, A2, A3...
           floor: f,
           row: r,
           column: c,
@@ -107,21 +125,21 @@ const seatMatrixByFloor = computed(() => {
       const rowSeats: SeatUI[] = [];
 
       for (let c = 1; c <= form.value.columns; c++) {
-        const seat = seats.value.find(
+        const seat: any = seats.value.find(
           (s) => s.floor === f && s.row === r && s.column === c,
         );
 
         rowSeats.push(
           seat || {
             code: "",
-            name: "",
-            floor: f,
-            row: r,
-            column: c,
+            floor: f!,
+            row: r!,
+            column: c!,
             isActive: false,
             isVip: false,
             _id: "",
             vehicleId,
+            name: "",
           },
         );
       }
@@ -167,6 +185,7 @@ const saveTemplate = async () => {
 
   await seatStore.updateMany(payload);
   router.push(`/admin/vehicles/${vehicleId}/seats`);
+  toast.success("Thay đổi sơ đồ ghế thành công");
 };
 
 /* =========================
@@ -198,59 +217,77 @@ const saveEditName = async () => {
 
   editingSeat.value.name = newName;
   showEditModal.value = false;
+
+  toast.success("Thay đổi tên ghế thành công");
 };
 </script>
 
 <template>
   <div class="mx-auto max-w-6xl space-y-6">
-    <h1 class="text-2xl font-semibold">Seat Layout Editor</h1>
+    <h1 class="text-2xl font-semibold">Sơ đồ chỗ ngồi</h1>
 
     <!-- FORM -->
     <div
-      class="grid grid-cols-5 gap-4 rounded-lg border bg-white p-5 shadow-sm"
+      class="grid grid-cols-4 gap-4 rounded-lg border bg-white p-5 shadow-sm"
     >
-      <div class="col-span-2">
-        <label class="label">Template name</label>
-        <input v-model="form.name" class="input" >
-      </div>
       <div>
-        <label class="label">Floors</label>
+        <label class="label">Tầng</label>
         <input
           v-model.number="form.floors"
           type="number"
           min="1"
           class="input"
-        >
+        />
       </div>
+
       <div>
-        <label class="label">Rows</label>
-        <input v-model.number="form.rows" type="number" min="1" class="input" >
+        <label class="label">Dòng</label>
+        <input v-model.number="form.rows" type="number" min="1" class="input" />
       </div>
+
       <div>
-        <label class="label">Columns</label>
+        <label class="label">Cột</label>
         <input
           v-model.number="form.columns"
           type="number"
           min="1"
           class="input"
-        >
+        />
       </div>
 
-      <div class="col-span-5">
-        <button class="btn-primary" @click="generateSeats">
-          Generate Seat Frame
+      <div>
+        <label class="label">Random</label>
+        <button class="btn-primary w-full" @click="generateSeats">
+          Random ghế
         </button>
       </div>
     </div>
 
     <!-- RESULT -->
     <div v-if="seats.length" class="space-y-6">
+      <!-- ACTION -->
+      <div class="flex justify-end gap-3">
+        <button
+          class="rounded-lg border bg-red-400 px-3 py-2 text-sm text-white hover:bg-red-300"
+          @click="router.back()"
+        >
+          Hủy
+        </button>
+        <button
+          class="rounded-lg border bg-primary px-3 py-2 text-sm !text-white"
+          :disabled="seatStore.loading"
+          @click="saveTemplate"
+        >
+          {{ seatStore.loading ? "Saving..." : "Lưu sơ đồ" }}
+        </button>
+      </div>
+
       <div
         v-for="(matrix, floor) in seatMatrixByFloor"
         :key="floor"
         class="rounded-lg border bg-white p-4 shadow-sm"
       >
-        <h3 class="mb-4 font-semibold">Floor {{ floor }}</h3>
+        <h3 class="mb-4 font-semibold">Tầng {{ floor }}</h3>
 
         <div class="space-y-2">
           <div
@@ -292,18 +329,6 @@ const saveEditName = async () => {
           </div>
         </div>
       </div>
-
-      <!-- ACTION -->
-      <div class="flex justify-end gap-3">
-        <button class="btn-secondary" @click="router.back()">Cancel</button>
-        <button
-          class="btn-primary"
-          :disabled="seatStore.loading"
-          @click="saveTemplate"
-        >
-          {{ seatStore.loading ? "Saving..." : "Save Layout" }}
-        </button>
-      </div>
     </div>
 
     <!-- EDIT NAME MODAL -->
@@ -312,24 +337,24 @@ const saveEditName = async () => {
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
     >
       <div class="w-[360px] rounded-lg bg-white p-5 shadow-lg">
-        <h3 class="mb-4 text-lg font-semibold">Edit Seat Name</h3>
+        <h3 class="mb-4 text-lg font-semibold">Thay đổi tên ghế</h3>
 
         <div class="space-y-3">
           <div>
-            <label class="label">Seat Name</label>
+            <label class="label">Tên ghế</label>
             <input
               v-model="editNameInput"
               class="input"
               placeholder="VD: Ghế VIP 01"
               autofocus
-            >
+            />
           </div>
 
           <div class="flex justify-end gap-3 pt-3">
             <button class="btn-secondary" @click="showEditModal = false">
-              Cancel
+              Hủy
             </button>
-            <button class="btn-primary" @click="saveEditName">Save</button>
+            <button class="btn-primary" @click="saveEditName">Lưu</button>
           </div>
         </div>
       </div>
@@ -367,11 +392,11 @@ const saveEditName = async () => {
 }
 
 .btn-primary {
-  @apply rounded-lg bg-primary px-4 py-2 !text-white;
+  @apply rounded-lg border px-3 py-2 text-sm !text-white;
 }
 
 .btn-secondary {
-  @apply rounded-lg border bg-gray-300 px-4 py-2 text-black;
+  @apply rounded-lg border bg-red-400 px-3 py-2 text-sm text-white hover:bg-red-300;
 }
 
 .edit-btn {

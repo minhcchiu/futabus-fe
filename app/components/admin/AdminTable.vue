@@ -176,7 +176,7 @@ const visiblePages = computed(() => {
           @keydown.enter="
             emit('go', +($event.target as HTMLInputElement).value)
           "
-        >
+        />
       </div>
     </div>
   </div>

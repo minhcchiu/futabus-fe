@@ -1,12 +1,26 @@
 <script setup lang="ts">
-import { useRouteStore } from "@/stores/route.store";
+import { format } from "date-fns";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import type { LocationsFromTo } from "~/validations/admin/route.validation";
 import type { Province } from "~/validations/pre-built/province.validation";
 
 const route = useRoute();
 const router = useRouter();
-const routeStore = useRouteStore();
+const props = defineProps<{
+  locationsFromTo: LocationsFromTo[];
+}>();
+const emit = defineEmits<{
+  (
+    e: "search",
+    query: {
+      from: string | null;
+      to: string | null;
+      date: string;
+      ticket: string;
+    },
+  ): void;
+}>();
 
 /* ========================
    STATE
@@ -19,20 +33,20 @@ const openType = ref<"from" | "to" | null>(null);
    COMPUTED LISTS
 ======================== */
 const locationsFrom = computed(() => {
-  return routeStore.locationsFromTo
+  return props.locationsFromTo
     .filter(
       (l) =>
         !provinceTo.value ||
-        l.provincesTo.some((pt) => pt._id === provinceTo.value?._id),
+        l.provincesTo.some((pt) => pt.name === provinceTo.value?.name),
     )
     .map((l) => l.provinceFrom);
 });
 
 const locationsTo = computed(() => {
-  return routeStore.locationsFromTo
+  return props.locationsFromTo
     .filter(
       (l) =>
-        !provinceFrom.value || l.provinceFrom._id === provinceFrom.value?._id,
+        !provinceFrom.value || l.provinceFrom.name === provinceFrom.value?.name,
     )
     .flatMap((l) => l.provincesTo);
 });
@@ -64,11 +78,10 @@ const selectProvinceTo = (province: Province | null) => {
 ======================== */
 const syncFormFromQuery = () => {
   const { from, to } = route.query;
-
   // FROM
   if (from) {
-    const foundFrom = routeStore.locationsFromTo.find(
-      (l) => l.provinceFrom._id === from,
+    const foundFrom = props.locationsFromTo.find(
+      (l) => l.provinceFrom.name === from,
     )?.provinceFrom;
 
     provinceFrom.value = foundFrom || null;
@@ -78,10 +91,10 @@ const syncFormFromQuery = () => {
 
   // TO (chỉ hợp lệ theo FROM)
   if (to && provinceFrom.value) {
-    const foundTo = routeStore.locationsFromTo
-      .filter((l) => l.provinceFrom._id === provinceFrom.value!._id)
+    const foundTo = props.locationsFromTo
+      .filter((l) => l.provinceFrom.name === provinceFrom.value!.name)
       .flatMap((l) => l.provincesTo)
-      .find((p) => p._id === to);
+      .find((p) => p.name === to);
 
     provinceTo.value = foundTo || null;
   } else {
@@ -90,12 +103,12 @@ const syncFormFromQuery = () => {
 
   // OPTIONAL: Nếu chỉ có TO mà không có FROM
   if (!from && to) {
-    const foundPair = routeStore.locationsFromTo.find((l) =>
-      l.provincesTo.some((p) => p._id === to),
+    const foundPair = props.locationsFromTo.find((l) =>
+      l.provincesTo.some((p) => p.name === to),
     );
     if (foundPair) {
       provinceFrom.value = foundPair.provinceFrom;
-      provinceTo.value = foundPair.provincesTo.find((p) => p._id === to)!;
+      provinceTo.value = foundPair.provincesTo.find((p) => p.name === to)!;
     }
   }
 };
@@ -103,11 +116,9 @@ const syncFormFromQuery = () => {
 /* ========================
    LIFECYCLE
 ======================== */
-onMounted(async () => {
-  await routeStore.getLocationsFromTo();
+onMounted(() => {
   syncFormFromQuery();
 });
-
 watch(
   () => route.query,
   () => {
@@ -118,9 +129,13 @@ watch(
 /* ========================
    Handle Date
 ======================== */
-const travelDate = ref<Date>(
-  route.query.date ? new Date(+route.query.date) : new Date(),
-);
+const travelDate = ref<Date>(new Date());
+onMounted(() => {
+  if (route.query.date) {
+    const [day, month, year] = (route.query.date as string).split("-");
+    travelDate.value = new Date(+year!, +month! - 1, +day!);
+  }
+});
 
 const onDateChange = (date: Date) => {
   travelDate.value = date;
@@ -131,14 +146,16 @@ const ticketCount = ref<number>(+(route.query?.ticket || 1));
 
 const onSubmit = () => {
   // set query
-  const query: Record<string, string | null> = {
-    from: provinceFrom.value?._id || null,
-    to: provinceTo.value?._id || null,
-    date: travelDate.value.getTime()?.toString() || null,
+  const query = {
+    from: provinceFrom.value?.name || null,
+    to: provinceTo.value?.name || null,
+    date: format(travelDate.value, "dd-MM-yyyy"),
     ticket: `${ticketCount.value}`,
   };
 
   router.replace({ query });
+
+  emit("search", query);
 };
 </script>
 <template>
@@ -149,12 +166,12 @@ const onSubmit = () => {
         <!-- Trip type -->
         <div class="flex items-center gap-6 text-sm">
           <label class="flex cursor-pointer items-center gap-2 text-green-600">
-            <input type="radio" checked class="accent-green-500" >
+            <input type="radio" checked class="accent-green-500" />
             Một chiều
           </label>
 
           <label class="hidden cursor-pointer items-center gap-2 text-gray-600">
-            <input type="radio" class="accent-green-500" >
+            <input type="radio" class="accent-green-500" />
             Khứ hồi
           </label>
         </div>
@@ -202,12 +219,16 @@ const onSubmit = () => {
               src="https://futabus.vn/images/icons/switch_location.svg"
               alt="Swap"
               class="transition-all duration-300 ease-in-out group-hover:rotate-180 group-hover:scale-110"
-            >
+            />
           </button>
         </div>
 
         <!-- Ngày đi -->
-        <DateSelect :value="travelDate" @change="onDateChange" />
+        <DateSelect
+          v-if="travelDate"
+          :value="travelDate"
+          @change="onDateChange"
+        />
 
         <!-- Số vé -->
         <div>

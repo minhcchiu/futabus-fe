@@ -159,14 +159,14 @@ onMounted(async () => {
       <!-- NAME -->
       <div>
         <label class="mb-1 block text-sm font-medium">Location Name</label>
-        <input v-model="form.name" class="input" >
+        <input v-model="form.name" class="input" />
         <p v-if="errors.name" class="error">{{ errors.name }}</p>
       </div>
 
       <!-- ADDRESS -->
       <div>
         <label class="mb-1 block text-sm font-medium">Address</label>
-        <input v-model="form.address" class="input" >
+        <input v-model="form.address" class="input" />
         <p v-if="errors.address" class="error">{{ errors.address }}</p>
       </div>
 
@@ -247,8 +247,5 @@ onMounted(async () => {
 }
 .btn-primary {
   @apply rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60;
-}
-.btn-secondary {
-  @apply rounded-lg border px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50;
 }
 </style>

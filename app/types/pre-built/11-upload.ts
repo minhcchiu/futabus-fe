@@ -1,7 +1,4 @@
-import type {
-  ResourceTypeEnum,
-  StorageLocationEnum,
-} from "~/utils/enums/enums";
+import type { ResourceTypeEnum, StorageLocationEnum } from "~/utils/enums";
 
 export type FileUploaded = {
   _id?: string;

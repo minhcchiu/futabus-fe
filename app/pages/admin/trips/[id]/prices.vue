@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 import { useSeatStore } from "~/stores/seat.store";
 import { useTripStore } from "~/stores/trip.store";
 import { useTripPriceStore } from "~/stores/trip_price.store";
@@ -136,6 +137,10 @@ const savePrice = async () => {
   await tripPriceStore.updateMany(payload);
   selectedSeats.value = [];
   priceInput.value = null;
+
+  toast.success(`Thiết lập giá thành công.`);
+  await loadTrip();
+  await loadTripPrices();
 };
 
 const getSeatPrice = (seatId: string) => {
@@ -151,11 +156,9 @@ const getSeatPrice = (seatId: string) => {
   <div class="mx-auto max-w-6xl space-y-6">
     <div class="flex justify-between">
       <div>
-        <h1 class="text-2xl font-semibold">Seat Price Configuration</h1>
+        <h1 class="text-2xl font-semibold">Thiết lập giá ghế</h1>
         <!-- DEBUG -->
-        <div class="text-sm text-gray-500">
-          Seats loaded: {{ seats.length }}
-        </div>
+        <div class="text-sm text-gray-500">Tổng số ghế: {{ seats.length }}</div>
       </div>
 
       <!-- back -->
@@ -167,14 +170,14 @@ const getSeatPrice = (seatId: string) => {
     <div class="rounded-lg border bg-white p-4 shadow-sm">
       <div class="flex items-end gap-4">
         <div class="flex-1">
-          <label class="label">Price for selected seats</label>
+          <label class="label">Giá</label>
           <input
             v-model.number="priceInput"
             type="number"
             min="0"
             class="input"
             placeholder="VD: 150000"
-          >
+          />
 
           <!-- HIỂN THỊ TIỀN VIỆT -->
           <div
@@ -184,11 +187,17 @@ const getSeatPrice = (seatId: string) => {
             {{ formattedPrice }}
           </div>
         </div>
-        <button class="btn-primary" @click="savePrice">Apply Price</button>
+        <button
+          class="btn-primary"
+          @click="savePrice"
+          :disabled="tripPriceStore.loading"
+        >
+          {{ tripPriceStore.loading ? "Đang..." : "Lưu" }}
+        </button>
       </div>
 
       <div class="mt-2 text-sm text-gray-500">
-        Selected seats:
+        Thay đổi ghế:
         <span
           v-for="seat in selectedSeats"
           :key="seat._id"
@@ -206,7 +215,7 @@ const getSeatPrice = (seatId: string) => {
         :key="floor"
         class="rounded-lg border bg-white p-4 shadow-sm"
       >
-        <h3 class="mb-4 font-semibold">Floor {{ floor }}</h3>
+        <h3 class="mb-4 font-semibold">Tầng {{ floor }}</h3>
 
         <div class="space-y-2">
           <div
@@ -248,7 +257,7 @@ const getSeatPrice = (seatId: string) => {
 
     <!-- ACTION -->
     <div class="flex justify-end">
-      <button class="btn-secondary" @click="router.back()">Back</button>
+      <button class="btn-secondary" @click="router.back()">Trở lại</button>
     </div>
   </div>
 </template>
@@ -274,9 +283,9 @@ const getSeatPrice = (seatId: string) => {
 }
 
 .seat.selected {
-  background: #dbeafe;
-  border-color: #2563eb;
-  color: #1e40af;
+  background: #dbeafe !important;
+  border-color: #2563eb !important;
+  color: #1e40af !important;
 }
 
 .seat.vip {

@@ -3,6 +3,7 @@ import AdminTable from "@/components/admin/AdminTable.vue";
 import DeleteButton from "@/components/common/DeleteButton.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useVehicleStore } from "~/stores/vehicle.store";
+import type { VehicleStatusEnum } from "~/validations/admin/vehicle.validation";
 
 definePageMeta({ layout: "admin" });
 
@@ -10,7 +11,7 @@ const store = useVehicleStore();
 
 /* UI STATE */
 const keyword = ref("");
-const statusFilter = ref<"ALL" | "ACTIVE" | "INACTIVE" | "MAINTENANCE">("ALL");
+const statusFilter = ref<VehicleStatusEnum | "ALL">("ALL");
 const page = ref(1);
 const pageSize = ref(5);
 
@@ -21,6 +22,7 @@ const fetchData = async () => {
     _limit: pageSize.value,
     keyword: keyword.value || undefined,
     _status: statusFilter.value !== "ALL" ? statusFilter.value : undefined,
+    _populate: "companyId",
   });
 };
 
@@ -58,17 +60,15 @@ async function handleDeleted() {
     <!-- HEADER -->
     <div class="mb-6 flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-semibold">Vehicles</h1>
-        <p class="text-sm text-gray-500">
-          Manage all vehicles in the transportation system
-        </p>
+        <h1 class="text-2xl font-semibold">Xe</h1>
+        <p class="text-sm text-gray-500">Quản lý xe trong hệ thống</p>
       </div>
 
       <NuxtLink
         to="/admin/vehicles/create"
         class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:opacity-90"
       >
-        + Add Vehicle
+        + Thêm xe
       </NuxtLink>
     </div>
 
@@ -78,16 +78,15 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Search plate or company..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      >
+      />
 
       <select
         v-model="statusFilter"
         class="rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
       >
         <option value="ALL">All Status</option>
-        <option value="ACTIVE">Active</option>
-        <option value="INACTIVE">Inactive</option>
-        <option value="MAINTENANCE">Maintenance</option>
+        <option value="{{ VehicleStatusEnum.ACTIVE }}">Active</option>
+        <option value="{{ VehicleStatusEnum.INACTIVE }}">Inactive</option>
       </select>
     </div>
 
@@ -99,7 +98,7 @@ async function handleDeleted() {
     <!-- TABLE -->
     <AdminTable
       v-else
-      :columns="['Plate', 'Company', 'Seats', 'Status', 'Actions']"
+      :columns="['Biển số', 'Nhà xe', 'Số ghế', 'Trạng thái', 'Actions']"
       :data="pagedVehicles"
       :page="page"
       :page-size="pageSize"
@@ -136,7 +135,7 @@ async function handleDeleted() {
             :to="`/admin/vehicles/${v._id}/seats`"
             class="text-sm font-medium text-primary hover:underline"
           >
-            {{ v.totalSeats || 0 }}
+            {{ v.seats?.length || 0 }}
           </NuxtLink>
         </td>
 

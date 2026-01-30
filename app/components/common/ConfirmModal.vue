@@ -17,20 +17,20 @@ const emit = defineEmits<{
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
   >
     <div class="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg">
-      <h3 class="mb-2 text-lg font-semibold">
-        {{ title || "Confirm" }}
+      <h3 class="mb-2 text-center text-lg font-semibold">
+        {{ title || "Xác nhận xóa" }}
       </h3>
-      <p class="mb-6 text-sm text-gray-500">
-        {{ message || "Are you sure?" }}
+      <p class="mb-6 text-center text-sm text-gray-500">
+        {{ message || "Bạn có chắc chắn muốn xóa?" }}
       </p>
 
-      <div class="flex justify-end gap-3">
+      <div class="flex justify-center gap-3">
         <button
           class="rounded-lg border px-4 py-2 text-sm"
           :disabled="loading"
           @click="emit('cancel')"
         >
-          Cancel
+          Hủy
         </button>
 
         <button
@@ -38,7 +38,7 @@ const emit = defineEmits<{
           :disabled="loading"
           @click="emit('confirm')"
         >
-          {{ loading ? "Deleting..." : "Delete" }}
+          {{ loading ? "Đang xóa..." : "Xóa" }}
         </button>
       </div>
     </div>

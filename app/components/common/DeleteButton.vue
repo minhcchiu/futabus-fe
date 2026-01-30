@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ConfirmModal from "@/components/common/ConfirmModal.vue";
 import { ref } from "vue";
-import { toast } from "~/components/ui/toast";
+import { toast } from "vue-sonner";
 
 const props = defineProps<{
   onDelete: () => Promise<any>;
@@ -22,14 +22,11 @@ const handleConfirm = async () => {
   loading.value = true;
   try {
     await props.onDelete();
-    toast({ title: props.successMessage || "Deleted successfully" });
+    toast.success(props.successMessage || "Đã xóa thành công");
     showModal.value = false;
     emit("deleted");
   } catch (error: any) {
-    toast({
-      title: props.errorMessage || error?.message || "Delete failed",
-      variant: "destructive",
-    });
+    toast.error(props.errorMessage || error?.message || "Xóa thất bại!");
   } finally {
     loading.value = false;
   }
@@ -42,13 +39,13 @@ const handleConfirm = async () => {
     :disabled="disabled"
     @click="showModal = true"
   >
-    {{ label || "Delete" }}
+    {{ label || "Xóa" }}
   </button>
 
   <ConfirmModal
     :show="showModal"
-    title="Confirm delete"
-    message="This action cannot be undone. Are you sure?"
+    title="Xác nhận xóa"
+    message="Bạn có chắc chắn muốn xóa?"
     :loading="loading"
     @cancel="showModal = false"
     @confirm="handleConfirm"

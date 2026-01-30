@@ -49,6 +49,7 @@
     "vue-countup-v3": "^1.4.2",
     "vue-currency-input": "^3.1.0",
     "vue-router": "latest",
+    "vue-sonner": "^2.0.9",
     "zod": "^3.23.8"
   },
   "devDependencies": {

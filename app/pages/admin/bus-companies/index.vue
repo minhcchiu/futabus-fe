@@ -60,8 +60,10 @@ async function handleDeleted() {
     <!-- HEADER -->
     <div class="mb-6 flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-semibold">Bus Companies</h1>
-        <p class="text-sm text-gray-500">Manage all bus operators in system</p>
+        <h1 class="text-2xl font-semibold">Nhà Xe</h1>
+        <p class="text-sm text-gray-500">
+          Quản lý tất cả các nhà khai thác xe buýt trong hệ thống
+        </p>
       </div>
 
       <NuxtLink
@@ -78,7 +80,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Search company or hotline..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      >
+      />
 
       <select
         v-model="statusFilter"
@@ -148,7 +150,7 @@ async function handleDeleted() {
           </NuxtLink>
 
           <DeleteButton
-            :on-delete="() => store.deleteById(c._id!)"
+            :on-delete="() => store.deleteManyByIds([c._id!])"
             :disabled="store.loading"
             success-message="Xoá nhà xe thành công"
             error-message="Xoá nhà xe thất bại"

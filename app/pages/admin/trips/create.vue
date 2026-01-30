@@ -89,7 +89,7 @@ const submit = async () => {
 
 <template>
   <div class="max-w-xl space-y-6">
-    <h1 class="text-2xl font-semibold">Create Trip</h1>
+    <h1 class="text-2xl font-semibold">Tạo Trip</h1>
 
     <div class="space-y-4">
       <!-- ROUTE -->
@@ -127,7 +127,7 @@ const submit = async () => {
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        >
+        />
         <p class="error">{{ errors.departureTime }}</p>
       </div>
 
@@ -156,9 +156,7 @@ const submit = async () => {
 .error {
   @apply mt-1 text-xs text-red-500;
 }
-.btn-primary {
-  @apply rounded-lg bg-primary px-4 py-2 text-white;
-}
+
 .btn-secondary {
   @apply rounded-lg border !bg-red-400 px-4 py-2 text-white;
 }

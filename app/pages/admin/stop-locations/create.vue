@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 import { ZodError } from "zod";
 import { useDistrictStore } from "~/stores/pre-built/district.store";
 import { useProvinceStore } from "~/stores/pre-built/province.store";
@@ -102,6 +103,7 @@ const submit = async () => {
     if (!form[key]) delete form[key];
   });
   const res = await store.create(form);
+  toast.success("Tạo điểm dừng/đón thành công");
   if (res) {
     router.push("/admin/stop-locations");
   }
@@ -112,31 +114,31 @@ const submit = async () => {
   <div class="max-w-xl space-y-6">
     <!-- HEADER -->
     <div>
-      <h1 class="text-2xl font-semibold">Create Stop Location</h1>
-      <p class="text-sm text-gray-500">Add a new pickup / drop-off location</p>
+      <h1 class="text-2xl font-semibold">Tạo điểm dừng/đón</h1>
+      <p class="text-sm text-gray-500">Thêm điểm dừng/đón mới</p>
     </div>
 
     <!-- FORM -->
     <div class="space-y-4">
       <!-- NAME -->
       <div>
-        <label class="mb-1 block text-sm font-medium">Location Name</label>
-        <input v-model="form.name" class="input" >
+        <label class="mb-1 block text-sm font-medium">Tên điểm dừng/đón</label>
+        <input v-model="form.name" class="input" />
         <p v-if="errors.name" class="error">{{ errors.name }}</p>
       </div>
 
       <!-- ADDRESS -->
       <div>
-        <label class="mb-1 block text-sm font-medium">Address</label>
-        <input v-model="form.address" class="input" >
+        <label class="mb-1 block text-sm font-medium">Địa chỉ</label>
+        <input v-model="form.address" class="input" />
         <p v-if="errors.address" class="error">{{ errors.address }}</p>
       </div>
 
       <!-- PROVINCE -->
       <div>
-        <label class="mb-1 block text-sm font-medium">Province</label>
+        <label class="mb-1 block text-sm font-medium">Tỉnh</label>
         <select v-model="form.provinceId" class="input">
-          <option value="">Select province</option>
+          <option value="">Chọn tỉnh</option>
           <option v-for="p in provinces" :key="p._id" :value="p._id">
             {{ p.name }}
           </option>
@@ -146,13 +148,13 @@ const submit = async () => {
 
       <!-- DISTRICT -->
       <div>
-        <label class="mb-1 block text-sm font-medium">District</label>
+        <label class="mb-1 block text-sm font-medium">Quận/Huyện</label>
         <select
           v-model="form.districtId"
           class="input"
           :disabled="!form.provinceId"
         >
-          <option value="">Select district</option>
+          <option value="">Chọn quận/huyện</option>
           <option v-for="d in districts" :key="d._id" :value="d._id">
             {{ d.name }}
           </option>
@@ -161,13 +163,13 @@ const submit = async () => {
 
       <!-- WARD -->
       <div>
-        <label class="mb-1 block text-sm font-medium">Ward</label>
+        <label class="mb-1 block text-sm font-medium">Phường/Xã</label>
         <select
           v-model="form.wardId"
           class="input"
           :disabled="!form.districtId"
         >
-          <option value="">Select ward</option>
+          <option value="">Chọn phường/xã</option>
           <option v-for="w in wards" :key="w._id" :value="w._id">
             {{ w.name }}
           </option>
@@ -186,11 +188,11 @@ const submit = async () => {
           v-if="store.loading"
           class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
         />
-        <span>{{ store.loading ? "Saving..." : "Create" }}</span>
+        <span>{{ store.loading ? "Saving..." : "Tạo" }}</span>
       </button>
 
       <NuxtLink to="/admin/stop-locations" class="btn-secondary">
-        Cancel
+        Hủy
       </NuxtLink>
     </div>
   </div>
@@ -205,8 +207,5 @@ const submit = async () => {
 }
 .btn-primary {
   @apply rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60;
-}
-.btn-secondary {
-  @apply rounded-lg border px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50;
 }
 </style>

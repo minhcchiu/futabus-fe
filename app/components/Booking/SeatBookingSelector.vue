@@ -4,6 +4,7 @@ import type { Seat } from "~/validations/admin/seat.validation";
 
 const props = defineProps<{
   vehicleId: string;
+  seatIdsBooked: string[];
 }>();
 const emit = defineEmits<{
   (e: "selectSeats", seats: Seat[]): void;
@@ -18,7 +19,13 @@ onMounted(async () => {
 });
 
 const seats = computed(
-  () => vehicleStore.selected?.seats.filter((s) => s.isActive) || [],
+  () =>
+    vehicleStore.selected?.seats
+      .filter((s) => s.isActive)
+      .map((s) => {
+        Object.assign(s, { isBooked: props.seatIdsBooked?.includes(s._id) });
+        return s;
+      }) || [],
 );
 
 const selectedSeats = ref<Seat[]>([]);
@@ -90,7 +97,7 @@ function toggleSeat(seat: Seat) {
           >
             <SeatBookingItem
               v-for="seat in rowSeats"
-              :key="seat.code"
+              :key="seat._id"
               :seat="seat"
               :selected-seats="selectedSeats"
               @toggle="toggleSeat"
@@ -110,7 +117,7 @@ function toggleSeat(seat: Seat) {
           >
             <SeatBookingItem
               v-for="seat in rowSeats"
-              :key="seat.code"
+              :key="seat._id"
               :seat="seat"
               :selected-seats="selectedSeats"
               @toggle="toggleSeat"
