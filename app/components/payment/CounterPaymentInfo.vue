@@ -39,7 +39,7 @@ const showQrPreview = ref(false);
           alt="QR Bank"
           class="h-20 w-20 rounded-md border"
           @click="showQrPreview = true"
-        />
+        >
       </div>
     </div>
 
@@ -83,7 +83,7 @@ const showQrPreview = ref(false);
             :src="setting?.bankInfo?.qr"
             alt="QR Preview"
             class="h-72 w-72 object-contain"
-          />
+          >
 
           <p class="mt-3 text-center text-sm text-gray-600">
             Quét mã để chuyển khoản nhanh

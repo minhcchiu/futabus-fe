@@ -54,16 +54,16 @@ onMounted(async () => {
             </div>
 
             <div class="my-4 space-y-4">
-              <input class="input" placeholder="Họ và tên" />
+              <input class="input" placeholder="Họ và tên" >
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <input class="input" placeholder="Email" />
-              <input class="input" placeholder="Số điện thoại" />
+              <input class="input" placeholder="Email" >
+              <input class="input" placeholder="Số điện thoại" >
             </div>
 
             <div class="mt-4 space-y-4">
-              <input class="input" placeholder="Nhập Tiêu đề" />
+              <input class="input" placeholder="Nhập Tiêu đề" >
 
               <textarea
                 rows="5"

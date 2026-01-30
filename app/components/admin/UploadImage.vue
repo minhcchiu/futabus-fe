@@ -21,7 +21,7 @@ defineEmits(["upload", "remove"]);
         aspectRatio: ratio || '1 / 1',
       }"
     >
-      <img v-if="src" :src="src" class="h-full w-full object-contain" />
+      <img v-if="src" :src="src" class="h-full w-full object-contain" >
       <span v-else class="absolute text-xs text-gray-400"> No image </span>
     </div>
 

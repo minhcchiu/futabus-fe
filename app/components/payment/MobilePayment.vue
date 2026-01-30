@@ -108,7 +108,7 @@ const onPayment = (data: {
             v-if="method"
             :src="METHODS_DATA.find((m) => m.key === method)?.icon"
             class="h-6 w-6"
-          />
+          >
           <div>
             <p class="text-sm text-gray-500">Phương thức thanh toán</p>
             <p class="font-medium">

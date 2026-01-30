@@ -47,7 +47,7 @@ const time = computed(() => {
       <img
         src="https://img.vietqr.io/image/TPB-0387776243-compact.png"
         class="h-56 w-56 rounded-lg border"
-      />
+      >
     </div>
 
     <div class="mt-4 text-left text-sm">
