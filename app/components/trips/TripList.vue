@@ -35,7 +35,7 @@ defineProps<{
         src="/images/empty_list.svg"
         alt="Không có chuyến xe"
         class="mb-4 h-28 opacity-80"
-      />
+      >
 
       <p class="text-base font-medium">Không có chuyến xe cho ngày đã chọn</p>
 
