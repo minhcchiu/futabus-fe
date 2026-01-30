@@ -8,10 +8,7 @@ defineProps<{
 
 const getHours = (time: number) => format(time, "hh:mm");
 
-export function calcDurationSimple(
-  departTime: number,
-  arrivalTime: number,
-): string {
+function calcDurationSimple(departTime: number, arrivalTime: number): string {
   const diffMs = arrivalTime - departTime;
   if (diffMs <= 0) return "0 phút";
 
