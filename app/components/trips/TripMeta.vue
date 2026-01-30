@@ -1,10 +1,17 @@
 <script setup lang="ts">
-import { toCamelCase, toVnd } from "~/utils/helpers/data.helper";
+import { formatMoney, toCamelCase } from "~/utils/helpers/data.helper";
 import type { Trip } from "~/validations/admin/trip.validation";
 
-defineProps<{
+const props = defineProps<{
   trip: Trip;
 }>();
+
+const tripMinPrice = computed(
+  () =>
+    props.trip.tripPrices
+      .sort((a, b) => a.price - b.price)
+      .filter((pr) => pr.price > 0)[0],
+);
 </script>
 
 <template>
@@ -23,7 +30,7 @@ defineProps<{
     </ul>
 
     <p class="mt-5 text-lg font-bold text-green-600">
-      {{ toVnd(trip.price || trip.tripPrices?.[0]?.price || 500000) }}
+      {{ tripMinPrice?.price ? formatMoney(tripMinPrice.price) : "Liên hệ" }}
     </p>
   </div>
 </template>

@@ -96,7 +96,7 @@ const selectTripInMobile = () => {
       <TripTime :trip="trip" />
       <TripMeta :trip="trip" />
     </div>
-    <MobileTripMeta />
+    <MobileTripMeta :trip="trip" />
 
     <!-- Desktop -->
     <div

@@ -2,6 +2,7 @@
 import AdminTable from "@/components/admin/AdminTable.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useBookingStore } from "~/stores/booking.store";
+import { formatMoney } from "~/utils/helpers/data.helper";
 import type { PaymentMethod } from "~/validations/admin/booking.validation";
 
 definePageMeta({ layout: "admin" });
@@ -186,7 +187,7 @@ const previewImage = ref<string | null>(null);
 
         <!-- AMOUNT -->
         <td class="px-4 py-3 font-semibold text-primary">
-          {{ b.amount.toLocaleString() }} đ
+          {{ formatMoney(b.amount) }}
         </td>
 
         <!-- BOOKING STATUS -->
