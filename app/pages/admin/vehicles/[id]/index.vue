@@ -123,7 +123,7 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
         <!-- PLATE -->
         <div>
           <label class="mb-1 block text-sm font-medium">Biển số</label>
-          <input v-model="form.plateNumber" class="input" />
+          <input v-model="form.plateNumber" class="input" >
           <p v-if="errors.plateNumber" class="error">
             {{ errors.plateNumber }}
           </p>
@@ -152,7 +152,7 @@ const removeAmenity = (i: number) => form.amenities?.splice(i, 1);
               v-model="form.amenities[i]"
               placeholder="wifi, tv..."
               class="input flex-1"
-            />
+            >
             <button
               type="button"
               class="text-sm text-red-500"

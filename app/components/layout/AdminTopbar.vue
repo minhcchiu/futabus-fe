@@ -3,7 +3,7 @@
     <input
       placeholder="Search... (Ctrl + K)"
       class="w-80 rounded-lg border px-4 py-2 text-sm"
-    />
+    >
 
     <div class="flex items-center gap-3">
       <button class="rounded-lg bg-primary px-4 py-2 text-white">

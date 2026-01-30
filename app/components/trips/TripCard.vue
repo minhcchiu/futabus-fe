@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { format } from "date-fns";
 import type { Trip } from "~/validations/admin/trip.validation";
 
 const router = useRouter();
@@ -66,11 +67,13 @@ const policy = `<h3>Chính sách huỷ vé</h3>
 </ul>
 `;
 
+const route = useRoute();
 const selectTrip = () => {
   router.push({
     path: "/booking",
     query: {
       trip_id: prop.trip._id,
+      date: route.query.date || format(new Date(), "yyyy-MM-dd"),
     },
   });
 };

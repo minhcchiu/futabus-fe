@@ -237,12 +237,12 @@ const saveEditName = async () => {
           type="number"
           min="1"
           class="input"
-        />
+        >
       </div>
 
       <div>
         <label class="label">Dòng</label>
-        <input v-model.number="form.rows" type="number" min="1" class="input" />
+        <input v-model.number="form.rows" type="number" min="1" class="input" >
       </div>
 
       <div>
@@ -252,7 +252,7 @@ const saveEditName = async () => {
           type="number"
           min="1"
           class="input"
-        />
+        >
       </div>
 
       <div>
@@ -347,7 +347,7 @@ const saveEditName = async () => {
               class="input"
               placeholder="VD: Ghế VIP 01"
               autofocus
-            />
+            >
           </div>
 
           <div class="flex justify-end gap-3 pt-3">

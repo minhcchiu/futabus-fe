@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import type { PaymentMethod } from "~/validations/admin/booking.validation";
+import { PaymentMethod } from "~/validations/admin/booking.validation";
 
 const props = defineProps<{
   amount: number;
@@ -25,6 +25,10 @@ const submitting = computed(() => props.isSubmitting);
 const remainingSeconds = ref(0);
 const filePayment = ref<File | null>(null);
 let timer: number | undefined;
+
+const isCashPayment = computed(
+  () => props.paymentMethod === PaymentMethod.CASH,
+);
 
 const updateRemaining = () => {
   const diff = props.expire - Date.now();
@@ -77,11 +81,32 @@ const onConfirm = async () => {
       </div>
     </div>
 
-    <!-- UPLOAD -->
+    <!-- UPLOAD / NOTICE -->
     <div class="mx-auto mb-8 max-w-xl">
+      <!-- TRƯỜNG HỢP TIỀN MẶT -->
+      <div
+        v-if="isCashPayment"
+        class="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700"
+      >
+        <p class="mb-1 font-medium">📌 Lưu ý thanh toán</p>
+        <ul class="list-disc space-y-1 pl-4">
+          <li>
+            Chúng tôi sẽ liên hệ với bạn qua số điện thoại đã đăng ký trong
+            <b>khoảng 1 giờ</b>.
+          </li>
+          <li>Vui lòng chú ý điện thoại để xác nhận thông tin đơn hàng.</li>
+          <li>
+            Sau <b>1 giờ</b> nếu không thể kết nối, hệ thống sẽ
+            <b>tự động huỷ đơn</b>.
+          </li>
+        </ul>
+      </div>
+
+      <!-- CÁC PHƯƠNG THỨC KHÁC -->
       <UploadBox
-        label="Nhấn vào để tải hình thanh toán (*)"
+        v-else
         v-model="filePayment"
+        label="Nhấn vào để tải hình thanh toán (*)"
         :disabled="isExpired"
       />
     </div>

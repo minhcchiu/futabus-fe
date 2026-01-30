@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useRouter } from "vue-router";
 import { formatDateTime, formatMoney } from "~/utils/helpers/data.helper";
 import { PaymentStatus } from "~/validations/admin/booking.validation";
 
+const router = useRouter();
 const loading = ref(false);
 function statusClass(status: string) {
   return status === PaymentStatus.PAID
@@ -12,7 +14,16 @@ function statusClass(status: string) {
 const bookingStore = useBookingStore();
 const showNotFound = ref(false);
 const findTickets = async () => {
-  if (phone.value) {
+  if (code.value) {
+    await bookingStore.fetchAll({
+      code: code.value,
+      _populate:
+        "fromStopId,toStopId,tripId,tripId.routeId,tripId.routeId.startStopId endStopId,seatIds",
+      _sort: "-createdAt",
+    });
+
+    showNotFound.value = true;
+  } else if (phone.value) {
     await bookingStore.fetchAll({
       "customerInfo.phone": phone.value,
       _populate:
@@ -22,6 +33,14 @@ const findTickets = async () => {
 
     showNotFound.value = true;
   }
+
+  router.push({
+    path: "/ticket-lookup",
+    query: {
+      phone: phone.value,
+      code: code.value,
+    },
+  });
 };
 
 const bookedList = computed(() => bookingStore.list);
@@ -31,7 +50,9 @@ const phone = ref<string>((route.query.phone as string) || "");
 const code = ref<string>("");
 
 onMounted(() => {
-  if (route.query.phone) {
+  if (route.query.code) {
+    findTickets();
+  } else if (route.query.phone) {
     findTickets();
   }
 });

@@ -127,7 +127,7 @@ const onSubmit = () => {
       <!-- Trip type -->
       <div class="mb-4 flex items-center gap-6 text-sm">
         <label class="flex items-center gap-2 text-green-600">
-          <input type="radio" checked class="accent-green-500" />
+          <input type="radio" checked class="accent-green-500" >
           Một chiều
         </label>
       </div>
@@ -173,7 +173,7 @@ const onSubmit = () => {
           <img
             src="https://futabus.vn/images/icons/switch_location.svg"
             class="h-6 w-6"
-          />
+          >
         </button>
       </div>
 

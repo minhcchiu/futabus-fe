@@ -5,6 +5,12 @@ import type { Trip } from "~/validations/admin/trip.validation";
 const tripStore = useTripStore();
 const routeStore = useRouteStore();
 
+const settingStore = useSettingStore();
+const setting = computed(() => settingStore.selected);
+onMounted(async () => {
+  await settingStore.fetchOne();
+});
+
 const selectedTrip = ref<Trip | null>(null);
 
 const route = useRoute();
@@ -146,9 +152,10 @@ const onCloseMobileTripList = () => {
 <template>
   <div>
     <HeroBanner
-      title="Futabus"
+      v-if="setting"
+      title="Mai Linh Express"
       description="A community for developers, ask questions and get answers."
-      image="https://api.huonganhgroup.vn/static/upload/image/1768727497064_b9325bded872cb0de35e563c_4e7c3aef7148c10ee.png"
+      :image="setting.banner!"
     />
 
     <div class="hidden md:block">
@@ -195,14 +202,14 @@ const onCloseMobileTripList = () => {
           <!-- IMAGE / BANNER -->
           <div class="relative h-36 w-full">
             <img
-              src="/images/contact-banner.png"
-              alt="FUTA Bus Lines"
+              :src="setting?.coverImage"
+              alt="Mail Linh"
               class="h-full w-full object-cover"
             />
             <div class="absolute inset-0 bg-black/30" />
             <div class="absolute bottom-3 left-4 text-white">
               <h2 class="text-lg font-semibold">Liên hệ với chúng tôi</h2>
-              <p class="text-xs opacity-90">FUTA Bus Lines</p>
+              <p class="text-xs opacity-90">{{ setting?.shortName }}</p>
             </div>
           </div>
 
@@ -212,8 +219,7 @@ const onCloseMobileTripList = () => {
             <div>
               <p class="text-xs uppercase text-gray-400">Đơn vị vận hành</p>
               <p class="mt-1 font-semibold text-green-600">
-                CÔNG TY CỔ PHẦN XE KHÁCH PHƯƠNG TRANG<br />
-                FUTA BUS LINES
+                {{ setting?.fullName }}
               </p>
             </div>
 
@@ -221,8 +227,7 @@ const onCloseMobileTripList = () => {
             <div class="flex items-start gap-2 text-gray-600">
               <span>📍</span>
               <p>
-                486-486A Lê Văn Lương, Phường Tân Hưng,<br />
-                TPHCM, Việt Nam
+                {{ setting?.address }}
               </p>
             </div>
 
@@ -230,27 +235,30 @@ const onCloseMobileTripList = () => {
             <div class="space-y-2">
               <div class="flex items-center gap-2">
                 📞
-                <a href="tel:19006067" class="font-medium text-green-600">
-                  1900 6067
+                <a
+                  :href="`tel:${setting?.phone}`"
+                  class="font-medium text-green-600"
+                >
+                  {{ setting?.phone }}
                 </a>
               </div>
               <div class="flex items-center gap-2">
                 ✉️
                 <a
-                  href="mailto:hotro@futa.vn"
+                  :href="`mailto:${setting?.email}`"
                   class="text-blue-600 hover:underline"
                 >
-                  hotro@futa.vn
+                  {{ setting?.email }}
                 </a>
               </div>
               <div class="flex items-center gap-2">
                 🌐
                 <a
-                  href="https://futabus.vn"
+                  :href="setting?.website"
                   target="_blank"
                   class="text-blue-600 hover:underline"
                 >
-                  futabus.vn
+                  {{ setting?.website }}
                 </a>
               </div>
             </div>
@@ -258,13 +266,13 @@ const onCloseMobileTripList = () => {
             <!-- Quick actions -->
             <div class="grid grid-cols-2 gap-2 pt-2">
               <a
-                href="tel:19006067"
+                :href="`tel:${setting?.phone}`"
                 class="flex items-center justify-center gap-1 rounded-lg bg-green-500 py-2 text-white hover:bg-green-600"
               >
                 📞 Gọi ngay
               </a>
               <a
-                href="https://zalo.me/19006067"
+                :href="`https://zalo.me/${setting?.zalo}`"
                 target="_blank"
                 class="flex items-center justify-center gap-1 rounded-lg bg-blue-500 py-2 text-white hover:bg-blue-600"
               >
@@ -279,10 +287,10 @@ const onCloseMobileTripList = () => {
       <main class="col-span-8 hidden md:block">
         <TripList
           :trips="trips"
-          @select="selectedTrip = $event"
           :pickup-province="from"
           :dropoff-province="to"
           :date-label="format(date, 'dd/MM/yyyy')"
+          @select="selectedTrip = $event"
         />
       </main>
     </div>

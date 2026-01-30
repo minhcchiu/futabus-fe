@@ -21,7 +21,7 @@ const date = ref<number>(Date.now());
 
 onMounted(async () => {
   const tripId = route.query.trip_id as string;
-  date.value = +((route.query.date as string) || Date.now());
+  date.value = formatDateUrlToNumber(route.query.date as string);
 
   seatIdsBooked.value = await bookingStore.getSeatsBooked({
     tripId,
@@ -225,8 +225,8 @@ const onCancel = () => {};
         <SeatBookingSelector
           v-if="trip"
           :vehicle-id="trip.vehicleId._id"
+          :seat-ids-booked="seatIdsBooked"
           @select-seats="selectSeats"
-          :seatIdsBooked="seatIdsBooked"
         />
         <CustomerForm :form="customerForm" @change="customerForm = $event" />
         <PickupDropoffBox
@@ -302,8 +302,8 @@ const onCancel = () => {};
         <SeatBookingSelector
           v-if="currentStep === 0 && trip"
           :vehicle-id="trip.vehicleId._id"
+          :seat-ids-booked="seatIdsBooked"
           @select-seats="selectSeats"
-          :seatIdsBooked="seatIdsBooked"
         />
         <CustomerForm
           v-if="currentStep === 1"

@@ -17,9 +17,8 @@ export enum BookingStatus {
 export enum PaymentMethod {
   CASH = "CASH", // Tiền mặt (quầy)
   BANK_TRANSFER = "BANK_TRANSFER",
-  E_WALLET = "E_WALLET", // Momo, ZaloPay
-  CREDIT_CARD = "CREDIT_CARD",
-  COD = "COD", // Thu tiền khi lên xe
+  VNPAY = "VNPay",
+  MBBANK = "MBBank",
 }
 
 export enum PaymentStatus {
@@ -88,6 +87,7 @@ export type CustomerInfo = {
 
 export type Booking = {
   _id: string;
+  code: string;
   tripId: Trip;
   seatIds: Seat[];
   fromStopId: TripStop;

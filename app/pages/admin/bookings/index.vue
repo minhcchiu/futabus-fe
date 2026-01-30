@@ -69,7 +69,7 @@ const previewImage = ref<string | null>(null);
         v-model="keyword"
         placeholder="Search booking, customer, seat..."
         class="w-72 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      />
+      >
 
       <select
         v-model="statusFilter"
@@ -194,7 +194,7 @@ const previewImage = ref<string | null>(null);
               alt="Payment proof"
               class="h-12 w-12 cursor-pointer rounded-lg border object-cover"
               @click="previewImage = b.paymentInfo.image"
-            />
+            >
 
             <!-- hover preview -->
             <div
@@ -203,7 +203,7 @@ const previewImage = ref<string | null>(null);
               <img
                 :src="b.paymentInfo.image"
                 class="max-h-60 max-w-60 rounded-lg object-contain"
-              />
+              >
             </div>
           </div>
 
@@ -235,7 +235,7 @@ const previewImage = ref<string | null>(null);
       <img
         :src="previewImage"
         class="max-h-[90vh] max-w-[90vw] rounded-xl bg-white p-2"
-      />
+      >
     </div>
   </div>
 </template>

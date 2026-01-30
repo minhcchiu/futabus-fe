@@ -77,7 +77,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Tìm kiếm..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      />
+      >
     </div>
 
     <!-- TABLE -->

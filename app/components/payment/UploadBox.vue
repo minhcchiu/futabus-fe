@@ -38,11 +38,11 @@ function onChange(e: Event) {
       class="hidden"
       :disabled="disabled"
       @change="onChange"
-    />
+    >
 
     <!-- PREVIEW -->
     <div v-if="previewUrl" class="h-40 bg-gray-50">
-      <img :src="previewUrl" class="h-full w-full object-contain" />
+      <img :src="previewUrl" class="h-full w-full object-contain" >
 
       <!-- overlay hint -->
       <div

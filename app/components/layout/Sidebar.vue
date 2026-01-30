@@ -14,7 +14,7 @@
     </nav>
 
     <div class="mt-auto text-sm text-gray-500">
-      Admin User<br />
+      Admin User<br >
       admin@bus.vn
     </div>
   </aside>

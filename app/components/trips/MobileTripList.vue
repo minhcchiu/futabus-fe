@@ -18,8 +18,8 @@ const emit = defineEmits(["openFilter", "select", "back"]);
       <!-- Back -->
       <button
         class="text-xl leading-none"
-        @click="emit('back')"
         aria-label="Back"
+        @click="emit('back')"
       >
         ←
       </button>
@@ -41,14 +41,14 @@ const emit = defineEmits(["openFilter", "select", "back"]);
       <!-- Filter -->
       <button
         class="hidden rounded-full p-1 active:bg-white/20"
-        @click="emit('openFilter')"
         aria-label="Filter"
+        @click="emit('openFilter')"
       >
         <img
           src="https://futabus.vn/images/icons/edit_filter.svg"
           alt="filter"
           class="h-5 w-5"
-        />
+        >
       </button>
     </div>
   </div>

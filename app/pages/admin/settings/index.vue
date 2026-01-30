@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { toast } from "vue-sonner";
 import { useUploadStore } from "~/stores/pre-built/upload.store";
 import { useSettingStore } from "~/stores/setting.store";
@@ -9,61 +9,53 @@ definePageMeta({ layout: "admin" });
 const store = useSettingStore();
 const uploadStore = useUploadStore();
 
+/* ================= FORM ================= */
 const form = reactive({
   shortName: "",
   fullName: "",
   logo: "",
   banner: "",
+  coverImage: "",
   website: "",
   email: "",
   phone: "",
   zalo: "",
   fax: "",
   address: "",
+  mapLink: "",
   termsOfUse: "",
   privacyPolicy: "",
+  bankInfo: {
+    bankName: "",
+    accountNumber: "",
+    accountHolder: "",
+    qr: "",
+  },
 });
+
 const setting = computed(() => store.selected);
+
+/* ================= INIT ================= */
 onMounted(async () => {
   await store.fetchOne();
   if (store.selected) {
-    form.shortName = store.selected.shortName;
-    form.fullName = store.selected.fullName;
-    form.logo = store.selected.logo;
-    form.banner = store.selected.banner;
-    form.website = store.selected.website;
-    form.email = store.selected.email;
-    form.phone = store.selected.phone;
-    form.zalo = store.selected.zalo;
-    form.fax = store.selected.fax;
-    form.address = store.selected.address;
-    form.termsOfUse = store.selected.termsOfUse;
-    form.privacyPolicy = store.selected.privacyPolicy;
+    Object.assign(form, store.selected);
   }
 });
 
-const onSubmit = async () => {
-  if (!setting.value) {
-    await store.create(form);
-  } else {
-    await store.updateById(setting.value._id, form);
-  }
-
-  toast.success("Cập nhật cài đặt hệ thống thành công");
-};
-const fileInput = ref<HTMLInputElement | null>(null);
-
-/* UPLOAD LOGO */
+/* ================= UPLOAD ================= */
 const uploading = ref(false);
-const uploadLogo = async (file: File) => {
-  uploading.value = true;
-  const res = await uploadStore.uploadFile({ file });
-  form.logo = res.url;
+const fileInput = ref<HTMLInputElement | null>(null);
+const currentField = ref<"logo" | "banner" | "coverImage" | "bankQr" | null>(
+  null,
+);
 
-  uploading.value = false;
+const triggerUpload = (field: typeof currentField.value) => {
+  currentField.value = field;
+  fileInput.value?.click();
 };
 
-const onChooseLogo = (e: Event) => {
+const onChooseFile = async (e: Event) => {
   const file = (e.target as HTMLInputElement)?.files?.[0];
   if (!file) return;
 
@@ -72,17 +64,55 @@ const onChooseLogo = (e: Event) => {
     return;
   }
 
-  uploadLogo(file);
+  uploading.value = true;
+  const res = await uploadStore.uploadFile({ file });
+
+  switch (currentField.value) {
+    case "logo":
+      form.logo = res.url;
+      break;
+    case "banner":
+      form.banner = res.url;
+      break;
+    case "coverImage":
+      form.coverImage = res.url;
+      break;
+    case "bankQr":
+      form.bankInfo.qr = res.url;
+      break;
+  }
+
+  uploading.value = false;
+  if (fileInput.value) fileInput.value.value = "";
 };
 
-const removeLogo = () => {
-  form.logo = "";
-  if (fileInput.value) fileInput.value.value = "";
+const removeImage = (field: typeof currentField.value) => {
+  if (field === "bankQr") form.bankInfo.qr = "";
+  else (form as any)[field!] = "";
+};
+
+/* ================= SUBMIT ================= */
+const onSubmit = async () => {
+  // @ts-ignore
+  delete form.updatedAt;
+  // @ts-ignore
+  delete form.createdAt;
+  // @ts-ignore
+  delete form._id;
+
+  if (!setting.value) {
+    await store.create(form);
+  } else {
+    await store.updateById(setting.value._id, form);
+  }
+
+  await store.fetchOne();
+  toast.success("Cập nhật cài đặt hệ thống thành công");
 };
 </script>
 
 <template>
-  <div class="max-w-4xl">
+  <div class="max-w-5xl">
     <div class="mb-6">
       <h1 class="text-2xl font-semibold">Cài đặt hệ thống</h1>
       <p class="text-sm text-gray-500">
@@ -91,60 +121,44 @@ const removeLogo = () => {
     </div>
 
     <form
-      class="space-y-6 rounded-xl border bg-white p-6"
+      class="space-y-8 rounded-xl border bg-white p-6"
       @submit.prevent="onSubmit"
     >
-      <!-- ===== LOGO ===== -->
+      <!-- ================= MEDIA ================= -->
       <section>
-        <h3 class="mb-3 font-medium">Logo</h3>
+        <h3 class="section-title">Hình ảnh</h3>
+        <div class="grid grid-cols-3 items-start gap-6">
+          <UploadImage
+            label="Logo"
+            :src="form.logo"
+            :height="140"
+            @upload="triggerUpload('logo')"
+            @remove="removeImage('logo')"
+          />
 
-        <div class="flex items-center gap-6">
-          <!-- PREVIEW -->
-          <div
-            class="flex h-28 w-28 items-center justify-center rounded-xl border bg-gray-50"
-          >
-            <img
-              v-if="form.logo"
-              :src="form.logo"
-              class="max-h-full max-w-full object-contain"
-            />
-            <span v-else class="text-xs text-gray-400">No logo</span>
-          </div>
+          <UploadImage
+            label="Banner"
+            ratio="16/9"
+            :src="form.banner"
+            :height="140"
+            @upload="triggerUpload('banner')"
+            @remove="removeImage('banner')"
+          />
 
-          <!-- ACTION -->
-          <div class="space-y-2">
-            <input
-              ref="fileInput"
-              type="file"
-              accept="image/*"
-              class="hidden"
-              @change="onChooseLogo"
-            />
-
-            <button
-              type="button"
-              class="rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
-              :disabled="uploading"
-              @click="fileInput?.click()"
-            >
-              {{ uploading ? "Đang upload..." : "Chọn logo" }}
-            </button>
-
-            <button
-              v-if="form.logo"
-              type="button"
-              class="block text-sm text-red-500 hover:underline"
-              @click="removeLogo"
-            >
-              Xoá logo
-            </button>
-          </div>
+          <UploadImage
+            label="Cover"
+            ratio="3/1"
+            :src="form.coverImage"
+            :height="140"
+            @upload="triggerUpload('coverImage')"
+            @remove="removeImage('coverImage')"
+          />
         </div>
       </section>
 
-      <!-- ===== THÔNG TIN DOANH NGHIỆP ===== -->
+      <!-- ================= COMPANY ================= -->
       <section>
-        <h3 class="mb-3 font-medium">Thông tin doanh nghiệp</h3>
+        <h3 class="section-title">Thông tin doanh nghiệp</h3>
         <div class="grid grid-cols-2 gap-4">
           <input
             v-model="form.shortName"
@@ -156,30 +170,72 @@ const removeLogo = () => {
             placeholder="Tên đầy đủ"
             class="input"
           />
-          <input v-model="form.website" placeholder="Website" class="input" />
+          <input
+            v-model="form.website"
+            placeholder="Website"
+            class="input col-span-2"
+          />
         </div>
       </section>
 
-      <!-- ===== LIÊN HỆ ===== -->
+      <!-- ================= CONTACT ================= -->
       <section>
-        <h3 class="mb-3 font-medium">Liên hệ</h3>
+        <h3 class="section-title">Liên hệ</h3>
         <div class="grid grid-cols-2 gap-4">
           <input v-model="form.phone" placeholder="SĐT" class="input" />
           <input v-model="form.zalo" placeholder="Zalo" class="input" />
           <input v-model="form.email" placeholder="Email" class="input" />
           <input v-model="form.fax" placeholder="Fax" class="input" />
         </div>
+
         <textarea
           v-model="form.address"
           rows="2"
           placeholder="Địa chỉ"
           class="input mt-4"
         />
+        <input
+          v-model="form.mapLink"
+          placeholder="Link bản đồ"
+          class="input mt-4"
+        />
       </section>
 
-      <!-- ===== PHÁP LÝ ===== -->
+      <!-- ================= BANK ================= -->
       <section>
-        <h3 class="mb-3 font-medium">Điều khoản & chính sách</h3>
+        <h3 class="section-title">Thông tin ngân hàng</h3>
+
+        <div class="grid grid-cols-2 gap-4">
+          <input
+            v-model="form.bankInfo.bankName"
+            placeholder="Tên ngân hàng"
+            class="input"
+          />
+          <input
+            v-model="form.bankInfo.accountHolder"
+            placeholder="Chủ tài khoản"
+            class="input"
+          />
+          <input
+            v-model="form.bankInfo.accountNumber"
+            placeholder="Số tài khoản"
+            class="input col-span-2"
+          />
+        </div>
+
+        <div class="mt-4 max-w-xs">
+          <UploadImage
+            label="QR Thanh toán"
+            :src="form.bankInfo.qr"
+            @upload="triggerUpload('bankQr')"
+            @remove="removeImage('bankQr')"
+          />
+        </div>
+      </section>
+
+      <!-- ================= LEGAL ================= -->
+      <section>
+        <h3 class="section-title">Điều khoản & chính sách</h3>
         <textarea
           v-model="form.termsOfUse"
           rows="4"
@@ -194,7 +250,7 @@ const removeLogo = () => {
         />
       </section>
 
-      <!-- ACTION -->
+      <!-- ================= ACTION ================= -->
       <div class="flex justify-end">
         <button
           type="submit"
@@ -205,11 +261,24 @@ const removeLogo = () => {
         </button>
       </div>
     </form>
+
+    <!-- INPUT FILE DÙNG CHUNG -->
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/*"
+      class="hidden"
+      @change="onChooseFile"
+    />
   </div>
 </template>
 
 <style scoped>
 .input {
   @apply w-full rounded-lg border px-3 py-2 text-sm focus:border-primary focus:outline-none;
+}
+
+.section-title {
+  @apply mb-3 font-medium;
 }
 </style>

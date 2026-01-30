@@ -16,7 +16,7 @@ defineEmits(["cancel", "submit"]);
         <span
           class="rounded-full bg-green-700 px-3 py-1 text-xs font-semibold text-white"
         >
-          VNPAY
+          Chuyển khoản
         </span>
 
         <span class="text-xl font-semibold text-gray-900">

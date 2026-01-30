@@ -11,8 +11,15 @@ export const CreateSettingSchema = z.object({
   website: z.string(),
   fax: z.string(),
   address: z.string(),
+  mapLink: z.string(),
   termsOfUse: z.string(),
   privacyPolicy: z.string(),
+  bankInfo: z.object({
+    bankName: z.string(),
+    accountNumber: z.string(),
+    accountHolder: z.string(),
+    qr: z.string(),
+  }),
 });
 
 export type CreateSetting = z.infer<typeof CreateSettingSchema>;
@@ -32,8 +39,16 @@ export type Setting = {
   website: string;
   fax: string;
   address: string;
+  mapLink: string;
   termsOfUse: string;
   privacyPolicy: string;
+  coverImage: string;
+  bankInfo: {
+    bankName: string;
+    accountNumber: string;
+    accountHolder: string;
+    qr: string;
+  };
   createdAt: string;
   updatedAt: string;
 };

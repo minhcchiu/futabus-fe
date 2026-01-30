@@ -1,4 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const settingStore = useSettingStore();
+const setting = computed(() => settingStore.selected);
+onMounted(async () => {
+  await settingStore.fetchOne();
+});
+</script>
 
 <template>
   <div class="mx-auto px-4 py-6">
@@ -12,33 +18,31 @@
             </h2>
 
             <div class="space-y-2 text-sm">
-              <p class="font-medium">▶ FUTA BUS LINES</p>
+              <p class="font-medium">▶ {{ setting?.shortName }}</p>
 
               <p class="font-semibold text-green-600">
-                CÔNG TY CỔ PHẦN XE KHÁCH <br />
-                PHƯƠNG TRANG - FUTA BUS LINES
+                {{ setting?.fullName }}
               </p>
 
               <p>
                 <strong>Địa chỉ:</strong>
-                486-486A Lê Văn Lương, Phường Tân Hưng, TPHCM, Việt Nam.
+                {{ setting?.address }}
               </p>
 
               <p>
                 <strong>Website:</strong>
                 <a
-                  href="https://futabus.vn"
+                  :href="setting?.website"
                   target="_blank"
                   class="text-blue-600 hover:underline"
                 >
-                  https://futabus.vn/
+                  {{ setting?.website }}
                 </a>
               </p>
 
-              <p><strong>Điện thoại:</strong> 02838386852</p>
-              <p><strong>Fax:</strong> 02838386853</p>
-              <p><strong>Email:</strong> hotro@futa.vn</p>
-              <p><strong>Hotline:</strong> 19006067</p>
+              <p><strong>Điện thoại:</strong> {{ setting?.phone }}</p>
+              <p><strong>Fax:</strong> {{ setting?.fax }}</p>
+              <p><strong>Email:</strong> {{ setting?.email }}</p>
             </div>
           </div>
 
@@ -49,13 +53,11 @@
               <h3 class="font-semibold">Gửi thông tin liên hệ đến chúng tôi</h3>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <select class="input">
-                <option>FUTA BUS LINES</option>
-              </select>
-
+            <div class="my-4 space-y-4">
               <input class="input" placeholder="Họ và tên" />
+            </div>
 
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <input class="input" placeholder="Email" />
               <input class="input" placeholder="Số điện thoại" />
             </div>

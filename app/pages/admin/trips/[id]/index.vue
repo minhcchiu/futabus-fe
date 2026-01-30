@@ -187,7 +187,7 @@ const submit = async () => {
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        />
+        >
         <p class="error">{{ errors.departureTime }}</p>
       </div>
 

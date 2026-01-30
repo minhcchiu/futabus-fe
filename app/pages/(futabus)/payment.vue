@@ -26,7 +26,7 @@ onMounted(async () => {
 });
 
 const paymentMethod = ref<PaymentMethod>(
-  booked.value?.paymentInfo.method || PaymentMethod.BANK_TRANSFER,
+  booked.value?.paymentInfo.method || PaymentMethod.VNPAY,
 );
 
 const isExpired = ref(false);
@@ -50,24 +50,32 @@ const onPayment = async (input: {
     toast.error("Chuyến đi đã được xác nhận");
     return;
   }
+
+  const paymentInfo = {
+    status:
+      input.paymentMethod === PaymentMethod.CASH
+        ? PaymentStatus.PENDING
+        : PaymentStatus.PAID,
+    amount: booked.value!.amount,
+    method: input.paymentMethod,
+    image: undefined as unknown as string,
+  };
+
   // TODO: Implement confirm logic
-  if (!input.filePayment) {
+  if (input.paymentMethod !== PaymentMethod.CASH && !input.filePayment) {
     toast.error("Vui lòng tải hình thanh toán");
+
+    const res = await uploadStore.uploadFile({
+      file: input.filePayment!,
+    });
+
+    paymentInfo.image = res.url;
     return;
   }
 
-  const res = await uploadStore.uploadFile({
-    file: input.filePayment!,
-  });
-
   const confirmed = await bookingStore.updateStatus(input.bookingId, {
     status: BookingStatus.CONFIRMED,
-    paymentInfo: {
-      status: PaymentStatus.PAID,
-      amount: booked.value!.amount,
-      method: input.paymentMethod,
-      image: res.url,
-    },
+    paymentInfo,
   });
 
   toast.success("Đã xác nhận chuyến đi");
@@ -92,12 +100,16 @@ const onPayment = async (input: {
 
         <!-- CENTER -->
         <div class="col-span-4">
-          <PaymentQRCode
-            v-if="booked && !isExpired"
-            :amount="booked?.amount"
-            :expire="booked.expireAt"
-            :method="paymentMethod"
-          />
+          <div v-if="booked && !isExpired">
+            <PaymentQRCode
+              v-if="paymentMethod !== PaymentMethod.CASH"
+              :amount="booked.amount"
+              :expire="booked.expireAt"
+              :method="paymentMethod"
+            />
+
+            <CounterPaymentInfo v-else />
+          </div>
 
           <div v-else class="rounded-xl bg-red-50 p-6 text-center text-red-600">
             ⛔ Thời gian thanh toán đã hết hiệu lực
@@ -119,10 +131,10 @@ const onPayment = async (input: {
         :amount="booked?.amount"
         :expire="booked.expireAt"
         :disabled="isExpired"
-        :bookingId="booked._id"
+        :booking-id="booked._id"
         :payment-method="paymentMethod"
-        @payment="onPayment"
         :is-submitting="bookingStore.loading"
+        @payment="onPayment"
       />
     </div>
 
@@ -132,8 +144,8 @@ const onPayment = async (input: {
       <MobilePayment
         v-if="booked"
         :booked="booked"
-        @payment="onPayment"
         :is-submitting="bookingStore.loading"
+        @payment="onPayment"
       />
     </div>
   </div>

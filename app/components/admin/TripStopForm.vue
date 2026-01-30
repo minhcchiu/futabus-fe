@@ -188,7 +188,7 @@ const submit = async () => {
             type="radio"
             value="PICK_UP"
             class="accent-primary"
-          />
+          >
           🚏 Điểm đón
         </label>
         <label class="flex cursor-pointer items-center gap-2">
@@ -197,7 +197,7 @@ const submit = async () => {
             type="radio"
             value="DROP_OFF"
             class="accent-primary"
-          />
+          >
           🏁 Điểm trả
         </label>
       </div>
@@ -206,14 +206,14 @@ const submit = async () => {
     <!-- ARRIVAL -->
     <div v-if="stopType === 'DROP_OFF'">
       <label class="mb-1 block text-sm font-medium">Arrival Time</label>
-      <input v-model="arrivalInput" type="time" class="input" />
+      <input v-model="arrivalInput" type="time" class="input" >
       <p class="error">{{ errors.arrivalTime }}</p>
     </div>
 
     <!-- DEPARTURE -->
     <div v-if="stopType === 'PICK_UP'">
       <label class="mb-1 block text-sm font-medium">Departure Time</label>
-      <input v-model="departureInput" type="time" class="input" />
+      <input v-model="departureInput" type="time" class="input" >
       <p class="error">{{ errors.departureTime }}</p>
     </div>
 

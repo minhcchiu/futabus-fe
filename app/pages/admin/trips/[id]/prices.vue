@@ -177,7 +177,7 @@ const getSeatPrice = (seatId: string) => {
             min="0"
             class="input"
             placeholder="VD: 150000"
-          />
+          >
 
           <!-- HIỂN THỊ TIỀN VIỆT -->
           <div
@@ -189,8 +189,8 @@ const getSeatPrice = (seatId: string) => {
         </div>
         <button
           class="btn-primary"
-          @click="savePrice"
           :disabled="tripPriceStore.loading"
+          @click="savePrice"
         >
           {{ tripPriceStore.loading ? "Đang..." : "Lưu" }}
         </button>

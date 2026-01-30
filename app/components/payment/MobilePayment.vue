@@ -30,9 +30,13 @@ const showMethodSheet = ref(false);
 const showQRModal = ref(false);
 
 const selectMethod = (m: PaymentMethod) => {
-  method.value = m;
+  paymentMethod.value = m;
   showMethodSheet.value = false;
-  showQRModal.value = true;
+
+  // CASH thì KHÔNG mở QR
+  if (m !== PaymentMethod.CASH) {
+    showQRModal.value = true;
+  }
 };
 
 const paymentMethod = ref<PaymentMethod>(
@@ -72,8 +76,13 @@ const onPayment = (data: {
     >
       <button @click="$router.back()">←</button>
       <div class="text-center">
-        <p class="font-semibold">Đà Nẵng - Đăk Lăk</p>
-        <p class="text-xs opacity-80">Thứ 2, 19/01</p>
+        <p class="font-semibold">
+          {{ booked?.tripId?.routeId?.startStopId?.name }} -
+          {{ booked?.tripId?.routeId?.endStopId?.name }}
+        </p>
+        <p class="text-xs opacity-80">
+          {{ new Date(booked?.departureTime).toLocaleDateString() }}
+        </p>
       </div>
       <div />
     </div>
@@ -116,10 +125,10 @@ const onPayment = (data: {
         :amount="booked?.amount"
         :expire="booked.expireAt"
         :disabled="isExpired"
-        :bookingId="booked._id"
+        :booking-id="booked._id"
         :payment-method="paymentMethod"
-        @payment="onPayment"
         :is-submitting="submitting"
+        @payment="onPayment"
       />
     </div>
 
