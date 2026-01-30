@@ -2,11 +2,38 @@
 import AdminTable from "@/components/admin/AdminTable.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useBookingStore } from "~/stores/booking.store";
-import { PaymentStatus } from "~/validations/admin/booking.validation";
+import type { PaymentMethod } from "~/validations/admin/booking.validation";
 
 definePageMeta({ layout: "admin" });
 
 const store = useBookingStore();
+
+const paymentStatusText: Record<string, string> = {
+  UNPAID: "Chưa thanh toán",
+  PENDING: "Đang xử lý",
+  PAID: "Đã thanh toán",
+  FAILED: "Thanh toán lỗi",
+  REFUNDING: "Đang hoàn tiền",
+  REFUNDED: "Đã hoàn tiền",
+};
+
+const bookingStatusText: Record<string, string> = {
+  PENDING: "Giữ chỗ",
+  CONFIRMED: "Đã xác nhận",
+  CANCELLED: "Đã huỷ",
+  EXPIRED: "Hết hạn",
+  CHECKED_IN: "Đã lên xe",
+  NO_SHOW: "Không lên xe",
+  COMPLETED: "Hoàn thành",
+  REFUNDED: "Đã hoàn tiền",
+};
+
+const paymentMethodText: Record<PaymentMethod, string> = {
+  CASH: "Tiền mặt tại quầy",
+  BANK_TRANSFER: "Thanh toán VNPay",
+  VNPay: "Chuyển khoản ngân hàng",
+  MBBank: "Chuyển khoản MB Bank",
+};
 
 /* UI STATE */
 const keyword = ref("");
@@ -19,7 +46,7 @@ const fetchData = async () => {
   await store.fetchPaginate({
     _page: page.value,
     _limit: pageSize.value,
-    keyword: keyword.value || undefined,
+    code: keyword.value || undefined,
     "paymentInfo.status":
       statusFilter.value !== "ALL" ? statusFilter.value : undefined,
     _sort: "-createdAt",
@@ -57,9 +84,9 @@ const previewImage = ref<string | null>(null);
   <div>
     <!-- HEADER -->
     <div class="mb-6">
-      <h1 class="text-2xl font-semibold">Bookings</h1>
+      <h1 class="text-2xl font-semibold">Danh sách đặt vé</h1>
       <p class="text-sm text-gray-500">
-        Manage all ticket bookings in the system
+        Quản lý toàn bộ đơn đặt vé trong hệ thống
       </p>
     </div>
 
@@ -67,19 +94,19 @@ const previewImage = ref<string | null>(null);
     <div class="mb-4 flex items-center gap-3">
       <input
         v-model="keyword"
-        placeholder="Search booking, customer, seat..."
+        placeholder="Search code..."
         class="w-72 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      >
+      />
 
       <select
         v-model="statusFilter"
         class="rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
       >
-        <option value="ALL">All Status</option>
-        <option value="PENDING">Pending</option>
-        <option value="PAID">Paid</option>
-        <option value="CANCELLED">Cancelled</option>
-        <option value="REFUNDED">Refunded</option>
+        <option value="ALL">Tất cả trạng thái</option>
+        <option value="PENDING">Giữ chỗ</option>
+        <option value="CONFIRMED">Đã xác nhận</option>
+        <option value="CANCELLED">Đã huỷ</option>
+        <option value="EXPIRED">Hết hạn</option>
       </select>
     </div>
 
@@ -107,7 +134,7 @@ const previewImage = ref<string | null>(null);
       <tr v-for="b in bookings" :key="b._id" class="border-b hover:bg-gray-50">
         <!-- BOOKING -->
         <td class="px-4 py-3 font-mono text-xs text-gray-600">
-          {{ b._id.slice(-8) }}
+          {{ b.code || b._id.slice(-8) }}
         </td>
 
         <!-- ROUTE -->
@@ -140,7 +167,10 @@ const previewImage = ref<string | null>(null);
 
         <!-- PAYMENT -->
         <td class="px-4 py-3 text-xs">
-          <div class="mb-1">{{ b.paymentInfo?.method }}</div>
+          <div class="mb-1 font-medium">
+            {{ paymentMethodText[b.paymentInfo?.method] || "—" }}
+          </div>
+
           <span
             :class="[
               'rounded-full px-2 py-0.5 text-xs font-medium',
@@ -150,7 +180,7 @@ const previewImage = ref<string | null>(null);
               b.paymentInfo?.status === 'FAILED' && 'bg-red-100 text-red-600',
             ]"
           >
-            {{ b.paymentInfo?.status }}
+            {{ paymentStatusText[b.paymentInfo?.status] }}
           </span>
         </td>
 
@@ -164,26 +194,35 @@ const previewImage = ref<string | null>(null);
           <span
             :class="[
               'rounded-full px-3 py-1 text-xs font-medium',
-              b.paymentInfo.status === PaymentStatus.PENDING &&
-                'bg-yellow-100 text-yellow-600',
-              b.paymentInfo.status === PaymentStatus.PAID &&
-                'bg-green-100 text-green-600',
-              b.paymentInfo.status === PaymentStatus.PAID &&
-                'bg-red-100 text-red-600',
+              b.status === 'PENDING' && 'bg-yellow-100 text-yellow-700',
+              b.status === 'CONFIRMED' && 'bg-green-100 text-green-700',
+              b.status === 'CANCELLED' && 'bg-gray-200 text-gray-600',
+              b.status === 'EXPIRED' && 'bg-red-100 text-red-600',
+              b.status === 'COMPLETED' && 'bg-blue-100 text-blue-600',
             ]"
           >
-            {{ b.paymentInfo.status }}
+            {{ bookingStatusText[b.status] }}
           </span>
         </td>
 
         <!-- EXPIRE -->
         <td class="px-4 py-3 text-xs">
-          <span v-if="Date.now() > b.expireAt" class="font-medium text-red-500">
-            Expired
-          </span>
-          <span v-else class="text-gray-600">
-            {{ Math.ceil((b.expireAt - Date.now()) / 60000) }} min
-          </span>
+          <!-- Chỉ giữ chỗ mới có hạn -->
+          <template v-if="b.status === 'PENDING'">
+            <span
+              v-if="Date.now() > b.expireAt"
+              class="font-medium text-red-600"
+            >
+              Hết hạn
+            </span>
+
+            <span v-else class="text-yellow-700">
+              Còn {{ Math.ceil((b.expireAt - Date.now()) / 60000) }} phút
+            </span>
+          </template>
+
+          <!-- Các trạng thái khác -->
+          <span v-else class="italic text-gray-400"> — </span>
         </td>
 
         <!-- PAYMENT PROOF -->
@@ -194,7 +233,7 @@ const previewImage = ref<string | null>(null);
               alt="Payment proof"
               class="h-12 w-12 cursor-pointer rounded-lg border object-cover"
               @click="previewImage = b.paymentInfo.image"
-            >
+            />
 
             <!-- hover preview -->
             <div
@@ -203,7 +242,7 @@ const previewImage = ref<string | null>(null);
               <img
                 :src="b.paymentInfo.image"
                 class="max-h-60 max-w-60 rounded-lg object-contain"
-              >
+              />
             </div>
           </div>
 
@@ -224,7 +263,7 @@ const previewImage = ref<string | null>(null);
 
     <!-- EMPTY -->
     <p v-if="!bookings.length" class="mt-6 text-center text-sm text-gray-400">
-      No bookings found
+      Không tìm thấy đơn đặt vé nào
     </p>
 
     <div
@@ -235,7 +274,7 @@ const previewImage = ref<string | null>(null);
       <img
         :src="previewImage"
         class="max-h-[90vh] max-w-[90vw] rounded-xl bg-white p-2"
-      >
+      />
     </div>
   </div>
 </template>

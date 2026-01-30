@@ -2142,11 +2142,6 @@
     "@emnapi/runtime" "^1.7.1"
     "@tybys/wasm-util" "^0.10.1"
 
-"@nestjs/schedule@nestjs/schedule":
-  version "6.1.0"
-  resolved "https://codeload.github.com/nestjs/schedule/tar.gz/03370e287430a7f80f7d0f5a140fcbb225c5e53c"
-  dependencies:
-    cron "4.3.5"
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
