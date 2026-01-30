@@ -45,8 +45,8 @@ export function calcDurationSimple(
           class="text-gray text-center leading-4"
           >{{
             calcDurationSimple(
-              trip.arrivalTime || Date.now(),
               trip.departureTime,
+              trip.arrivalTime || Date.now(),
             )
           }}
           <br /><span class="text-[13px]">(Asian/Ho Chi Minh)</span></span
