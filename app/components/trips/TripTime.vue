@@ -8,24 +8,23 @@ defineProps<{
 
 const getHours = (time: number) => format(time, "hh:mm");
 
-function calcDurationSimple(departTime: number, arrivalTime: number): string {
-  const diffMs = arrivalTime - departTime;
-  if (diffMs <= 0) return "0 phút";
+ function calcDurationSimple(
+  departTime: number,
+  arrivalTime: number,
+): string {
+  const minutes = Math.max(
+    0,
+    Math.floor((arrivalTime - departTime) / 60000),
+  );
 
-  const totalMinutes = Math.floor(diffMs / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
 
-  if (hours > 0 && minutes > 0) {
-    return `${hours} giờ ${minutes} phút`;
-  }
-
-  if (hours > 0) {
-    return `${hours} giờ`;
-  }
-
-  return `${minutes} phút`;
+  if (h && m) return `${h} giờ ${m} phút`;
+  if (h) return `${h} giờ`;
+  return `${m} phút`;
 }
+
 </script>
 
 <template>

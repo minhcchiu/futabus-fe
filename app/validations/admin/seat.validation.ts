@@ -28,4 +28,6 @@ export type Seat = {
   isActive: boolean;
   editing?: boolean;
   isBooked?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 };

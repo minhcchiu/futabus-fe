@@ -62,13 +62,26 @@ const loadSeatsByVehicle = async () => {
   const data = await seatStore.fetchAll({ vehicleId, _sort: "code" });
   if (!data?.length) return;
 
+  seats.value = data.map((s) => {
+    delete s.createdAt;
+    delete s.updatedAt;
+
+    return {
+      ...s,
+      _id: s._id,
+      vehicleId: s.vehicleId,
+      name: s.name || "",
+      isActive: s.isActive ?? true,
+      isVip: s.isVip ?? false,
+    };
+  });
+
   form.value = {
-    floors: Math.max(...seats.value.map((s) => s.floor)),
-    rows: Math.max(...seats.value.map((s) => s.row)),
-    columns: Math.max(...seats.value.map((s) => s.column)),
+    floors: Math.max(...data.map((s) => s.floor)),
+    rows: Math.max(...data.map((s) => s.row)),
+    columns: Math.max(...data.map((s) => s.column)),
   };
 };
-
 onMounted(loadSeatsByVehicle);
 
 /* =========================
@@ -86,26 +99,31 @@ const numberToLetters = (num: number) => {
 };
 
 const generateSeats = () => {
+  const oldSeats = seats.value;
   seats.value = [];
 
   for (let r = 1; r <= form.value.rows; r++) {
     for (let c = 1; c <= form.value.columns; c++) {
-      const columnLetter = numberToLetters(c); // A, B, C...
+      const columnLetter = numberToLetters(c);
 
       for (let f = 1; f <= form.value.floors; f++) {
         const seatNumber = (r - 1) * form.value.floors + f;
         const code = `F${f}-R${r}-C${c}`;
 
+        const exist = oldSeats.find(
+          (s) => s.floor === f && s.row === r && s.column === c,
+        );
+
         seats.value.push({
+          _id: exist?._id,
+          vehicleId,
           code,
-          name: `${columnLetter}${seatNumber}`, // 👈 A1, A2, A3...
+          name: exist?.name || `${columnLetter}${seatNumber}`,
           floor: f,
           row: r,
           column: c,
-          isActive: true,
-          isVip: false,
-          _id: "",
-          vehicleId,
+          isActive: exist?.isActive ?? true,
+          isVip: exist?.isVip ?? false,
         });
       }
     }
@@ -173,6 +191,7 @@ const saveTemplate = async () => {
   if (!seats.value.length) return;
 
   const payload = seats.value.map((s) => ({
+    _id: s._id || undefined, // ⭐ QUAN TRỌNG
     code: s.code,
     name: s.name,
     floor: s.floor,
@@ -184,8 +203,9 @@ const saveTemplate = async () => {
   }));
 
   await seatStore.updateMany(payload);
-  router.push(`/admin/vehicles/${vehicleId}/seats`);
+
   toast.success("Thay đổi sơ đồ ghế thành công");
+  router.push(`/admin/vehicles/${vehicleId}/seats`);
 };
 
 /* =========================
@@ -237,12 +257,12 @@ const saveEditName = async () => {
           type="number"
           min="1"
           class="input"
-        >
+        />
       </div>
 
       <div>
         <label class="label">Dòng</label>
-        <input v-model.number="form.rows" type="number" min="1" class="input" >
+        <input v-model.number="form.rows" type="number" min="1" class="input" />
       </div>
 
       <div>
@@ -252,7 +272,7 @@ const saveEditName = async () => {
           type="number"
           min="1"
           class="input"
-        >
+        />
       </div>
 
       <div>
@@ -347,7 +367,7 @@ const saveEditName = async () => {
               class="input"
               placeholder="VD: Ghế VIP 01"
               autofocus
-            >
+            />
           </div>
 
           <div class="flex justify-end gap-3 pt-3">
