@@ -7,6 +7,7 @@ export const CreateRouteSchema = z.object({
   companyId: z.string(),
   startStopId: z.string(),
   endStopId: z.string(),
+  durationMinutes: z.number(),
 });
 
 export type CreateRoute = z.infer<typeof CreateRouteSchema>;
@@ -16,6 +17,7 @@ export type Route = {
   companyId: BusCompany;
   startStopId: StopLocation;
   endStopId: StopLocation;
+  durationMinutes?: number;
   createdAt: string;
   updatedAt: string;
 };

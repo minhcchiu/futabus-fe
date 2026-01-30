@@ -21,35 +21,45 @@ const routeStore = useRouteStore();
 const vehicleStore = useVehicleStore();
 
 const vehicleList = computed(() => vehicleStore.list || []);
+
 /* =========================
-  FORM STATE
+  FORM
 ========================= */
 const form = reactive<CreateTrip>({
   routeId: "",
   companyId: "",
   vehicleId: "",
   departureTime: Date.now(),
+  arrivalTime: Date.now(),
   status: TripStatus.CREATED,
 });
 
 const statusList = computed(() => Object.values(TripStatus));
 const errors = ref<Record<string, string>>({});
 
+/**
+ * Flag: arrivalTime auto hay user chỉnh
+ */
+const isAutoArrive = ref(true);
+
 /* =========================
   HELPERS
 ========================= */
-const getCompanyIdFromRoute = (r: any) => {
-  if (!r?.companyId) return "";
-  return typeof r.companyId === "string" ? r.companyId : r.companyId._id;
-};
+const getCompanyIdFromRoute = (r: any) =>
+  typeof r?.companyId === "string" ? r.companyId : r?.companyId?._id || "";
 
-const getCompanyIdFromTrip = (c: any) => {
-  if (!c) return "";
-  return typeof c === "string" ? c : c._id;
+const getCompanyIdFromTrip = (c: any) =>
+  typeof c === "string" ? c : c?._id || "";
+
+const calcArriveTime = () => {
+  const r = routeStore.list.find((i) => i._id === form.routeId);
+  if (!r?.durationMinutes) return;
+
+  form.arrivalTime = form.departureTime + r.durationMinutes * 60 * 1000;
 };
 
 /* =========================
-  FETCH DETAIL (EDIT)
+  FETCH DETAIL
 ========================= */
 const fetchDetail = async () => {
   const res: any = await tripStore.fetchById(route.params.id as string);
@@ -59,7 +69,10 @@ const fetchDetail = async () => {
   form.companyId = getCompanyIdFromTrip(res.companyId);
   form.vehicleId = res.vehicleId;
   form.departureTime = res.departureTime;
+  form.arrivalTime = res.arrivalTime;
   form.status = res.status;
+
+  isAutoArrive.value = false; // EDIT: tôn trọng dữ liệu cũ
 
   if (form.companyId) {
     await vehicleStore.fetchAll({ companyId: form.companyId });
@@ -67,15 +80,13 @@ const fetchDetail = async () => {
 };
 
 /* =========================
-  INIT LOAD
+  INIT
 ========================= */
 onMounted(async () => {
-  // Load routes first
   await routeStore.fetchAll({
     _populate: "companyId,startStopId,endStopId",
   });
 
-  // Then load trip detail
   if (route.params.id) {
     await fetchDetail();
   }
@@ -95,9 +106,10 @@ watch(
     const companyId = getCompanyIdFromRoute(r);
     if (!companyId) return;
 
-    // Nếu user đổi route → reset vehicle
     if (oldRouteId && routeId !== oldRouteId) {
       form.vehicleId = "";
+      isAutoArrive.value = true;
+      calcArriveTime();
     }
 
     form.companyId = companyId;
@@ -106,12 +118,31 @@ watch(
 );
 
 /* =========================
-  DATETIME BINDING
+  WATCH DEPARTURE TIME
+========================= */
+watch(
+  () => form.departureTime,
+  () => {
+    if (!isAutoArrive.value) return;
+    calcArriveTime();
+  },
+);
+
+/* =========================
+  DATETIME INPUTS
 ========================= */
 const departureTimeInput = computed({
   get: () => new Date(form.departureTime).toISOString().slice(0, 16),
   set: (val: string) => {
     form.departureTime = new Date(val).getTime();
+  },
+});
+
+const arrivalTimeInput = computed({
+  get: () => new Date(form.arrivalTime).toISOString().slice(0, 16),
+  set: (val: string) => {
+    isAutoArrive.value = false;
+    form.arrivalTime = new Date(val).getTime();
   },
 });
 
@@ -127,8 +158,7 @@ const validateForm = () => {
     if (err instanceof ZodError) {
       const fieldErrors: Record<string, string> = {};
       err.errors.forEach((e) => {
-        const field = e.path[0] as string;
-        fieldErrors[field] = e.message;
+        fieldErrors[e.path[0] as string] = e.message;
       });
       errors.value = fieldErrors;
     }
@@ -143,6 +173,7 @@ const submit = async () => {
   if (!validateForm()) return;
 
   const res = await tripStore.updateById(route.params.id as string, form);
+
   if (res) router.push("/admin/trips");
 };
 </script>
@@ -187,8 +218,15 @@ const submit = async () => {
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        >
+        />
         <p class="error">{{ errors.departureTime }}</p>
+      </div>
+
+      <!-- ARRIVE -->
+      <div>
+        <label>Arrive Time</label>
+        <input v-model="arrivalTimeInput" type="datetime-local" class="input" />
+        <p class="error">{{ errors.arrivalTime }}</p>
       </div>
 
       <!-- STATUS -->
@@ -216,7 +254,6 @@ const submit = async () => {
 .error {
   @apply mt-1 text-xs text-red-500;
 }
-
 .btn-secondary {
   @apply rounded-lg border !bg-red-400 px-4 py-2 text-white;
 }

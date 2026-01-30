@@ -19,26 +19,30 @@ const store = useRouteStore();
 const companyStore = useBusCompanyStore();
 const stopStore = useStopLocationStore();
 
+/* FORM */
 const form = reactive<CreateRoute>({
   companyId: "",
   startStopId: "",
   endStopId: "",
+  durationMinutes: 10 * 60, // 👈 thêm duration
 });
 
 const errors = ref<Record<string, string>>({});
 
-/* FETCH */
+/* FETCH DETAIL */
 const fetchDetail = async () => {
   const res: any = await store.fetchById(route.params.id as string);
   if (!res) return;
 
   Object.assign(form, {
-    companyId: res.companyId,
-    startStopId: res.startStopId,
-    endStopId: res.endStopId,
+    companyId: res.companyId?._id || res.companyId,
+    startStopId: res.startStopId?._id || res.startStopId,
+    endStopId: res.endStopId?._id || res.endStopId,
+    durationMinutes: res.durationMinutes,
   });
 };
 
+/* INIT */
 onMounted(async () => {
   await companyStore.fetchAll();
   await stopStore.fetchAll();
@@ -79,32 +83,53 @@ const submit = async () => {
     <div class="space-y-4">
       <!-- COMPANY -->
       <div>
-        <label>Company</label>
+        <label class="block text-sm font-medium">Company</label>
         <select v-model="form.companyId" class="input">
+          <option value="">Select company</option>
           <option v-for="c in companyStore.list" :key="c._id" :value="c._id">
             {{ c.name }}
           </option>
         </select>
+        <p class="error">{{ errors.companyId }}</p>
       </div>
 
       <!-- START -->
       <div>
-        <label>Start Stop</label>
+        <label class="block text-sm font-medium">Start Stop</label>
         <select v-model="form.startStopId" class="input">
+          <option value="">Select start stop</option>
           <option v-for="s in stopStore.list" :key="s._id" :value="s._id">
             {{ s.name }}
           </option>
         </select>
+        <p class="error">{{ errors.startStopId }}</p>
       </div>
 
       <!-- END -->
       <div>
-        <label>End Stop</label>
+        <label class="block text-sm font-medium">End Stop</label>
         <select v-model="form.endStopId" class="input">
+          <option value="">Select end stop</option>
           <option v-for="s in stopStore.list" :key="s._id" :value="s._id">
             {{ s.name }}
           </option>
         </select>
+        <p class="error">{{ errors.endStopId }}</p>
+      </div>
+
+      <!-- DURATION -->
+      <div>
+        <label class="block text-sm font-medium">
+          Thời gian hành trình (phút)
+        </label>
+        <input
+          v-model.number="form.durationMinutes"
+          type="number"
+          min="1"
+          placeholder="Ví dụ: 300"
+          class="input"
+        />
+        <p class="error">{{ errors.durationMinutes }}</p>
       </div>
     </div>
 
@@ -114,3 +139,13 @@ const submit = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.input {
+  @apply w-full rounded-lg border px-3 py-2 text-sm;
+}
+
+.error {
+  @apply mt-1 text-xs text-red-500;
+}
+</style>

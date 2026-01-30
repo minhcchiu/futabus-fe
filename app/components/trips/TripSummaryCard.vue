@@ -43,7 +43,7 @@ defineProps<{
           </div>
 
           <div>
-            <p class="font-semibold">{{ trip.arriveTime }}</p>
+            <p class="font-semibold">{{ trip.arrivalTime }}</p>
             <p class="text-muted-foreground">
               {{ trip.arriveStation }}
             </p>

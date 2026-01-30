@@ -11,3 +11,15 @@ export const formatDateUrlToNumber = (date?: string) => {
 
   return new Date(+year!, +month! - 1, +day!).getTime();
 };
+
+// 1h30p, 2h, 45p
+export function formatDurationShort(minutes?: number): string {
+  if (!minutes || minutes <= 0) return "—";
+
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (h && m) return `${h}h${m}p`;
+  if (h) return `${h}h`;
+  return `${m}p`;
+}

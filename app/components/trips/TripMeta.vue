@@ -6,11 +6,8 @@ const props = defineProps<{
   trip: Trip;
 }>();
 
-const tripMinPrice = computed(
-  () =>
-    props.trip.tripPrices
-      .sort((a, b) => a.price - b.price)
-      .filter((pr) => pr.price > 0)[0],
+const minPrice = computed(() =>
+  Math.min(...props.trip.tripPrices.map((p) => p.price).filter((p) => p > 0)),
 );
 </script>
 
@@ -30,7 +27,7 @@ const tripMinPrice = computed(
     </ul>
 
     <p class="mt-5 text-lg font-bold text-green-600">
-      {{ tripMinPrice?.price ? formatMoney(tripMinPrice.price) : "Liên hệ" }}
+      {{ minPrice ? formatMoney(minPrice) : "Liên hệ" }}
     </p>
   </div>
 </template>

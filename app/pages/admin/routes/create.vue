@@ -23,6 +23,7 @@ const form = reactive<CreateRoute>({
   companyId: "",
   startStopId: "",
   endStopId: "",
+  durationMinutes: 10 * 60, // 👈 thêm duration
 });
 
 const errors = ref<Record<string, string>>({});
@@ -102,6 +103,21 @@ const submit = async () => {
         </select>
         <p class="error">{{ errors.endStopId }}</p>
       </div>
+
+      <!-- DURATION -->
+      <div>
+        <label class="block text-sm font-medium">
+          Thời gian hành trình (phút)
+        </label>
+        <input
+          v-model.number="form.durationMinutes"
+          type="number"
+          min="1"
+          placeholder="Ví dụ: 300"
+          class="input"
+        />
+        <p class="error">{{ errors.durationMinutes }}</p>
+      </div>
     </div>
 
     <div class="flex gap-3">
@@ -115,6 +131,7 @@ const submit = async () => {
 .input {
   @apply w-full rounded-lg border px-3 py-2 text-sm;
 }
+
 .error {
   @apply mt-1 text-xs text-red-500;
 }

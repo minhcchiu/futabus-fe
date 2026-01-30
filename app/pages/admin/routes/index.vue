@@ -4,18 +4,22 @@ import DeleteButton from "@/components/common/DeleteButton.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useBusCompanyStore } from "~/stores/bus_company.store";
 import { useRouteStore } from "~/stores/route.store";
-
+import { formatDurationShort } from "~/utils/date.util";
 definePageMeta({ layout: "admin" });
 
 const store = useRouteStore();
 const companyStore = useBusCompanyStore();
 
-/* UI STATE */
+/* =========================
+  UI STATE
+========================= */
 const keyword = ref("");
 const page = ref(1);
 const pageSize = ref(5);
 
-/* FETCH */
+/* =========================
+  FETCH
+========================= */
 const fetchData = async () => {
   await store.fetchPaginate({
     _page: page.value,
@@ -30,19 +34,25 @@ onMounted(async () => {
   await fetchData();
 });
 
-/* WATCH */
+/* =========================
+  WATCH
+========================= */
 watch([keyword, pageSize], () => {
   page.value = 1;
   fetchData();
 });
 watch(page, fetchData);
 
-/* COMPUTED */
+/* =========================
+  COMPUTED
+========================= */
 const routes = computed(() => store.paginate?.data || []);
 const pagination = computed(() => store.paginate?.paginationInfo);
 const totalPages = computed(() => pagination.value?._totalPages || 1);
 
-/* HANDLERS */
+/* =========================
+  HANDLERS
+========================= */
 function prevPage() {
   if (page.value > 1) page.value--;
 }
@@ -60,7 +70,7 @@ async function handleDeleted() {
     <div class="mb-6 flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-semibold">Tuyến đường</h1>
-        <p class="text-sm text-gray-500">Quản lý các tuyển đường</p>
+        <p class="text-sm text-gray-500">Quản lý các tuyến đường</p>
       </div>
 
       <NuxtLink
@@ -77,12 +87,18 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Tìm kiếm..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      >
+      />
     </div>
 
     <!-- TABLE -->
     <AdminTable
-      :columns="['Nhà xe', 'Điểm bắt đầu', 'Điểm kết thúc', 'Actions']"
+      :columns="[
+        'Nhà xe',
+        'Điểm bắt đầu',
+        'Điểm kết thúc',
+        'Thời gian (phút)',
+        'Actions',
+      ]"
       :data="routes"
       :page="page"
       :page-size="pageSize"
@@ -91,10 +107,30 @@ async function handleDeleted() {
       @next="nextPage"
     >
       <tr v-for="r in routes" :key="r._id" class="border-b hover:bg-gray-50">
-        <td class="px-4 py-3">{{ r.companyId?.name || "-" }}</td>
-        <td class="px-4 py-3">{{ r.startStopId?.name || "-" }}</td>
-        <td class="px-4 py-3">{{ r.endStopId?.name || "-" }}</td>
+        <!-- COMPANY -->
+        <td class="px-4 py-3">
+          {{ r.companyId?.name || "-" }}
+        </td>
 
+        <!-- START -->
+        <td class="px-4 py-3">
+          {{ r.startStopId?.name || "-" }}
+        </td>
+
+        <!-- END -->
+        <td class="px-4 py-3">
+          {{ r.endStopId?.name || "-" }}
+        </td>
+
+        <!-- DURATION -->
+        <td class="px-4 py-3">
+          <span v-if="r.durationMinutes">
+            {{ formatDurationShort(r.durationMinutes) }}
+          </span>
+          <span v-else class="text-gray-400">—</span>
+        </td>
+
+        <!-- ACTIONS -->
         <td class="space-x-3 px-4 py-3 text-right">
           <NuxtLink
             :to="`/admin/routes/${r._id}`"
