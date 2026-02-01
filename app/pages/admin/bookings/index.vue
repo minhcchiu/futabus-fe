@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import AdminTable from "@/components/admin/AdminTable.vue";
 import { computed, onMounted, ref, watch } from "vue";
+import { toast } from "vue-sonner";
 import { useBookingStore } from "~/stores/booking.store";
 import { formatMoney } from "~/utils/helpers/data.helper";
-import type { PaymentMethod } from "~/validations/admin/booking.validation";
+import {
+  BookingStatus,
+  PaymentMethod,
+  PaymentStatus,
+} from "~/validations/admin/booking.validation";
 
 definePageMeta({ layout: "admin", middleware: "auth" });
 
 const store = useBookingStore();
 
+/* ================= TEXT ================= */
 const paymentStatusText: Record<string, string> = {
   UNPAID: "Chưa thanh toán",
   PENDING: "Đang xử lý",
@@ -26,23 +32,68 @@ const bookingStatusText: Record<string, string> = {
   CHECKED_IN: "Đã lên xe",
   NO_SHOW: "Không lên xe",
   COMPLETED: "Hoàn thành",
-  REFUNDED: "Đã hoàn tiền",
 };
 
-const paymentMethodText: Record<PaymentMethod, string> = {
-  CASH: "Tiền mặt tại quầy",
-  BANK_TRANSFER: "Thanh toán VNPay",
-  VNPay: "Chuyển khoản ngân hàng",
-  MBBank: "Chuyển khoản MB Bank",
+/* ================= COLOR ================= */
+const STATUS_COLOR: Record<string, string> = {
+  PENDING: "bg-yellow-100 text-yellow-700",
+  CONFIRMED: "bg-green-100 text-green-700",
+  CHECKED_IN: "bg-blue-100 text-blue-700",
+  COMPLETED: "bg-indigo-100 text-indigo-700",
+  NO_SHOW: "bg-orange-100 text-orange-700",
+  CANCELLED: "bg-gray-200 text-gray-600",
+  EXPIRED: "bg-red-100 text-red-600",
+  REFUNDED: "bg-purple-100 text-purple-700",
+
+  UNPAID: "bg-gray-100 text-gray-600",
+  PAID: "bg-green-100 text-green-700",
+  FAILED: "bg-red-100 text-red-600",
 };
 
-/* UI STATE */
+/* ================= FLOW ================= */
+const BOOKING_STATUS_FLOW: Record<BookingStatus, BookingStatus[]> = {
+  [BookingStatus.PENDING]: [
+    BookingStatus.CONFIRMED,
+    BookingStatus.CANCELLED,
+    BookingStatus.EXPIRED,
+  ],
+  [BookingStatus.CONFIRMED]: [
+    BookingStatus.CHECKED_IN,
+    BookingStatus.NO_SHOW,
+    BookingStatus.COMPLETED,
+    BookingStatus.CANCELLED,
+  ],
+  [BookingStatus.CHECKED_IN]: [BookingStatus.COMPLETED],
+  [BookingStatus.NO_SHOW]: [],
+  [BookingStatus.COMPLETED]: [],
+  [BookingStatus.CANCELLED]: [],
+  [BookingStatus.EXPIRED]: [],
+  [BookingStatus.REFUNDED]: [],
+};
+
+const PAYMENT_STATUS_FLOW: Record<PaymentStatus, PaymentStatus[]> = {
+  [PaymentStatus.UNPAID]: [PaymentStatus.PENDING, PaymentStatus.PAID],
+  [PaymentStatus.PENDING]: [PaymentStatus.PAID, PaymentStatus.FAILED],
+  [PaymentStatus.PAID]: [PaymentStatus.REFUNDING, PaymentStatus.REFUNDED],
+  [PaymentStatus.FAILED]: [],
+  [PaymentStatus.REFUNDING]: [PaymentStatus.REFUNDED],
+  [PaymentStatus.REFUNDED]: [],
+};
+
+const canChangeBookingStatus = (current: BookingStatus, next: BookingStatus) =>
+  BOOKING_STATUS_FLOW[current]?.includes(next);
+
+const canChangePaymentStatus = (current: PaymentStatus, next: PaymentStatus) =>
+  PAYMENT_STATUS_FLOW[current]?.includes(next);
+
+/* ================= UI STATE ================= */
 const keyword = ref("");
 const statusFilter = ref("ALL");
 const page = ref(1);
 const pageSize = ref(5);
+const previewImage = ref<string | null>(null);
 
-/* FETCH */
+/* ================= FETCH ================= */
 const fetchData = async () => {
   await store.fetchPaginate({
     _page: page.value,
@@ -58,19 +109,18 @@ const fetchData = async () => {
 
 onMounted(fetchData);
 
-/* WATCH */
 watch([keyword, statusFilter, pageSize], () => {
   page.value = 1;
   fetchData();
 });
 watch(page, fetchData);
 
-/* COMPUTED */
+/* ================= COMPUTED ================= */
 const bookings = computed(() => store.paginate?.data || []);
 const pagination = computed(() => store.paginate?.paginationInfo);
 const totalPages = computed(() => pagination.value?._totalPages || 1);
 
-/* HANDLERS */
+/* ================= HANDLER ================= */
 function prevPage() {
   if (page.value > 1) page.value--;
 }
@@ -78,39 +128,78 @@ function nextPage() {
   if (page.value < totalPages.value) page.value++;
 }
 
-const previewImage = ref<string | null>(null);
+/* ================= OPTIONS ================= */
+const BOOKING_STATUS_OPTIONS = [
+  { value: BookingStatus.PENDING, label: "Giữ chỗ" },
+  { value: BookingStatus.CONFIRMED, label: "Đã xác nhận" },
+  { value: BookingStatus.CHECKED_IN, label: "Đã lên xe" },
+  { value: BookingStatus.NO_SHOW, label: "Không lên xe" },
+  { value: BookingStatus.COMPLETED, label: "Hoàn thành" },
+  { value: BookingStatus.CANCELLED, label: "Đã huỷ" },
+  { value: BookingStatus.EXPIRED, label: "Hết hạn" },
+  { value: BookingStatus.REFUNDED, label: "Đã hoàn tiền" },
+];
+
+const PAYMENT_STATUS_OPTIONS = [
+  { value: PaymentStatus.UNPAID, label: "Chưa thanh toán" },
+  { value: PaymentStatus.PENDING, label: "Đang xử lý" },
+  { value: PaymentStatus.PAID, label: "Đã thanh toán" },
+  { value: PaymentStatus.FAILED, label: "Thanh toán lỗi" },
+  { value: PaymentStatus.REFUNDED, label: "Đã hoàn tiền" },
+];
+
+/* ================= UPDATE ================= */
+const updateBookingStatus = async (
+  bookingId: string,
+  status: BookingStatus,
+) => {
+  const booking = bookings.value.find((b) => b._id === bookingId);
+  if (!booking) return;
+
+  if (!canChangeBookingStatus(booking.status, status)) {
+    toast.error("Không thể chuyển sang trạng thái này");
+    return;
+  }
+
+  await store.updateStatus(bookingId, { status });
+  toast.success("Đã cập nhật trạng thái đơn");
+  fetchData();
+};
+
+const updatePaymentStatus = async (
+  bookingId: string,
+  status: PaymentStatus,
+) => {
+  const booking = bookings.value.find((b) => b._id === bookingId);
+  if (!booking) return;
+
+  if (!canChangePaymentStatus(booking.paymentInfo.status, status)) {
+    toast.error("Không thể chuyển trạng thái thanh toán này");
+    return;
+  }
+
+  await store.updateStatus(bookingId, {
+    paymentInfo: {
+      status,
+      amount: booking.amount,
+      method: booking.paymentInfo.method || PaymentMethod.CASH,
+    },
+  });
+
+  toast.success("Đã cập nhật trạng thái thanh toán");
+  fetchData();
+};
+
+const paymentMethodText: Record<PaymentMethod, string> = {
+  CASH: "Tiền mặt tại quầy",
+  BANK_TRANSFER: "Thanh toán VNPay",
+  VNPay: "Chuyển khoản ngân hàng",
+  MBBank: "Chuyển khoản MB Bank",
+};
 </script>
 
 <template>
   <div>
-    <!-- HEADER -->
-    <div class="mb-6">
-      <h1 class="text-2xl font-semibold">Danh sách đặt vé</h1>
-      <p class="text-sm text-gray-500">
-        Quản lý toàn bộ đơn đặt vé trong hệ thống
-      </p>
-    </div>
-
-    <!-- SEARCH + FILTER -->
-    <div class="mb-4 flex items-center gap-3">
-      <input
-        v-model="keyword"
-        placeholder="Search code..."
-        class="w-72 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      />
-
-      <select
-        v-model="statusFilter"
-        class="rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      >
-        <option value="ALL">Tất cả trạng thái</option>
-        <option value="PENDING">Giữ chỗ</option>
-        <option value="CONFIRMED">Đã xác nhận</option>
-        <option value="CANCELLED">Đã huỷ</option>
-        <option value="EXPIRED">Hết hạn</option>
-      </select>
-    </div>
-
     <!-- TABLE -->
     <AdminTable
       :columns="[
@@ -252,30 +341,58 @@ const previewImage = ref<string | null>(null);
 
         <!-- ACTION -->
         <td class="px-4 py-3 text-right">
-          <NuxtLink
-            :to="`/admin/bookings/${b._id}`"
-            class="text-sm text-primary hover:underline"
-          >
-            View
-          </NuxtLink>
+          <div class="flex flex-col items-end gap-2">
+            <!-- BOOKING STATUS -->
+            <select
+              class="rounded border px-2 py-1 text-xs font-medium"
+              :class="STATUS_COLOR[b.status]"
+              :disabled="BOOKING_STATUS_FLOW[b.status].length === 0"
+              :value="b.status"
+              @change="
+                updateBookingStatus(
+                  b._id,
+                  ($event.target as HTMLSelectElement).value as BookingStatus,
+                )
+              "
+            >
+              <option
+                v-for="s in BOOKING_STATUS_OPTIONS"
+                :key="s.value"
+                :value="s.value"
+                :disabled="!canChangeBookingStatus(b.status, s.value)"
+              >
+                {{ s.label }}
+              </option>
+            </select>
+
+            <!-- PAYMENT STATUS -->
+            <select
+              v-if="b.paymentInfo"
+              class="rounded border px-2 py-1 text-xs font-medium"
+              :class="STATUS_COLOR[b.paymentInfo.status]"
+              :disabled="PAYMENT_STATUS_FLOW[b.paymentInfo.status].length === 0"
+              :value="b.paymentInfo.status"
+              @change="
+                updatePaymentStatus(
+                  b._id,
+                  ($event.target as HTMLSelectElement).value as PaymentStatus,
+                )
+              "
+            >
+              <option
+                v-for="s in PAYMENT_STATUS_OPTIONS"
+                :key="s.value"
+                :value="s.value"
+                :disabled="
+                  !canChangePaymentStatus(b.paymentInfo.status, s.value)
+                "
+              >
+                {{ s.label }}
+              </option>
+            </select>
+          </div>
         </td>
       </tr>
     </AdminTable>
-
-    <!-- EMPTY -->
-    <p v-if="!bookings.length" class="mt-6 text-center text-sm text-gray-400">
-      Không tìm thấy đơn đặt vé nào
-    </p>
-
-    <div
-      v-if="previewImage"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-      @click="previewImage = null"
-    >
-      <img
-        :src="previewImage"
-        class="max-h-[90vh] max-w-[90vw] rounded-xl bg-white p-2"
-      />
-    </div>
   </div>
 </template>

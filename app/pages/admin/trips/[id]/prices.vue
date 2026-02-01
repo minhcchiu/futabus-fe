@@ -177,7 +177,7 @@ const getSeatPrice = (seatId: string) => {
             min="0"
             class="input"
             placeholder="VD: 150000"
-          />
+          >
 
           <!-- HIỂN THỊ TIỀN VIỆT -->
           <div

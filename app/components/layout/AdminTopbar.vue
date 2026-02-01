@@ -17,7 +17,7 @@ const me = computed(() => userStore.selected);
     <input
       placeholder="Search... (Ctrl + K)"
       class="w-80 rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-    />
+    >
 
     <!-- Right actions -->
     <div class="flex items-center gap-4">
@@ -31,7 +31,7 @@ const me = computed(() => userStore.selected);
             v-if="me?.avatar"
             :src="me.avatar"
             class="h-7 w-7 rounded-full object-cover"
-          />
+          >
           <div
             v-else
             class="flex h-7 w-7 items-center justify-center rounded-full bg-primarySoft text-xs font-semibold text-primary"
@@ -50,8 +50,8 @@ const me = computed(() => userStore.selected);
         <DropdownMenuPortal>
           <DropdownMenuContent
             align="end"
-            :sideOffset="8"
-            :avoidCollisions="false"
+            :side-offset="8"
+            :avoid-collisions="false"
             class="absolute right-0 top-0 z-50 w-56"
           >
             <DropdownMenuLabel class="px-2 py-1.5">
