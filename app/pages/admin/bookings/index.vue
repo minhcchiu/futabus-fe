@@ -128,6 +128,15 @@ function nextPage() {
   if (page.value < totalPages.value) page.value++;
 }
 
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success("Đã sao chép mã đặt vé");
+  } catch (err) {
+    toast.error("Không thể sao chép mã");
+  }
+};
+
 /* ================= OPTIONS ================= */
 const BOOKING_STATUS_OPTIONS = [
   { value: BookingStatus.PENDING, label: "Giữ chỗ" },
@@ -223,8 +232,18 @@ const paymentMethodText: Record<PaymentMethod, string> = {
     >
       <tr v-for="b in bookings" :key="b._id" class="border-b hover:bg-gray-50">
         <!-- BOOKING -->
-        <td class="px-4 py-3 font-mono text-xs text-gray-600">
-          {{ b.code || b._id.slice(-8) }}
+        <td class="px-4 py-3 font-mono text-xs">
+          <button
+            class="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline"
+            @click="navigateTo(`/admin/bookings/${b._id}`)"
+            @click.right="copyToClipboard(b.code || b._id.slice(-8))"
+            :title="
+              'Click to view details, right-click to copy: ' +
+              (b.code || b._id.slice(-8))
+            "
+          >
+            {{ b.code || b._id.slice(-8) }}
+          </button>
         </td>
 
         <!-- ROUTE -->

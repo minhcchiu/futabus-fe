@@ -74,14 +74,14 @@ onMounted(() => {
             type="text"
             placeholder="Vui lòng nhập số điện thoại"
             class="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-emerald-500"
-          >
+          />
 
           <input
             v-model="code"
             type="text"
             placeholder="Vui lòng nhập mã vé"
             class="w-full rounded-lg border px-4 py-3 text-sm outline-none focus:border-emerald-500"
-          >
+          />
 
           <!-- Button -->
           <div class="pt-4">
@@ -177,7 +177,12 @@ onMounted(() => {
             </p>
 
             <div class="flex flex-col gap-2 sm:flex-row sm:gap-3">
-              <button class="btn-outline w-full sm:w-auto">Xem chi tiết</button>
+              <button
+                class="btn-outline w-full sm:w-auto"
+                @click="navigateTo(`/admin/bookings/${ticket._id}`)"
+              >
+                Xem chi tiết
+              </button>
               <button class="btn-danger w-full sm:w-auto">Hủy vé</button>
             </div>
           </div>
