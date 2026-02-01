@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 import { useSeatStore } from "~/stores/seat.store";
 
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: "admin", middleware: "auth" });
 
 const route = useRoute();
 const router = useRouter();

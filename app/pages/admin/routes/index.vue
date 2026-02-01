@@ -5,7 +5,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useBusCompanyStore } from "~/stores/bus_company.store";
 import { useRouteStore } from "~/stores/route.store";
 import { formatDurationShort } from "~/utils/date.util";
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: "admin", middleware: "auth" });
 
 const store = useRouteStore();
 const companyStore = useBusCompanyStore();
@@ -87,7 +87,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Tìm kiếm..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      >
+      />
     </div>
 
     <!-- TABLE -->

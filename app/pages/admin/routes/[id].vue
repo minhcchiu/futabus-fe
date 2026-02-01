@@ -10,7 +10,7 @@ import {
   type CreateRoute,
 } from "~/validations/admin/route.validation";
 
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: "admin", middleware: "auth" });
 
 const router = useRouter();
 const route = useRoute();
@@ -128,7 +128,7 @@ const submit = async () => {
           min="1"
           placeholder="Ví dụ: 300"
           class="input"
-        >
+        />
         <p class="error">{{ errors.durationMinutes }}</p>
       </div>
     </div>

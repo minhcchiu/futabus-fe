@@ -3,7 +3,7 @@ import AdminTable from "@/components/admin/AdminTable.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useStopLocationStore } from "~/stores/stop_location.store";
 
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: "admin", middleware: "auth" });
 
 const store = useStopLocationStore();
 
@@ -76,7 +76,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Tìm kiếm..."
         class="w-64 rounded-lg border px-3 py-2 text-sm"
-      >
+      />
     </div>
 
     <!-- TABLE -->

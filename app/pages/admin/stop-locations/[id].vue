@@ -11,7 +11,7 @@ import {
   type CreateStopLocation,
 } from "~/validations/admin/stop_location.validation";
 
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: "admin", middleware: "auth" });
 
 /* ROUTER */
 const route = useRoute();
@@ -159,14 +159,14 @@ onMounted(async () => {
       <!-- NAME -->
       <div>
         <label class="mb-1 block text-sm font-medium">Location Name</label>
-        <input v-model="form.name" class="input" >
+        <input v-model="form.name" class="input" />
         <p v-if="errors.name" class="error">{{ errors.name }}</p>
       </div>
 
       <!-- ADDRESS -->
       <div>
         <label class="mb-1 block text-sm font-medium">Address</label>
-        <input v-model="form.address" class="input" >
+        <input v-model="form.address" class="input" />
         <p v-if="errors.address" class="error">{{ errors.address }}</p>
       </div>
 

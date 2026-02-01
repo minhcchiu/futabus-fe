@@ -8,14 +8,8 @@ defineProps<{
 
 const getHours = (time: number) => format(time, "hh:mm");
 
- function calcDurationSimple(
-  departTime: number,
-  arrivalTime: number,
-): string {
-  const minutes = Math.max(
-    0,
-    Math.floor((arrivalTime - departTime) / 60000),
-  );
+function calcDurationSimple(departTime: number, arrivalTime: number): string {
+  const minutes = Math.max(0, Math.floor((arrivalTime - departTime) / 60000));
 
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -24,7 +18,6 @@ const getHours = (time: number) => format(time, "hh:mm");
   if (h) return `${h} giờ`;
   return `${m} phút`;
 }
-
 </script>
 
 <template>
@@ -37,7 +30,7 @@ const getHours = (time: number) => format(time, "hh:mm");
         <img
           src="https://futabus.vn/images/icons/pickup.svg"
           alt="pickup"
-        /><span class="flex-1 border-b-2 border-dotted" /><span
+        ><span class="flex-1 border-b-2 border-dotted" /><span
           class="text-gray text-center leading-4"
           >{{
             calcDurationSimple(
@@ -45,11 +38,11 @@ const getHours = (time: number) => format(time, "hh:mm");
               trip.arrivalTime || Date.now(),
             )
           }}
-          <br /><span class="text-[13px]">(Asian/Ho Chi Minh)</span></span
+          <br ><span class="text-[13px]">(Asian/Ho Chi Minh)</span></span
         ><span class="flex-1 border-b-2 border-dotted" /><img
           src="https://futabus.vn/images/icons/station.svg"
           alt="station"
-        />
+        >
       </div>
       <span class="text-lg font-medium md:text-2xl">{{
         getHours(trip.arrivalTime || Date.now())
@@ -60,13 +53,13 @@ const getHours = (time: number) => format(time, "hh:mm");
         <span class="text-sm font-medium md:text-[15px]">{{
           trip.routeId.startStopId.name
         }}</span
-        ><br /><span class="text-gray mt-2" />
+        ><br ><span class="text-gray mt-2" />
       </div>
       <div class="flex-1 text-right">
         <span class="text-sm font-medium md:text-[15px]">{{
           trip.routeId.endStopId.name
         }}</span
-        ><br /><span class="text-gray mt-2" />
+        ><br ><span class="text-gray mt-2" />
       </div>
     </div>
   </div>

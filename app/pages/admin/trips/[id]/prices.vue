@@ -8,7 +8,7 @@ import { useTripPriceStore } from "~/stores/trip_price.store";
 import type { Seat } from "~/validations/admin/seat.validation";
 import type { TripPrice } from "~/validations/admin/trip_price.validation";
 
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: "admin", middleware: "auth" });
 
 const route = useRoute();
 const router = useRouter();
@@ -177,7 +177,7 @@ const getSeatPrice = (seatId: string) => {
             min="0"
             class="input"
             placeholder="VD: 150000"
-          >
+          />
 
           <!-- HIỂN THỊ TIỀN VIỆT -->
           <div

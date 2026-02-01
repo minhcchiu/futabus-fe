@@ -4,7 +4,7 @@ import DeleteButton from "@/components/common/DeleteButton.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useBusCompanyStore } from "~/stores/bus_company.store";
 
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: "admin", middleware: "auth" });
 
 const store = useBusCompanyStore();
 
@@ -80,7 +80,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Search company or hotline..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      >
+      />
 
       <select
         v-model="statusFilter"

@@ -11,7 +11,7 @@ import {
   type CreateTrip,
 } from "~/validations/admin/trip.validation";
 
-definePageMeta({ layout: "admin" });
+definePageMeta({ layout: "admin", middleware: "auth" });
 
 const router = useRouter();
 const store = useTripStore();
@@ -169,14 +169,14 @@ const submit = async () => {
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        >
+        />
         <p class="error">{{ errors.departureTime }}</p>
       </div>
 
       <!-- ARRIVE -->
       <div>
         <label>Arrive Time</label>
-        <input v-model="arrivalTimeInput" type="datetime-local" class="input" >
+        <input v-model="arrivalTimeInput" type="datetime-local" class="input" />
         <p class="error">{{ errors.arrivalTime }}</p>
       </div>
 

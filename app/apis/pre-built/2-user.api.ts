@@ -5,7 +5,7 @@ import type { UpdateResult } from "~/types/update-result";
 import type { AccountStatus } from "~/utils/enums";
 import { authFetch, guestFetch } from "~/utils/fetch";
 import type { FetchOptions, PaginationParams } from "~/utils/types/fetch.types";
-import type { UpdateUser } from "~/validations/user.validation";
+import type { CreateUser, UpdateUser } from "~/validations/user.validation";
 
 const USER_URL = "/users";
 
@@ -38,7 +38,7 @@ export const userApi = {
   },
 
   //  ----- Method: POST -----
-  create: (body: User, options?: FetchOptions): Promise<User> => {
+  create: (body: CreateUser, options?: FetchOptions): Promise<User> => {
     return authFetch.post(USER_URL, body, options);
   },
 
