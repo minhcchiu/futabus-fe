@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { PaymentMethod } from "~/validations/admin/booking.validation";
 
 const props = defineProps<{
   amount: number;
   expire: number; // timestamp ms
-  method: string;
+  method?: string;
+  qrCode?: string;
+  bankName?: string;
 }>();
 
 const remainingSeconds = ref(0);
@@ -44,25 +45,18 @@ const time = computed(() => {
     </div>
 
     <div class="flex justify-center">
-      <img
-        src="https://img.vietqr.io/image/TPB-0387776243-compact.png"
-        class="h-56 w-56 rounded-lg border"
-      >
+      <img :src="qrCode" class="h-56 w-56 rounded-lg border" />
     </div>
 
     <div class="mt-4 text-left text-sm">
       <p class="font-semibold text-green-600">
         Hướng dẫn thanh toán bằng
-        {{ method === PaymentMethod.BANK_TRANSFER ? "Chuyển khoản" : method }}
+        {{ bankName }}
       </p>
       <ol class="mt-2 list-decimal space-y-1 pl-5 text-gray-600">
         <li>
           Mở ứng dụng
-          {{
-            method === PaymentMethod.BANK_TRANSFER
-              ? "Ngân hàng (bất kỳ)"
-              : method
-          }}
+          {{ bankName }}
         </li>
         <li>Dùng biểu tượng quét mã QR</li>
         <li>Quét mã và thanh toán</li>

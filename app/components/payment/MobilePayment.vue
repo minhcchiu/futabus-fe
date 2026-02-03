@@ -1,47 +1,74 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import BankTransferConfirm from "~/components/payment/BankTransferConfirm.vue";
-import { METHODS_DATA } from "~/utils/data";
+import { toast } from "vue-sonner";
+import { formatDate } from "~/utils/helpers/data.helper";
 import {
-  PaymentMethod,
+  BookingStatus,
+  PaymentStatus,
   type Booking,
 } from "~/validations/admin/booking.validation";
+import type { Sepay } from "~/validations/admin/sepay.validation";
+import type { Setting } from "~/validations/admin/setting.validation";
 
 const props = defineProps<{
+  setting: Setting;
   booked: Booking;
-  isSubmitting: boolean;
+  banks: Sepay[];
+  loading: boolean;
+  getQrCode: (method?: string) => Promise<string | undefined>;
 }>();
-const emit = defineEmits<{
-  (
-    e: "payment",
-    input: {
-      filePayment: File | null;
-      bookingId: string;
-      paymentMethod: PaymentMethod;
-    },
-  ): void;
-}>();
-const submitting = computed(() => props.isSubmitting);
-const method = ref<PaymentMethod | null>(
-  props.booked.paymentInfo.method || null,
+const router = useRouter();
+
+const submitting = computed(() => props.loading);
+const methodSelected = ref<string | undefined>(
+  props.booked.paymentInfo?.method,
 );
+const bookingStore = useBookingStore();
 
 const showMethodSheet = ref(false);
 const showQRModal = ref(false);
 
-const selectMethod = (m: PaymentMethod) => {
-  paymentMethod.value = m;
-  showMethodSheet.value = false;
+const canConfirm = ref(false);
+let confirmTimer: number | undefined;
 
-  // CASH thì KHÔNG mở QR
-  if (m !== PaymentMethod.CASH) {
-    showQRModal.value = true;
-  }
+const selectMethod = (m: string) => {
+  methodSelected.value = m;
+  showMethodSheet.value = false;
+  showQRModal.value = true;
+
+  canConfirm.value = false;
+
+  if (confirmTimer) clearTimeout(confirmTimer);
+
+  confirmTimer = window.setTimeout(() => {
+    canConfirm.value = true;
+  }, 2000);
 };
 
-const paymentMethod = ref<PaymentMethod>(
-  props.booked?.paymentInfo.method || PaymentMethod.BANK_TRANSFER,
-);
+watch(showQRModal, (val) => {
+  if (!val) {
+    canConfirm.value = false;
+    if (confirmTimer) clearTimeout(confirmTimer);
+  }
+});
+
+const qrCodeUrl = ref<string | undefined>();
+
+const generateQRCode = async () => {
+  qrCodeUrl.value = await props.getQrCode(methodSelected.value);
+};
+
+watch(methodSelected, async () => {
+  if (methodSelected.value && methodSelected.value !== "CASH") {
+    await generateQRCode();
+  } else {
+    qrCodeUrl.value = undefined;
+  }
+});
+
+const bankSelected = computed(() => {
+  return props.banks.find((m) => m.code === methodSelected.value);
+});
 
 const isExpired = ref(false);
 let timer: number | undefined;
@@ -59,13 +86,67 @@ onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 
-const onPayment = (data: {
-  filePayment: File | null;
-  bookingId: string;
-  paymentMethod: PaymentMethod;
-}) => {
-  emit("payment", data);
+const onPayment = async () => {
+  if (props.booked?.status !== BookingStatus.PENDING) {
+    toast.error("Chuyến đi đã được xác nhận rồi");
+    return;
+  }
+
+  const paymentInfo = {
+    status: PaymentStatus.PAID,
+    amount: props.booked!.amount,
+    method: methodSelected.value,
+  };
+
+  if (!methodSelected.value) {
+    toast.error("Vui lòng chọn phương thức thanh toán");
+    return;
+  }
+
+  const confirmed = await bookingStore.updateStatus(props.booked!._id, {
+    status: BookingStatus.CONFIRMED,
+    // @ts-ignore
+    paymentInfo,
+  });
+
+  toast.success("Đã xác nhận chuyến đi");
+  showQRModal.value = false;
+
+  router.push({
+    path: "/ticket-lookup",
+    query: {
+      phone: confirmed?.customerInfo.phone,
+    },
+  });
 };
+
+const remainingMs = ref(0);
+
+let expireTimer: number | undefined;
+
+const updateRemainingTime = () => {
+  const diff = props.booked.expireAt - Date.now();
+  remainingMs.value = diff > 0 ? diff : 0;
+};
+
+const formatRemaining = computed(() => {
+  if (remainingMs.value <= 0) return "00:00";
+
+  const totalSeconds = Math.floor(remainingMs.value / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+});
+
+onMounted(() => {
+  updateRemainingTime();
+  expireTimer = window.setInterval(updateRemainingTime, 1000);
+});
+
+onUnmounted(() => {
+  if (expireTimer) clearInterval(expireTimer);
+});
 </script>
 
 <template>
@@ -81,55 +162,18 @@ const onPayment = (data: {
           {{ booked?.tripId?.routeId?.endStopId?.name }}
         </p>
         <p class="text-xs opacity-80">
-          {{ new Date(booked?.departureTime).toLocaleDateString() }}
+          {{ formatDate(booked?.departureTime) }}
         </p>
       </div>
       <div />
     </div>
 
     <!-- CONTENT -->
-    <div class="h-full flex-1 space-y-4 overflow-y-auto p-4 pb-32">
+    <div class="h-full flex-1 space-y-4 overflow-y-auto p-4 pb-40">
       <h3 class="text-center text-lg font-semibold">Thông tin thanh toán</h3>
       <PassengerInfoCard :customer-info="booked?.customerInfo" />
       <TripInfoCard v-if="booked" :booked="booked" />
       <PriceDetailCard v-if="booked" :booked="booked" />
-
-      <div
-        class="flex cursor-pointer items-center justify-between rounded-xl border bg-white p-4"
-        @click="
-          () => {
-            if (isExpired) return;
-            showMethodSheet = true;
-          }
-        "
-      >
-        <div class="flex items-center gap-3">
-          <img
-            v-if="method"
-            :src="METHODS_DATA.find((m) => m.key === method)?.icon"
-            class="h-6 w-6"
-          >
-          <div>
-            <p class="text-sm text-gray-500">Phương thức thanh toán</p>
-            <p class="font-medium">
-              {{ method ? method : "Chọn phương thức" }}
-            </p>
-          </div>
-        </div>
-
-        <span class="text-gray-400">›</span>
-      </div>
-
-      <BankTransferConfirm
-        v-if="booked"
-        :amount="booked?.amount"
-        :expire="booked.expireAt"
-        :disabled="isExpired"
-        :booking-id="booked._id"
-        :payment-method="paymentMethod"
-        :is-submitting="submitting"
-        @payment="onPayment"
-      />
     </div>
 
     <!-- PAYMENT METHOD SHEET -->
@@ -148,43 +192,61 @@ const onPayment = (data: {
           </div>
 
           <PaymentMethodList
-            v-model="method"
+            :banks="banks"
+            v-model="methodSelected"
+            :cash="setting?.bankInfo"
             @update:model-value="selectMethod"
           />
         </div>
       </div>
     </transition>
 
-    <!-- QR MODAL -->
+    <!-- PAYMENT MODAL -->
     <transition name="fade">
       <div
         v-if="showQRModal"
-        class="fixed inset-0 z-[999] flex items-center justify-center bg-black/40"
+        class="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 px-3"
       >
-        <div class="w-[90%] max-w-sm rounded-2xl bg-white p-4">
-          <!-- Header -->
-          <div class="mb-2 flex items-center justify-between">
-            <h3 class="font-semibold">Thanh toán ví điện tử</h3>
+        <div
+          class="flex max-h-[90vh] w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-white"
+        >
+          <!-- HEADER (fixed) -->
+          <div class="flex items-center justify-between border-b px-4 py-3">
+            <h3 class="font-semibold">
+              {{
+                methodSelected === "CASH"
+                  ? "Thanh toán tại quầy"
+                  : "Thanh toán ví điện tử"
+              }}
+            </h3>
             <button
-              class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              class="rounded-full p-1 text-gray-400 hover:bg-gray-100"
               @click="showQRModal = false"
             >
               ✕
             </button>
           </div>
 
-          <PaymentQRCode
-            v-if="booked && !isExpired"
-            :amount="booked?.amount"
-            :expire="booked.expireAt"
-            :method="paymentMethod"
-          />
+          <!-- BODY (SCROLLABLE) -->
+          <div class="flex-1 overflow-y-auto px-4 py-3">
+            <!-- CASH -->
+            <CounterPaymentInfo v-if="methodSelected === 'CASH'" />
 
-          <!-- Footer buttons -->
-          <div class="mt-4 space-y-2">
+            <!-- QR -->
+            <PaymentQRCode
+              v-else-if="booked && !isExpired"
+              :amount="booked.amount"
+              :expire="booked.expireAt"
+              :method="methodSelected"
+              :qrCode="qrCodeUrl"
+              :bankName="bankSelected?.shortName || bankSelected?.short_name"
+            />
+          </div>
+
+          <!-- FOOTER (fixed bottom) -->
+          <div class="space-y-2 border-t px-4 py-3">
             <button
-              class="w-full rounded-xl border border-gray-300 py-2 font-medium text-gray-600 hover:bg-gray-50"
-              :disabled="isExpired"
+              class="w-full rounded-xl border py-2 font-medium text-gray-600 hover:bg-gray-50"
               @click="
                 showQRModal = false;
                 showMethodSheet = true;
@@ -194,15 +256,47 @@ const onPayment = (data: {
             </button>
 
             <button
-              class="w-full rounded-xl bg-green-100 py-2 font-medium text-green-600 hover:bg-orange-200"
-              @click="showQRModal = false"
+              class="w-full rounded-xl py-2 font-semibold transition"
+              :disabled="!canConfirm || isExpired"
+              :class="[
+                !canConfirm || isExpired
+                  ? 'bg-gray-200 text-gray-400'
+                  : 'bg-green-500 text-white hover:bg-green-600',
+              ]"
+              @click="onPayment"
             >
-              Quay lại xác nhận
+              <span v-if="!canConfirm">Đang kiểm tra…</span>
+              <span v-else>Xác nhận thanh toán</span>
             </button>
           </div>
         </div>
       </div>
     </transition>
+
+    <!-- BOTTOM PAYMENT BAR -->
+    <div class="fixed bottom-0 left-0 right-0 z-30 border-t bg-white px-4 py-3">
+      <!-- Remaining time -->
+      <div v-if="!isExpired" class="mb-2 text-center text-sm text-gray-500">
+        ⏳ Thời gian giữ chỗ còn
+        <span class="font-semibold text-green-600">
+          {{ formatRemaining }}
+        </span>
+      </div>
+
+      <button
+        class="w-full rounded-xl py-3 text-lg font-semibold transition"
+        :class="[
+          isExpired
+            ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+            : 'bg-green-500 text-white hover:bg-green-600',
+        ]"
+        :disabled="isExpired"
+        @click="showMethodSheet = true"
+      >
+        <template v-if="isExpired"> ⛔ Đã hết hạn thanh toán </template>
+        <template v-else> Thanh toán </template>
+      </button>
+    </div>
   </div>
 </template>
 

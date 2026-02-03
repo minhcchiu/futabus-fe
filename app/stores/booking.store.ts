@@ -11,7 +11,7 @@ export const useBookingStore = defineStore("booking", () => {
   const loading = ref(false);
   const list = ref<Booking[]>([]);
   const paginate = ref<PaginateResponse<Booking> | null>(null);
-  const selected = ref<Booking | null>(null);
+  const selected = ref<Booking | undefined>(undefined);
 
   const fetchAll = async (query?: PaginationParams) => {
     loading.value = true;

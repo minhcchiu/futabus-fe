@@ -35,6 +35,15 @@ export const formatTime = (timestamp?: number) => {
   return d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
 };
 
+export const formatDate = (timestamp?: number) => {
+  if (!timestamp) return "--";
+  const d = new Date(timestamp);
+  return d.toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 export const formatDateTime = (timestamp?: number) => {
   if (!timestamp) return "--";
   const d = new Date(timestamp);

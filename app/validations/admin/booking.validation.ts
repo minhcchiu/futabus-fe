@@ -14,12 +14,12 @@ export enum BookingStatus {
   REFUNDED = "REFUNDED", // Đã hoàn tiền
 }
 
-export enum PaymentMethod {
-  CASH = "CASH", // Tiền mặt (quầy)
-  BANK_TRANSFER = "BANK_TRANSFER",
-  VNPAY = "VNPay",
-  MBBANK = "MBBank",
-}
+export const PaymentMethod = {
+  CASH: "CASH", // Tiền mặt (quầy)
+  BANK_TRANSFER: "BANK_TRANSFER",
+  VNPAY: "VNPay",
+  MBBANK: "MBBank",
+};
 
 export enum PaymentStatus {
   UNPAID = "UNPAID", // Chưa thanh toán
@@ -65,7 +65,7 @@ export const UpdateBookingSchema = CreateBookingSchema.partial();
 export type UpdateBooking = z.infer<typeof UpdateBookingSchema>;
 
 export type PaymentInfo = {
-  method: PaymentMethod;
+  method: string;
   status: PaymentStatus;
   amount: number;
   paidAmount?: number;
