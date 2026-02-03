@@ -18,7 +18,6 @@ const setting = computed(() => settingStore.selected);
 const methodSelected = ref<string | undefined>(
   booked.value?.paymentInfo.method,
 );
-const bankSelected = computed(() => getSepayByMethod(methodSelected.value));
 
 onMounted(async () => {
   const bookingId = route.query.booking_id as string;
@@ -179,7 +178,7 @@ const onPayment = async () => {
         :booked="booked"
         :banks="banks"
         :setting="setting!"
-        :getQrCode="getQRCode"
+        :get-qr-code="getQRCode"
         :loading="bookingStore.loading"
       />
     </div>

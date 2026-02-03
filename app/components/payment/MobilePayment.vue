@@ -192,8 +192,8 @@ onUnmounted(() => {
           </div>
 
           <PaymentMethodList
-            :banks="banks"
             v-model="methodSelected"
+            :banks="banks"
             :cash="setting?.bankInfo"
             @update:model-value="selectMethod"
           />
@@ -238,8 +238,8 @@ onUnmounted(() => {
               :amount="booked.amount"
               :expire="booked.expireAt"
               :method="methodSelected"
-              :qrCode="qrCodeUrl"
-              :bankName="bankSelected?.shortName || bankSelected?.short_name"
+              :qr-code="qrCodeUrl"
+              :bank-name="bankSelected?.shortName || bankSelected?.short_name"
             />
           </div>
 

@@ -39,7 +39,7 @@ const emit = defineEmits<{
             :amount="booked.amount"
             :expire="booked.expireAt"
             :method="methodSelected"
-            :qrCode="qrCodeUrl"
+            :qr-code="qrCodeUrl"
           />
 
           <CounterPaymentInfo v-else />
@@ -47,7 +47,7 @@ const emit = defineEmits<{
 
         <div v-else class="rounded-xl bg-red-50 p-6 text-center text-red-600">
           ⛔ Thời gian thanh toán đã hết hiệu lực
-          <br />
+          <br >
           Vui lòng đặt vé lại
         </div>
       </div>

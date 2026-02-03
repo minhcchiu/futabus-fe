@@ -235,12 +235,12 @@ const paymentMethodText: Record<PaymentMethod, string> = {
         <td class="px-4 py-3 font-mono text-xs">
           <button
             class="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline"
-            @click="navigateTo(`/admin/bookings/${b._id}`)"
-            @click.right="copyToClipboard(b.code || b._id.slice(-8))"
             :title="
               'Click to view details, right-click to copy: ' +
               (b.code || b._id.slice(-8))
             "
+            @click="navigateTo(`/admin/bookings/${b._id}`)"
+            @click.right="copyToClipboard(b.code || b._id.slice(-8))"
           >
             {{ b.code || b._id.slice(-8) }}
           </button>
@@ -342,7 +342,7 @@ const paymentMethodText: Record<PaymentMethod, string> = {
               alt="Payment proof"
               class="h-12 w-12 cursor-pointer rounded-lg border object-cover"
               @click="previewImage = b.paymentInfo.image"
-            />
+            >
 
             <!-- hover preview -->
             <div
@@ -351,7 +351,7 @@ const paymentMethodText: Record<PaymentMethod, string> = {
               <img
                 :src="b.paymentInfo.image"
                 class="max-h-60 max-w-60 rounded-lg object-contain"
-              />
+              >
             </div>
           </div>
 

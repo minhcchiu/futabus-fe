@@ -15,7 +15,7 @@ onMounted(async () => {
 <template>
   <aside class="flex w-64 flex-col border-r bg-white px-4 pb-6 pt-2">
     <div class="text-xl font-bold text-primary">
-      <img :src="setting?.logo" alt="" class="h-16 object-contain" />
+      <img :src="setting?.logo" alt="" class="h-16 object-contain" >
     </div>
 
     <nav class="flex-1 space-y-2">
@@ -31,7 +31,7 @@ onMounted(async () => {
     </nav>
 
     <div class="mt-auto text-sm text-gray-500">
-      {{ me?.fullName }}<br />
+      {{ me?.fullName }}<br >
       {{ me?.email }}
     </div>
   </aside>

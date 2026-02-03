@@ -82,7 +82,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Tìm theo tên, mã, BIN..."
         class="w-72 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      />
+      >
     </div>
 
     <!-- TABLE -->
@@ -111,7 +111,7 @@ async function handleDeleted() {
             v-if="s.logo"
             :src="s.logo"
             class="h-8 w-8 rounded object-contain"
-          />
+          >
           <span v-else class="text-gray-400">—</span>
         </td>
 
