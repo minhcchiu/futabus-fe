@@ -41,9 +41,9 @@ export const CreateBookingSchema = z.object({
   departureTime: z.number(),
   amount: z.number(),
   paymentInfo: z.object({
-    method: z.string(),
-    status: z.string(),
-    amount: z.number(),
+    method: z.string().optional(),
+    status: z.string().optional(),
+    amount: z.number().optional(),
     paidAmount: z.number().optional(),
     transactionId: z.string().optional(),
     provider: z.string().optional(),

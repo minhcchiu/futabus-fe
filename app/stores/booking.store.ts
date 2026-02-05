@@ -47,6 +47,14 @@ export const useBookingStore = defineStore("booking", () => {
     }
   };
 
+  const holdSlot = async (id: string, input: UpdateBooking) => {
+    loading.value = true;
+    try {
+      return await bookingApi.holdSlot(id, input);
+    } finally {
+      loading.value = false;
+    }
+  };
   const updateStatus = async (id: string, input: UpdateBooking) => {
     loading.value = true;
     try {
@@ -100,5 +108,6 @@ export const useBookingStore = defineStore("booking", () => {
     updateStatus,
     seatIdsBooked,
     getSeatsBooked,
+    holdSlot,
   };
 });

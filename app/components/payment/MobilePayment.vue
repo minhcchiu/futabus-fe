@@ -4,7 +4,6 @@ import { toast } from "vue-sonner";
 import { formatDate } from "~/utils/helpers/data.helper";
 import {
   BookingStatus,
-  PaymentStatus,
   type Booking,
 } from "~/validations/admin/booking.validation";
 import type { Sepay } from "~/validations/admin/sepay.validation";
@@ -92,24 +91,18 @@ const onPayment = async () => {
     return;
   }
 
-  const paymentInfo = {
-    status: PaymentStatus.PAID,
-    amount: props.booked!.amount,
-    method: methodSelected.value,
-  };
-
   if (!methodSelected.value) {
     toast.error("Vui lòng chọn phương thức thanh toán");
     return;
   }
 
-  const confirmed = await bookingStore.updateStatus(props.booked!._id, {
-    status: BookingStatus.CONFIRMED,
-    // @ts-ignore
-    paymentInfo,
+  const confirmed = await bookingStore.holdSlot(props.booked!._id, {
+    paymentInfo: {
+      method: methodSelected.value,
+    },
   });
 
-  toast.success("Đã xác nhận chuyến đi");
+  toast.success("Đã giữ chỗ");
   showQRModal.value = false;
 
   router.push({

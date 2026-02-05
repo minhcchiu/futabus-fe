@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import { toast } from "vue-sonner";
-import {
-  BookingStatus,
-  PaymentStatus,
-} from "~/validations/admin/booking.validation";
+import { BookingStatus } from "~/validations/admin/booking.validation";
 
 const router = useRouter();
 const route = useRoute();
@@ -93,24 +90,18 @@ const onPayment = async () => {
     return;
   }
 
-  const paymentInfo = {
-    status: PaymentStatus.PAID,
-    amount: booked.value!.amount,
-    method: methodSelected.value,
-  };
-
   if (!methodSelected.value) {
     toast.error("Vui lòng chọn phương thức thanh toán");
     return;
   }
 
-  const confirmed = await bookingStore.updateStatus(booked.value!._id, {
-    status: BookingStatus.CONFIRMED,
-    // @ts-ignore
-    paymentInfo,
+  const confirmed = await bookingStore.holdSlot(booked.value!._id, {
+    paymentInfo: {
+      method: methodSelected.value,
+    },
   });
 
-  toast.success("Đã xác nhận chuyến đi");
+  toast.success("Đã giữ chỗ");
 
   router.push({
     path: "/ticket-lookup",
@@ -184,5 +175,7 @@ const onPayment = async () => {
     </div>
   </div>
 </template>
+
+<style lang="css" scoped></style>
 
 <style lang="css" scoped></style>

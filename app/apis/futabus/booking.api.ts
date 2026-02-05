@@ -43,6 +43,14 @@ export const bookingApi = {
   },
 
   //  ----- Method: PATCH -----
+  holdSlot: (
+    id: string,
+    body: UpdateBooking,
+    options?: FetchOptions,
+  ): Promise<Booking> => {
+    return authFetch.patch(`${BOOKING_URL}/${id}/hold`, body, options);
+  },
+
   updateStatus: (
     id: string,
     body: UpdateBooking,
