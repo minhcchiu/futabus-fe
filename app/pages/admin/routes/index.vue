@@ -87,7 +87,7 @@ async function handleDeleted() {
         v-model="keyword"
         placeholder="Tìm kiếm..."
         class="w-64 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
-      >
+      />
     </div>
 
     <!-- TABLE -->
@@ -96,7 +96,7 @@ async function handleDeleted() {
         'Nhà xe',
         'Điểm bắt đầu',
         'Điểm kết thúc',
-        'Thời gian (phút)',
+        'Thời gian (giờ)',
         'Actions',
       ]"
       :data="routes"
@@ -124,8 +124,8 @@ async function handleDeleted() {
 
         <!-- DURATION -->
         <td class="px-4 py-3">
-          <span v-if="r.durationMinutes">
-            {{ formatDurationShort(r.durationMinutes) }}
+          <span v-if="r.durationHour">
+            {{ formatDurationShort(r.durationHour) }}
           </span>
           <span v-else class="text-gray-400">—</span>
         </td>

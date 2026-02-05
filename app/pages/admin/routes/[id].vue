@@ -24,7 +24,7 @@ const form = reactive<CreateRoute>({
   companyId: "",
   startStopId: "",
   endStopId: "",
-  durationMinutes: 10 * 60, // 👈 thêm duration
+  durationHour: 10, // 👈 thêm duration
 });
 
 const errors = ref<Record<string, string>>({});
@@ -38,7 +38,7 @@ const fetchDetail = async () => {
     companyId: res.companyId?._id || res.companyId,
     startStopId: res.startStopId?._id || res.startStopId,
     endStopId: res.endStopId?._id || res.endStopId,
-    durationMinutes: res.durationMinutes,
+    durationHour: res.durationHour,
   });
 };
 
@@ -78,14 +78,14 @@ const submit = async () => {
 
 <template>
   <div class="max-w-xl space-y-6">
-    <h1 class="text-2xl font-semibold">Edit Route</h1>
+    <h1 class="text-2xl font-semibold">Cập nhật tuyến đường</h1>
 
     <div class="space-y-4">
       <!-- COMPANY -->
       <div>
-        <label class="block text-sm font-medium">Company</label>
+        <label class="block text-sm font-medium">Nhà xe</label>
         <select v-model="form.companyId" class="input">
-          <option value="">Select company</option>
+          <option value="">Chọn nhà xe</option>
           <option v-for="c in companyStore.list" :key="c._id" :value="c._id">
             {{ c.name }}
           </option>
@@ -95,9 +95,9 @@ const submit = async () => {
 
       <!-- START -->
       <div>
-        <label class="block text-sm font-medium">Start Stop</label>
+        <label class="block text-sm font-medium">Điểm bắt đầu</label>
         <select v-model="form.startStopId" class="input">
-          <option value="">Select start stop</option>
+          <option value="">Chọn điểm bắt đầu</option>
           <option v-for="s in stopStore.list" :key="s._id" :value="s._id">
             {{ s.name }}
           </option>
@@ -107,9 +107,9 @@ const submit = async () => {
 
       <!-- END -->
       <div>
-        <label class="block text-sm font-medium">End Stop</label>
+        <label class="block text-sm font-medium">Điểm kết thúc</label>
         <select v-model="form.endStopId" class="input">
-          <option value="">Select end stop</option>
+          <option value="">Chọn điểm kết thúc</option>
           <option v-for="s in stopStore.list" :key="s._id" :value="s._id">
             {{ s.name }}
           </option>
@@ -120,22 +120,22 @@ const submit = async () => {
       <!-- DURATION -->
       <div>
         <label class="block text-sm font-medium">
-          Thời gian hành trình (phút)
+          Thời gian hành trình (giờ)
         </label>
         <input
-          v-model.number="form.durationMinutes"
+          v-model.number="form.durationHour"
           type="number"
           min="1"
           placeholder="Ví dụ: 300"
           class="input"
-        >
-        <p class="error">{{ errors.durationMinutes }}</p>
+        />
+        <p class="error">{{ errors.durationHour }}</p>
       </div>
     </div>
 
     <div class="flex gap-3">
-      <button class="btn-primary" @click="submit">Update</button>
-      <NuxtLink to="/admin/routes" class="btn-secondary">Cancel</NuxtLink>
+      <button class="btn-primary" @click="submit">Lưu</button>
+      <NuxtLink to="/admin/routes" class="btn-secondary">Hủy</NuxtLink>
     </div>
   </div>
 </template>

@@ -127,7 +127,7 @@ watch(
         :placeholder="placeholder"
         class="w-full py-2 text-sm outline-none"
         readonly
-      />
+      >
 
       <!-- Clear -->
       <button
@@ -154,7 +154,7 @@ watch(
             v-model="searchKeyword"
             placeholder="Tìm tỉnh/thành"
             class="w-full rounded-lg border px-3 py-3 pr-10 outline-none focus:border-green-500"
-          />
+          >
 
           <button
             v-if="searchKeyword"

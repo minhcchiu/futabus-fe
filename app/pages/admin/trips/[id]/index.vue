@@ -30,17 +30,12 @@ const form = reactive<CreateTrip>({
   companyId: "",
   vehicleId: "",
   departureTime: Date.now(),
-  arrivalTime: Date.now(),
+  arrivalTime: Date.now(), // auto
   status: TripStatus.CREATED,
 });
 
 const statusList = computed(() => Object.values(TripStatus));
 const errors = ref<Record<string, string>>({});
-
-/**
- * Flag: arrivalTime auto hay user chỉnh
- */
-const isAutoArrive = ref(true);
 
 /* =========================
   HELPERS
@@ -51,12 +46,42 @@ const getCompanyIdFromRoute = (r: any) =>
 const getCompanyIdFromTrip = (c: any) =>
   typeof c === "string" ? c : c?._id || "";
 
+/* =========================
+  CALC ARRIVAL TIME
+========================= */
 const calcArriveTime = () => {
   const r = routeStore.list.find((i) => i._id === form.routeId);
-  if (!r?.durationMinutes) return;
+  if (!r?.durationHour) return;
 
-  form.arrivalTime = form.departureTime + r.durationMinutes * 60 * 1000;
+  form.arrivalTime = form.departureTime + r.durationHour * 60 * 60 * 1000;
 };
+
+/* =========================
+  ROUTE SELECTED
+========================= */
+const selectedRoute = computed(() =>
+  routeStore.list.find((i) => i._id === form.routeId),
+);
+
+/* =========================
+  ETA PREVIEW (LABEL)
+========================= */
+const arrivalPreview = computed(() => {
+  if (!selectedRoute.value?.durationHour || !form.departureTime) return "";
+
+  const start = new Date(form.departureTime);
+  const end = new Date(
+    form.departureTime + selectedRoute.value.durationHour * 60 * 60 * 1000,
+  );
+
+  const fmt = (d: Date) =>
+    d.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return `${fmt(start)} → ${fmt(end)}`;
+});
 
 /* =========================
   FETCH DETAIL
@@ -71,8 +96,6 @@ const fetchDetail = async () => {
   form.departureTime = res.departureTime;
   form.arrivalTime = res.arrivalTime;
   form.status = res.status;
-
-  isAutoArrive.value = false; // EDIT: tôn trọng dữ liệu cũ
 
   if (form.companyId) {
     await vehicleStore.fetchAll({ companyId: form.companyId });
@@ -108,8 +131,7 @@ watch(
 
     if (oldRouteId && routeId !== oldRouteId) {
       form.vehicleId = "";
-      isAutoArrive.value = true;
-      calcArriveTime();
+      calcArriveTime(); // auto recal
     }
 
     form.companyId = companyId;
@@ -123,26 +145,17 @@ watch(
 watch(
   () => form.departureTime,
   () => {
-    if (!isAutoArrive.value) return;
     calcArriveTime();
   },
 );
 
 /* =========================
-  DATETIME INPUTS
+  DATETIME INPUT
 ========================= */
 const departureTimeInput = computed({
   get: () => new Date(form.departureTime).toISOString().slice(0, 16),
   set: (val: string) => {
     form.departureTime = new Date(val).getTime();
-  },
-});
-
-const arrivalTimeInput = computed({
-  get: () => new Date(form.arrivalTime).toISOString().slice(0, 16),
-  set: (val: string) => {
-    isAutoArrive.value = false;
-    form.arrivalTime = new Date(val).getTime();
   },
 });
 
@@ -173,37 +186,43 @@ const submit = async () => {
   if (!validateForm()) return;
 
   const res = await tripStore.updateById(route.params.id as string, form);
-
   if (res) router.push("/admin/trips");
 };
 </script>
 
 <template>
   <div class="max-w-xl space-y-6">
-    <h1 class="text-2xl font-semibold">Update Trip</h1>
+    <h1 class="text-2xl font-semibold">Cập nhật chuyến</h1>
 
     <div class="space-y-4">
       <!-- ROUTE -->
       <div>
-        <label>Route</label>
+        <label class="flex items-center justify-between">
+          <span>Tuyến đường</span>
+          <span v-if="arrivalPreview" class="text-xs font-normal text-gray-500">
+            ⏱ {{ arrivalPreview }}
+          </span>
+        </label>
+
         <select v-model="form.routeId" class="input">
-          <option value="">Select route</option>
+          <option value="">Chọn tuyến</option>
           <option v-for="r in routeStore.list" :key="r._id" :value="r._id">
             {{ r.startStopId?.name }} → {{ r.endStopId?.name }}
           </option>
         </select>
+
         <p class="error">{{ errors.routeId }}</p>
       </div>
 
       <!-- VEHICLE -->
       <div>
-        <label>Vehicle</label>
+        <label>Xe</label>
         <select
           v-model="form.vehicleId"
           class="input"
           :disabled="!form.routeId"
         >
-          <option value="">Select vehicle</option>
+          <option value="">Chọn xe</option>
           <option v-for="v in vehicleList" :key="v._id" :value="v._id">
             {{ v.plateNumber }}
           </option>
@@ -213,20 +232,23 @@ const submit = async () => {
 
       <!-- DEPARTURE -->
       <div>
-        <label>Departure Time</label>
+        <label>Khởi hành</label>
         <input
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        >
+        />
         <p class="error">{{ errors.departureTime }}</p>
       </div>
 
-      <!-- ARRIVE -->
+      <!-- ARRIVAL -->
       <div>
-        <label>Arrive Time</label>
-        <input v-model="arrivalTimeInput" type="datetime-local" class="input" >
-        <p class="error">{{ errors.arrivalTime }}</p>
+        <label>Đến nơi (auto)</label>
+        <input
+          :value="new Date(form.arrivalTime).toLocaleString('vi-VN')"
+          class="input bg-gray-100"
+          disabled
+        />
       </div>
 
       <!-- STATUS -->
@@ -234,15 +256,15 @@ const submit = async () => {
         <label>Status</label>
         <select v-model="form.status" class="input">
           <option v-for="s in statusList" :key="s" :value="s">
-            {{ s }}
+            {{ TripStatusText[s] }}
           </option>
         </select>
       </div>
     </div>
 
     <div class="flex gap-3">
-      <button class="btn-primary" @click="submit">Update</button>
-      <NuxtLink to="/admin/trips" class="btn-secondary">Cancel</NuxtLink>
+      <button class="btn-primary" @click="submit">Lưu</button>
+      <NuxtLink to="/admin/trips" class="btn-secondary">Hủy</NuxtLink>
     </div>
   </div>
 </template>

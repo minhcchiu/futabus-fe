@@ -3,6 +3,7 @@ import AdminTable from "@/components/admin/AdminTable.vue";
 import DeleteButton from "@/components/common/DeleteButton.vue";
 import { computed, onMounted, ref, watch } from "vue";
 import { useTripStore } from "~/stores/trip.store";
+import { TripStatusText } from "~/utils/data";
 
 definePageMeta({ layout: "admin", middleware: "auth" });
 
@@ -57,28 +58,28 @@ const openStops = (trip: any) => {
     <!-- HEADER -->
     <div class="mb-6 flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-semibold">Trips</h1>
-        <p class="text-sm text-gray-500">Manage trips</p>
+        <h1 class="text-2xl font-semibold">Chuyến xe</h1>
+        <p class="text-sm text-gray-500">Quản lý chuyến</p>
       </div>
 
       <NuxtLink
         to="/admin/trips/create"
         class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:opacity-90"
       >
-        + Add Trip
+        + Thêm chuyến
       </NuxtLink>
     </div>
 
     <!-- TABLE -->
     <AdminTable
       :columns="[
-        'Route',
-        'Vehicle',
-        'Departure',
-        'Arrive',
-        'Status',
-        'Stop',
-        'Price',
+        'Tuyến đường',
+        'Xe',
+        'Thời gian khởi hành',
+        'Khoảng thời gian',
+        'Trạng thái',
+        'Điểm dừng',
+        'Giá',
         'Actions',
       ]"
       :data="trips"
@@ -115,13 +116,13 @@ const openStops = (trip: any) => {
 
         <!-- STATUS -->
         <td class="px-4 py-3">
-          {{ t.status }}
+          {{ TripStatusText[t.status] }}
         </td>
 
         <!-- STOPS -->
         <td class="px-4 py-3">
           <button class="text-blue-600 underline" @click="openStops(t)">
-            Stops
+            Điểm đón/dừng
           </button>
         </td>
 
@@ -131,7 +132,7 @@ const openStops = (trip: any) => {
             :to="`/admin/trips/${t._id}/prices`"
             class="text-primary underline"
           >
-            Price
+            Cài đặt giá
           </NuxtLink>
         </td>
 
@@ -141,7 +142,7 @@ const openStops = (trip: any) => {
             :to="`/admin/trips/${t._id}`"
             class="text-primary hover:underline"
           >
-            Edit
+            Sửa
           </NuxtLink>
 
           <DeleteButton

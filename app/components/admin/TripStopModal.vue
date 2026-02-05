@@ -58,7 +58,7 @@ const getStopType = (ts: TripStop) => {
     <div class="max-h-[80vh] w-[700px] overflow-auto rounded-xl bg-white p-6">
       <div class="mb-4 flex justify-between">
         <h2 class="text-xl font-semibold">
-          Trip Stops - {{ props.trip.route?.startStopId?.name }} →
+          Điếm đón / trả - {{ props.trip.route?.startStopId?.name }} →
           {{ props.trip.route?.endStopId?.name }}
         </h2>
         <button @click="$emit('close')">✖</button>
@@ -70,19 +70,19 @@ const getStopType = (ts: TripStop) => {
           :class="activeTab === 'list' && 'border-b-2 font-bold'"
           @click="activeTab = 'list'"
         >
-          Stop List
+          Danh sách điểm dừng
         </button>
         <button
           :class="activeTab === 'form' && 'border-b-2 font-bold'"
           :disabled="!editingStop"
         >
-          {{ editingStop ? "Edit Stop" : "Add Stop" }}
+          {{ editingStop ? "Sửa" : "Thêm" }}
         </button>
       </div>
 
       <!-- LIST -->
       <div v-if="activeTab === 'list'">
-        <button class="btn-primary mb-3" @click="addStop">+ Add Stop</button>
+        <button class="btn-primary mb-3" @click="addStop">+ Thêm</button>
 
         <table class="w-full overflow-hidden rounded-lg border text-sm">
           <thead class="bg-muted/40">

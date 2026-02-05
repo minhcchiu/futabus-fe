@@ -25,17 +25,11 @@ const form = reactive<CreateTrip>({
   vehicleId: "",
   departureTime: Date.now(),
   arrivalTime: Date.now(),
-  status: TripStatus.OPEN,
+  status: TripStatus.CREATED,
 });
 
 const statusList = computed(() => Object.values(TripStatus));
 const errors = ref<Record<string, string>>({});
-
-/**
- * Flag để biết arrivalTime là auto hay user chỉnh tay
- * → tránh bị watcher ghi đè
- */
-const isAutoArrive = ref(true);
 
 /* ================= FETCH ================= */
 onMounted(async () => {
@@ -47,10 +41,26 @@ onMounted(async () => {
 /* ================= UTILS ================= */
 const calcArriveTime = () => {
   const route = routeStore.list.find((r) => r._id === form.routeId);
-  if (!route?.durationMinutes) return;
+  if (!route?.durationHour) return;
 
-  form.arrivalTime = form.departureTime + route.durationMinutes * 60 * 1000;
+  form.arrivalTime = form.departureTime + route.durationHour * 60 * 60 * 1000;
 };
+
+/* ================= PREVIEW ================= */
+/**
+ * Giờ tới dự kiến hiển thị trên label Tuyến đường
+ */
+const arrivalPreview = computed(() => {
+  if (!form.routeId) return null;
+
+  const route = routeStore.list.find((r) => r._id === form.routeId);
+  if (!route?.durationHour) return null;
+
+  return new Date(form.arrivalTime).toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+});
 
 /* ================= WATCHERS ================= */
 
@@ -68,8 +78,7 @@ watch(
 
     form.companyId = route.companyId._id;
 
-    isAutoArrive.value = true;
-    calcArriveTime();
+    calcArriveTime(); // 👈 tính lại ngay
 
     await vehicleStore.fetchAll({ companyId: route.companyId._id });
   },
@@ -81,8 +90,7 @@ watch(
 watch(
   () => form.departureTime,
   () => {
-    if (!isAutoArrive.value) return;
-    calcArriveTime();
+    calcArriveTime(); // 👈 realtime
   },
 );
 
@@ -91,14 +99,6 @@ const departureTimeInput = computed({
   get: () => new Date(form.departureTime).toISOString().slice(0, 16),
   set: (val: string) => {
     form.departureTime = new Date(val).getTime();
-  },
-});
-
-const arrivalTimeInput = computed({
-  get: () => new Date(form.arrivalTime).toISOString().slice(0, 16),
-  set: (val: string) => {
-    isAutoArrive.value = false; // user chỉnh tay
-    form.arrivalTime = new Date(val).getTime();
   },
 });
 
@@ -131,30 +131,48 @@ const submit = async () => {
 
 <template>
   <div class="max-w-xl space-y-6">
-    <h1 class="text-2xl font-semibold">Tạo Trip</h1>
+    <h1 class="text-2xl font-semibold">Tạo chuyến</h1>
 
     <div class="space-y-4">
       <!-- ROUTE -->
       <div>
-        <label>Route</label>
+        <label class="flex items-center gap-2">
+          <span>Tuyến đường</span>
+
+          <span
+            v-if="arrivalPreview"
+            class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700"
+          >
+            Dự kiến tới: {{ arrivalPreview }}
+          </span>
+
+          <span
+            v-else
+            class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
+          >
+            Chưa xác định giờ tới
+          </span>
+        </label>
+
         <select v-model="form.routeId" class="input">
-          <option value="">Select route</option>
+          <option value="">Chọn tuyến</option>
           <option v-for="r in routeStore.list" :key="r._id" :value="r._id">
             {{ r.startStopId?.name }} → {{ r.endStopId?.name }}
           </option>
         </select>
+
         <p class="error">{{ errors.routeId }}</p>
       </div>
 
       <!-- VEHICLE -->
       <div>
-        <label>Vehicle</label>
+        <label>Xe</label>
         <select
           v-model="form.vehicleId"
           class="input"
           :disabled="!form.routeId"
         >
-          <option value="">Select vehicle</option>
+          <option value="">Chọn xe</option>
           <option v-for="v in vehicleStore.list" :key="v._id" :value="v._id">
             {{ v.plateNumber }}
           </option>
@@ -164,36 +182,39 @@ const submit = async () => {
 
       <!-- DEPARTURE -->
       <div>
-        <label>Departure Time</label>
+        <label>Khởi hành</label>
         <input
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        >
+        />
         <p class="error">{{ errors.departureTime }}</p>
       </div>
 
-      <!-- ARRIVE -->
+      <!-- ARRIVAL -->
       <div>
-        <label>Arrive Time</label>
-        <input v-model="arrivalTimeInput" type="datetime-local" class="input" >
-        <p class="error">{{ errors.arrivalTime }}</p>
+        <label>Thời gian tới (auto)</label>
+        <input
+          :value="new Date(form.arrivalTime).toLocaleString('vi-VN')"
+          class="input bg-gray-100"
+          disabled
+        />
       </div>
 
       <!-- STATUS -->
       <div>
-        <label>Status</label>
+        <label>Trạng thái</label>
         <select v-model="form.status" class="input">
           <option v-for="s in statusList" :key="s" :value="s">
-            {{ s }}
+            {{ TripStatusText[s] }}
           </option>
         </select>
       </div>
     </div>
 
     <div class="flex gap-3">
-      <button class="btn-primary" @click="submit">Create</button>
-      <NuxtLink to="/admin/trips" class="btn-secondary">Cancel</NuxtLink>
+      <button class="btn-primary" @click="submit">Tạo</button>
+      <NuxtLink to="/admin/trips" class="btn-secondary">Hủy</NuxtLink>
     </div>
   </div>
 </template>

@@ -13,11 +13,12 @@ export const formatDateUrlToNumber = (date?: string) => {
 };
 
 // 1h30p, 2h, 45p
-export function formatDurationShort(minutes?: number): string {
-  if (!minutes || minutes <= 0) return "—";
+export function formatDurationShort(hours?: number): string {
+  if (!hours || hours <= 0) return "—";
 
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+  const totalMinutes = Math.round(hours * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
 
   if (h && m) return `${h}h${m}p`;
   if (h) return `${h}h`;

@@ -1,4 +1,5 @@
 import { PaymentMethod } from "~/validations/admin/booking.validation";
+import { TripStatus } from "~/validations/admin/trip.validation";
 
 export const METHODS_DATA = [
   {
@@ -26,3 +27,11 @@ export const METHODS_DATA = [
     note: "Liên hệ nhà xe và thanh toán tại nhà xe",
   },
 ];
+
+export const TripStatusText = {
+  [TripStatus.CREATED]: "Chưa khởi hành", // Đã tạo chuyến, chưa khởi hành
+  [TripStatus.DEPARTED]: "Đã khởi hành", // Đã khởi hành
+  [TripStatus.IN_PROGRESS]: "Đang chạy", // Đang chạy
+  [TripStatus.COMPLETED]: "Hoàn thành", // Hoàn thành chuyến
+  [TripStatus.CANCELLED]: "Hủy", // Hủy chuyến
+};

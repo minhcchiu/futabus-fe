@@ -122,7 +122,7 @@ watch(
               type="radio"
               value="station"
               class="accent-green-500"
-            />
+            >
             Bến xe/VP
           </label>
 
@@ -132,7 +132,7 @@ watch(
               type="radio"
               value="custom"
               class="accent-green-500"
-            />
+            >
             Tự nhập
           </label>
         </div>
@@ -151,7 +151,7 @@ watch(
           v-model="pickupCustomAddress"
           placeholder="Nhập điểm đón (VD: 123 Lê Duẩn, Đà Nẵng)"
           class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
-        />
+        >
       </div>
 
       <!-- ================= ĐIỂM TRẢ ================= -->
@@ -165,7 +165,7 @@ watch(
               type="radio"
               value="station"
               class="accent-green-500"
-            />
+            >
             Bến xe/VP
           </label>
 
@@ -175,7 +175,7 @@ watch(
               type="radio"
               value="custom"
               class="accent-green-500"
-            />
+            >
             Tự nhập
           </label>
         </div>
@@ -194,7 +194,7 @@ watch(
           v-model="dropoffCustomAddress"
           placeholder="Nhập điểm trả (VD: Sân bay Tân Sơn Nhất)"
           class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
-        />
+        >
       </div>
     </div>
   </div>

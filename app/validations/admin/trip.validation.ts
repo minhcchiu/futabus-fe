@@ -7,8 +7,6 @@ import type { Vehicle } from "~/validations/admin/vehicle.validation";
 
 export enum TripStatus {
   CREATED = "CREATED", // Đã tạo chuyến, chưa khởi hành
-  READY = "READY", // Sẵn sàng khởi hành
-  OPEN = "OPEN", // Đang mở
   DEPARTED = "DEPARTED", // Đã khởi hành
   IN_PROGRESS = "IN_PROGRESS", // Đang chạy
   COMPLETED = "COMPLETED", // Hoàn thành chuyến
@@ -24,8 +22,6 @@ export const CreateTripSchema = z.object({
   price: z.number().optional(),
   status: z.enum([
     TripStatus.CREATED,
-    TripStatus.READY,
-    TripStatus.OPEN,
     TripStatus.DEPARTED,
     TripStatus.IN_PROGRESS,
     TripStatus.COMPLETED,
