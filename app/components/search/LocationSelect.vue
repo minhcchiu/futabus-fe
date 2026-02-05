@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import type { Province } from "~/validations/pre-built/province.validation";
 
 const props = defineProps<{
@@ -12,55 +20,63 @@ const props = defineProps<{
 
 const emit = defineEmits(["open", "close", "select"]);
 
-const keyword = ref("");
+/* =========================
+   STATE
+========================= */
+const displayValue = ref(""); // Giá trị đã chọn (hiển thị)
+const searchKeyword = ref(""); // Keyword tìm kiếm trong dropdown
 
 /* =========================
-  SYNC MODEL -> INPUT
+   SYNC MODEL -> DISPLAY
 ========================= */
 watch(
   () => props.modelValue,
   (val) => {
-    if (val) {
-      keyword.value = val.fullName;
-    } else {
-      keyword.value = "";
-    }
+    displayValue.value = val ? val.fullName : "";
+    searchKeyword.value = ""; // reset search sau khi chọn
   },
   { immediate: true },
 );
 
 /* =========================
-  FILTER
+   FILTER
 ========================= */
 const filteredLocations = computed(() =>
   props.provinces.filter((pro) =>
-    pro.name.toLowerCase().includes(keyword.value.toLowerCase()),
+    pro.name.toLowerCase().includes(searchKeyword.value.toLowerCase()),
   ),
 );
 
-function close() {
-  emit("close");
+/* =========================
+   HANDLERS
+========================= */
+function openDropdown() {
+  searchKeyword.value = ""; // 🔥 reset mỗi lần mở
+  emit("open");
 }
 
 function select(value: Province) {
-  keyword.value = value.fullName;
+  displayValue.value = value.fullName;
   emit("select", value);
-  close();
+  emit("close");
 }
 
 function clear() {
-  keyword.value = "";
-  emit("select", null); // reset value bên ngoài
+  displayValue.value = "";
+  searchKeyword.value = "";
+  emit("select", null);
 }
 
-const dropdownWrapper = ref<any>();
-
-const openDropdown = () => {
-  emit("open");
-};
+/* =========================
+   CLICK OUTSIDE
+========================= */
+const dropdownWrapper = ref<HTMLElement | null>(null);
 
 function handleClickOutside(e: MouseEvent) {
-  if (dropdownWrapper.value && !dropdownWrapper.value.contains(e.target)) {
+  if (
+    dropdownWrapper.value &&
+    !dropdownWrapper.value.contains(e.target as Node)
+  ) {
     emit("close");
   }
 }
@@ -72,6 +88,22 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleClickOutside);
 });
+
+/* =========================
+   AUTO FOCUS SEARCH INPUT
+========================= */
+const searchInput = ref<HTMLInputElement | null>(null);
+
+watch(
+  () => props.open,
+  (val) => {
+    if (val) {
+      nextTick(() => {
+        searchInput.value?.focus();
+      });
+    }
+  },
+);
 </script>
 
 <template>
@@ -81,7 +113,7 @@ onBeforeUnmount(() => {
       {{ label }}
     </label>
 
-    <!-- Input box -->
+    <!-- INPUT DISPLAY -->
     <div
       class="flex cursor-text items-center rounded-lg border bg-white px-4 py-3"
       :class="[
@@ -91,15 +123,15 @@ onBeforeUnmount(() => {
       @click.stop="openDropdown"
     >
       <input
-        v-model="keyword"
+        :value="displayValue"
         :placeholder="placeholder"
         class="w-full py-2 text-sm outline-none"
         readonly
-      >
+      />
 
       <!-- Clear -->
       <button
-        v-if="keyword"
+        v-if="displayValue"
         class="ml-2 text-gray-400 hover:text-gray-600"
         @click.stop="clear"
       >
@@ -114,30 +146,32 @@ onBeforeUnmount(() => {
       class="absolute inset-x-0 top-0 z-50 w-full rounded-xl border bg-white shadow-2xl md:w-96"
       @click.stop
     >
-      <!-- Search input (inside popup) -->
+      <!-- SEARCH INPUT -->
       <div class="border-b p-4">
         <div class="relative">
           <input
-            v-model="keyword"
+            ref="searchInput"
+            v-model="searchKeyword"
             placeholder="Tìm tỉnh/thành"
             class="w-full rounded-lg border px-3 py-3 pr-10 outline-none focus:border-green-500"
-          >
+          />
 
-          <!-- Clear button -->
           <button
-            v-if="keyword"
+            v-if="searchKeyword"
             type="button"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-500"
-            @click="clear"
+            @click="searchKeyword = ''"
           >
             ✕
           </button>
         </div>
       </div>
 
-      <!-- Province list -->
+      <!-- LIST -->
       <div class="max-h-60 overflow-y-auto">
-        <p class="px-4 py-2 text-xs font-bold text-gray-500">TỈNH/THÀNH PHỐ</p>
+        <p class="px-4 py-2 text-xs font-bold text-gray-500">
+          TỈNH / THÀNH PHỐ
+        </p>
 
         <button
           v-for="item in filteredLocations"

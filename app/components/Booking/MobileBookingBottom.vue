@@ -13,7 +13,7 @@ const emit = defineEmits(["next", "prev", "submit"]);
 
 <template>
   <div
-    class="fixed bottom-0 left-0 right-0 z-50 border-t bg-white px-4 py-3 pb-20"
+    class="fixed bottom-0 left-0 right-0 z-50 border-t bg-white px-4 py-3 md:pb-20"
   >
     <!-- SEAT SUMMARY -->
     <div v-if="step === 0 || step === 3" class="mb-2 text-sm">

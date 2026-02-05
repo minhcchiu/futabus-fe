@@ -85,7 +85,7 @@ function toggleSeat(seat: Seat) {
       <a href="#" class="text-sm text-blue-600">Thông tin xe</a>
     </div>
 
-    <div class="grid grid-cols-2 gap-12 gap-x-32">
+    <div class="grid grid-cols-2 gap-12 gap-x-8 md:gap-x-16 lg:gap-x-28">
       <!-- TẦNG DƯỚI -->
       <div>
         <h3 class="mb-3 text-center text-sm font-medium">Tầng dưới</h3>

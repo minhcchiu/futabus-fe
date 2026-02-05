@@ -16,8 +16,10 @@ const bookingStore = useBookingStore();
 const tripPriceStore = useTripPriceStore();
 const trip = computed(() => tripStore.selected);
 const seatIdsBooked = ref<string[]>([]);
+const sepayStore = useSepayStore();
 
 const date = ref<number>(Date.now());
+const banks = computed(() => sepayStore.list);
 
 onMounted(async () => {
   const tripId = route.query.trip_id as string;
@@ -36,6 +38,7 @@ onMounted(async () => {
     tripPriceStore.fetchAll({
       tripId,
     }),
+    sepayStore.fetchAll({ isUse: true }),
   ]);
 });
 
@@ -102,11 +105,15 @@ const customerForm = ref({
 
 // Handle pickup / dropOff
 const pickupDropoff = ref<{
-  pickupTripStopId: string;
   departureTime?: number;
-  dropoffTripStopId: string;
-  pickupType: "station" | "transfer";
-  dropoffType: "station" | "transfer";
+
+  pickupType: "station" | "custom";
+  pickupTripStopId?: string;
+  pickupCustomAddress?: string;
+
+  dropoffType: "station" | "custom";
+  dropoffTripStopId?: string;
+  dropoffCustomAddress?: string;
 }>({
   departureTime: undefined,
   pickupTripStopId: "",
@@ -147,8 +154,10 @@ const checkCustomerInfo = () => {
 
 const checkPickupDropoff = () => {
   if (
-    !pickupDropoff.value.pickupTripStopId ||
-    !pickupDropoff.value.dropoffTripStopId
+    (!pickupDropoff.value.pickupTripStopId &&
+      !pickupDropoff.value.pickupCustomAddress) ||
+    (!pickupDropoff.value.dropoffTripStopId &&
+      !pickupDropoff.value.dropoffCustomAddress)
   ) {
     toast.error("Vui lòng chọn điểm đón và trả");
     return false;
@@ -171,20 +180,24 @@ const canPay = () => {
   return true;
 };
 
-const onPayment = async () => {
+const onPayment = async (bank?: string) => {
   if (!canPay()) return;
 
   try {
-    const pickupTime = new Date(pickupDropoff.value.departureTime!);
+    const pickupTime = pickupDropoff.value?.departureTime
+      ? new Date(pickupDropoff.value.departureTime)
+      : new Date(trip.value!.departureTime!);
     const booked = await bookingStore.create({
       tripId: trip.value!._id,
       seatIds: selectedSeats.value.map((s) => s._id),
       fromStopId: pickupDropoff.value.pickupTripStopId,
       toStopId: pickupDropoff.value.dropoffTripStopId,
+      pickupCustomAddress: pickupDropoff.value.pickupCustomAddress,
+      dropoffCustomAddress: pickupDropoff.value.dropoffCustomAddress,
       status: BookingStatus.PENDING,
       amount: totalPrice.value,
       paymentInfo: {
-        method: PaymentMethod.BANK_TRANSFER,
+        method: bank || banks.value[0]?.code || PaymentMethod.CASH,
         status: BookingStatus.PENDING,
         amount: totalPrice.value,
       },
@@ -236,6 +249,7 @@ const onCancel = () => {};
 
         <BookingFooter
           :amount="totalPrice"
+          :banks="banks"
           @cancel="onCancel"
           @submit="onPayment"
         />
@@ -246,7 +260,6 @@ const onCancel = () => {};
         <TripBookingSummary
           :trip="trip"
           :seats="selectedSeats"
-          :pickup-drop-off="pickupDropoff"
           :total-price="totalPrice"
         />
 

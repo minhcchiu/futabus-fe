@@ -6,25 +6,8 @@ import type { Trip } from "~/validations/admin/trip.validation";
 const prop = defineProps<{
   trip?: Trip | null;
   seats: Seat[];
-  pickupDropOff: {
-    pickupTripStopId: string;
-    dropoffTripStopId: string;
-    pickupType: "station" | "transfer";
-    dropoffType: "station" | "transfer";
-  };
   totalPrice: number;
 }>();
-
-// const pickupTripStop = computed(() =>
-//   prop.trip?.tripStops.find(
-//     (ts) => ts._id === prop.pickupDropOff.pickupTripStopId,
-//   ),
-// );
-// const departureTime = computed(() =>
-//   formatDateTime(
-//     pickupTripStop.value?.departureTime || prop.trip?.departureTime,
-//   ),
-// );
 </script>
 
 <template>
@@ -39,10 +22,6 @@ const prop = defineProps<{
           {{ prop.trip?.routeId?.endStopId?.name }}</span
         >
       </div>
-      <!-- <div class="flex justify-between">
-        <span>Thời gian xuất bến</span>
-        <span class="font-medium">{{ departureTime }}</span>
-      </div> -->
       <div class="flex justify-between">
         <span>Số ghế</span>
         <span

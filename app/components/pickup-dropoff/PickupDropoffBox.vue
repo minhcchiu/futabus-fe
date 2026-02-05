@@ -10,11 +10,15 @@ const emit = defineEmits<{
   (
     e: "change",
     payload: {
-      pickupTripStopId: string;
-      dropoffTripStopId: string;
       departureTime?: number;
-      pickupType: "station" | "transfer";
-      dropoffType: "station" | "transfer";
+
+      pickupType: "station" | "custom";
+      pickupTripStopId?: string;
+      pickupCustomAddress?: string;
+
+      dropoffType: "station" | "custom";
+      dropoffTripStopId?: string;
+      dropoffCustomAddress?: string;
     },
   ): void;
 }>();
@@ -22,11 +26,14 @@ const emit = defineEmits<{
 /* ========================
    STATE
 ======================== */
-const pickupType = ref<"station" | "transfer">("station");
-const dropoffType = ref<"station" | "transfer">("station");
+const pickupType = ref<"station" | "custom">("station");
+const dropoffType = ref<"station" | "custom">("station");
 
 const pickupTripStopId = ref<string>("");
 const dropoffTripStopId = ref<string>("");
+
+const pickupCustomAddress = ref<string>("");
+const dropoffCustomAddress = ref<string>("");
 
 /* ========================
    OPTIONS
@@ -40,19 +47,55 @@ const endLocations = computed(() =>
 );
 
 /* ========================
+   RESET KHI ĐỔI TYPE
+======================== */
+watch(pickupType, (val) => {
+  if (val === "custom") {
+    pickupTripStopId.value = "";
+  } else {
+    pickupCustomAddress.value = "";
+  }
+});
+
+watch(dropoffType, (val) => {
+  if (val === "custom") {
+    dropoffTripStopId.value = "";
+  } else {
+    dropoffCustomAddress.value = "";
+  }
+});
+
+/* ========================
    EMIT DATA
 ======================== */
 watch(
-  [pickupTripStopId, dropoffTripStopId, pickupType, dropoffType],
+  [
+    pickupType,
+    dropoffType,
+    pickupTripStopId,
+    dropoffTripStopId,
+    pickupCustomAddress,
+    dropoffCustomAddress,
+  ],
   () => {
     emit("change", {
-      departureTime: props.tripStops.find(
-        (ts) => ts._id === pickupTripStopId.value,
-      )?.departureTime,
-      pickupTripStopId: pickupTripStopId.value,
-      dropoffTripStopId: dropoffTripStopId.value,
+      departureTime:
+        pickupType.value === "station"
+          ? props.tripStops.find((ts) => ts._id === pickupTripStopId.value)
+              ?.departureTime
+          : undefined,
+
       pickupType: pickupType.value,
+      pickupTripStopId:
+        pickupType.value === "station" ? pickupTripStopId.value : undefined,
+      pickupCustomAddress:
+        pickupType.value === "custom" ? pickupCustomAddress.value : undefined,
+
       dropoffType: dropoffType.value,
+      dropoffTripStopId:
+        dropoffType.value === "station" ? dropoffTripStopId.value : undefined,
+      dropoffCustomAddress:
+        dropoffType.value === "custom" ? dropoffCustomAddress.value : undefined,
     });
   },
   { immediate: true },
@@ -61,6 +104,7 @@ watch(
 
 <template>
   <div class="rounded-xl border bg-white p-5 pt-6">
+    <!-- HEADER -->
     <div class="mb-4 flex items-center gap-2">
       <h3 class="font-semibold">Thông tin đón trả</h3>
       <span class="text-green-500">ⓘ</span>
@@ -78,20 +122,35 @@ watch(
               type="radio"
               value="station"
               class="accent-green-500"
-            >
+            />
             Bến xe/VP
           </label>
 
-          <label class="hidden items-center gap-1 text-gray-400">
-            <input type="radio" disabled >
-            Trung chuyển
+          <label class="flex items-center gap-1">
+            <input
+              v-model="pickupType"
+              type="radio"
+              value="custom"
+              class="accent-green-500"
+            />
+            Tự nhập
           </label>
         </div>
 
+        <!-- Station -->
         <PickupLocationSelect
+          v-if="pickupType === 'station'"
           v-model="pickupTripStopId"
           :options="startLocations"
           placeholder="Chọn điểm đón"
+        />
+
+        <!-- Custom -->
+        <input
+          v-else
+          v-model="pickupCustomAddress"
+          placeholder="Nhập điểm đón (VD: 123 Lê Duẩn, Đà Nẵng)"
+          class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
         />
       </div>
 
@@ -106,20 +165,35 @@ watch(
               type="radio"
               value="station"
               class="accent-green-500"
-            >
+            />
             Bến xe/VP
           </label>
 
-          <label class="hidden items-center gap-1 text-gray-400">
-            <input type="radio" disabled >
-            Trung chuyển
+          <label class="flex items-center gap-1">
+            <input
+              v-model="dropoffType"
+              type="radio"
+              value="custom"
+              class="accent-green-500"
+            />
+            Tự nhập
           </label>
         </div>
 
+        <!-- Station -->
         <PickupLocationSelect
+          v-if="dropoffType === 'station'"
           v-model="dropoffTripStopId"
           :options="endLocations"
           placeholder="Chọn điểm trả"
+        />
+
+        <!-- Custom -->
+        <input
+          v-else
+          v-model="dropoffCustomAddress"
+          placeholder="Nhập điểm trả (VD: Sân bay Tân Sơn Nhất)"
+          class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
         />
       </div>
     </div>

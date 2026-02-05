@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { formatMoney } from "~/utils/helpers/data.helper";
+import type { Sepay } from "~/validations/admin/sepay.validation";
 
 defineProps<{
   amount: number;
+  banks: Sepay[];
 }>();
 
 defineEmits(["cancel", "submit"]);
@@ -16,7 +18,11 @@ defineEmits(["cancel", "submit"]);
         <span
           class="rounded-full bg-green-700 px-3 py-1 text-xs font-semibold text-white"
         >
-          Chuyển khoản
+          {{
+            banks[0]
+              ? banks[0].shortName || banks[0].short_name
+              : "Thanh toán tại quầy"
+          }}
         </span>
 
         <span class="text-xl font-semibold text-gray-900">
@@ -35,7 +41,7 @@ defineEmits(["cancel", "submit"]);
 
         <button
           class="rounded-full bg-green-500 px-6 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-          @click="$emit('submit')"
+          @click="$emit('submit', banks[0]?.code || 'CASH')"
         >
           Thanh toán
         </button>

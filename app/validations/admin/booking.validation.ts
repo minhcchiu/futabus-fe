@@ -33,8 +33,10 @@ export enum PaymentStatus {
 export const CreateBookingSchema = z.object({
   tripId: z.string(),
   seatIds: z.array(z.string()),
-  fromStopId: z.string(),
-  toStopId: z.string(),
+  fromStopId: z.string().optional(),
+  toStopId: z.string().optional(),
+  pickupCustomAddress: z.string().optional(),
+  dropoffCustomAddress: z.string().optional(),
   status: z.string(),
   departureTime: z.number(),
   amount: z.number(),
@@ -92,6 +94,8 @@ export type Booking = {
   seatIds: Seat[];
   fromStopId: TripStop;
   toStopId: TripStop;
+  pickupCustomAddress: string;
+  dropoffCustomAddress: string;
   status: BookingStatus;
   departureTime: number;
   amount: number;

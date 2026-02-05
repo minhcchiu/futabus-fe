@@ -14,10 +14,15 @@ const props = defineProps<{
   trip?: Trip | null;
   seats: Seat[];
   pickupDropOff: {
-    pickupTripStopId: string;
-    dropoffTripStopId: string;
-    pickupType: "station" | "transfer";
-    dropoffType: "station" | "transfer";
+    departureTime?: number;
+
+    pickupType: "station" | "custom";
+    pickupTripStopId?: string;
+    pickupCustomAddress?: string;
+
+    dropoffType: "station" | "custom";
+    dropoffTripStopId?: string;
+    dropoffCustomAddress?: string;
   };
   totalPrice: number;
 }>();
@@ -28,7 +33,7 @@ const pickupTripStop = computed(() =>
   ),
 );
 const pickupTime = computed(() =>
-  formatTime(pickupTripStop.value?.departureTime),
+  formatTime(pickupTripStop.value?.departureTime || props.trip?.departureTime),
 );
 
 const dropoffTripStop = computed(() =>
@@ -38,7 +43,7 @@ const dropoffTripStop = computed(() =>
 );
 
 const dropoffTime = computed(() =>
-  formatTime(dropoffTripStop.value?.arrivalTime),
+  formatTime(dropoffTripStop.value?.arrivalTime || props.trip?.arrivalTime),
 );
 </script>
 
@@ -80,7 +85,12 @@ const dropoffTime = computed(() =>
       <div class="grid grid-cols-[90px_1fr] gap-2">
         <span class="text-gray-600">Điểm đón</span>
         <span class="break-words font-medium">
-          {{ pickupTime }} - {{ pickupTripStop?.stopId.name || "--" }}
+          {{ pickupTime }} -
+          {{
+            pickupTripStop?.stopId.name ||
+            pickupDropOff.pickupCustomAddress ||
+            "--"
+          }}
         </span>
       </div>
 
@@ -88,7 +98,12 @@ const dropoffTime = computed(() =>
       <div class="grid grid-cols-[90px_1fr] gap-2">
         <span class="text-gray-600">Điểm trả</span>
         <span class="break-words font-medium">
-          {{ dropoffTime }} - {{ dropoffTripStop?.stopId.name || "--" }}
+          {{ dropoffTime }} -
+          {{
+            dropoffTripStop?.stopId.name ||
+            pickupDropOff.dropoffCustomAddress ||
+            "--"
+          }}
         </span>
       </div>
     </div>

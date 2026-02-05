@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const title = computed(() => {
   if (!props.from && !props.to) {
-    return `Các chuyến xe hôm nay · ${props.dateLabel}`;
+    return `Các chuyến xe ngày · ${props.dateLabel}`;
   }
 
   if (props.from && !props.to) {

@@ -23,7 +23,7 @@ onMounted(async () => {
   const bookingId = route.query.booking_id as string;
   await bookingStore.fetchById(bookingId!, {
     _populate:
-      "fromStopId,toStopId,tripId,tripId.routeId,tripId.routeId.startStopId endStopId,seatIds",
+      "fromStopId.stopId,toStopId.stopId,tripId,tripId.routeId,tripId.routeId.startStopId endStopId,seatIds",
   });
 
   checkExpire();

@@ -1,21 +1,31 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed } from "vue";
 import type { Sepay } from "~/validations/admin/sepay.validation";
 
-defineProps<{
+const props = defineProps<{
   banks: Sepay[];
   cash?: {
     bankName: string;
     note?: string;
   };
-  modelValue?: string;
+  modelValue?: string | "CASH";
 }>();
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string | "CASH"): void;
 }>();
 
-const model = ref<string | "CASH" | null>(null);
+/* ========================
+   V-MODEL PROXY
+======================== */
+const model = computed<string | "CASH">({
+  get() {
+    return props.modelValue ?? "";
+  },
+  set(value) {
+    emit("update:modelValue", value);
+  },
+});
 </script>
 
 <template>
@@ -36,10 +46,9 @@ const model = ref<string | "CASH" | null>(null);
           type="radio"
           class="accent-green-500"
           :value="item.code"
-          @change="emit('update:modelValue', item.code)"
-        >
+        />
 
-        <img :src="item.logo" class="w-12" >
+        <img :src="item.logo" class="w-12" />
 
         <div>
           <div class="font-medium">
@@ -60,8 +69,7 @@ const model = ref<string | "CASH" | null>(null);
           type="radio"
           class="accent-green-500"
           value="CASH"
-          @change="emit('update:modelValue', 'CASH')"
-        >
+        />
 
         <div
           class="ml-2 mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"
