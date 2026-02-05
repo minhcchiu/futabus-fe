@@ -199,7 +199,7 @@ const submit = async () => {
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        />
+        >
         <p class="error">{{ errors.departureTime }}</p>
       </div>
 
@@ -210,7 +210,7 @@ const submit = async () => {
           :value="new Date(form.arrivalTime).toLocaleString('vi-VN')"
           class="input bg-gray-100"
           disabled
-        />
+        >
       </div>
 
       <!-- STATUS -->
