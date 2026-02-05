@@ -124,7 +124,19 @@ const validateForm = () => {
 const submit = async () => {
   if (!validateForm()) return;
 
-  const res = await store.create(form);
+  const departureProvinceId = routeStore.list.find(
+    (r) => r._id === form.routeId,
+  )?.startStopId.provinceId;
+  const arrivalProvinceId = routeStore.list.find((r) => r._id === form.routeId)
+    ?.endStopId.provinceId;
+
+  const res = await store.create({
+    ...form,
+    departureProvinceIds: departureProvinceId
+      ? [departureProvinceId.toString()]
+      : [],
+    arrivalProvinceIds: arrivalProvinceId ? [arrivalProvinceId.toString()] : [],
+  });
   if (res) router.push("/admin/trips");
 };
 </script>
@@ -187,7 +199,7 @@ const submit = async () => {
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        >
+        />
         <p class="error">{{ errors.departureTime }}</p>
       </div>
 
@@ -198,7 +210,7 @@ const submit = async () => {
           :value="new Date(form.arrivalTime).toLocaleString('vi-VN')"
           class="input bg-gray-100"
           disabled
-        >
+        />
       </div>
 
       <!-- STATUS -->
