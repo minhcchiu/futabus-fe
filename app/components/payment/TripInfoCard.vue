@@ -36,9 +36,9 @@ defineProps<{
       <div>
         <b>Điểm đón:</b>
         <span v-if="booked?.fromStopId">
-          🚌 {{ booked?.fromStopId?.stopId.name }}
+          🚌 {{ booked?.fromStopId?.stopId?.name }}
           <span class="text-gray-500">
-            ({{ booked?.fromStopId?.stopId.address || "—" }})
+            ({{ booked?.fromStopId?.stopId?.address || "—" }})
           </span>
         </span>
 
@@ -49,9 +49,9 @@ defineProps<{
       <div>
         <b>Điểm trả:</b>
         <span v-if="booked?.toStopId">
-          🚌 {{ booked?.toStopId?.stopId.name }}
+          🚌 {{ booked?.toStopId?.stopId?.name }}
           <span class="text-gray-500">
-            ({{ booked?.toStopId?.stopId.address || "—" }})
+            ({{ booked?.toStopId?.stopId?.address || "—" }})
           </span>
         </span>
 

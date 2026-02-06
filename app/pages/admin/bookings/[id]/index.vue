@@ -38,13 +38,6 @@ const paymentStatusText: Record<string, string> = {
   REFUNDED: "Đã hoàn tiền",
 };
 
-const paymentMethodText: Record<string, string> = {
-  CASH: "Tiền mặt",
-  BANK_TRANSFER: "Chuyển khoản",
-  VNPay: "VNPay",
-  MBBank: "MB Bank",
-};
-
 /* ================= FETCH ================= */
 const booking = ref<Booking | null>(null);
 
@@ -95,14 +88,16 @@ const showPaymentAction = computed(() => {
   return (
     booking.value.status === "PENDING" &&
     booking.value.paymentInfo.status === "PENDING" &&
-    booking.value.paymentInfo.method !== "CASH" &&
     !isPaymentExpired.value
   );
 });
 
 const goToPayment = () => {
   router.push({
-    path: `/payment/${bookingId}`,
+    path: `/payment`,
+    query: {
+      booking_id: bookingId,
+    },
   });
 };
 </script>
@@ -213,7 +208,13 @@ const goToPayment = () => {
           </div>
           <div>
             <b>Phương thức:</b>
-            {{ paymentMethodText[booking.paymentInfo.method] || "—" }}
+            {{
+              booking.paymentInfo?.method
+                ? booking.paymentInfo?.method === "CASH"
+                  ? "Tiền mặt tại quầy"
+                  : `Thanh toán bằng ${booking.paymentInfo?.method}`
+                : "—"
+            }}
           </div>
           <div>
             <b>Số tiền:</b>

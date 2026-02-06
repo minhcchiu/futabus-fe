@@ -198,13 +198,6 @@ const updatePaymentStatus = async (
   toast.success("Đã cập nhật trạng thái thanh toán");
   fetchData();
 };
-
-const paymentMethodText: Record<PaymentMethod, string> = {
-  CASH: "Tiền mặt tại quầy",
-  BANK_TRANSFER: "Thanh toán VNPay",
-  VNPay: "Chuyển khoản ngân hàng",
-  MBBank: "Chuyển khoản MB Bank",
-};
 </script>
 
 <template>
@@ -277,7 +270,13 @@ const paymentMethodText: Record<PaymentMethod, string> = {
         <!-- PAYMENT -->
         <td class="px-4 py-3 text-xs">
           <div class="mb-1 font-medium">
-            {{ paymentMethodText[b.paymentInfo?.method] || "—" }}
+            {{
+              b.paymentInfo?.method
+                ? b.paymentInfo?.method === "CASH"
+                  ? "Tiền mặt tại quầy"
+                  : `Thanh toán bằng ${b.paymentInfo?.method}`
+                : "—"
+            }}
           </div>
 
           <span
@@ -342,7 +341,7 @@ const paymentMethodText: Record<PaymentMethod, string> = {
               alt="Payment proof"
               class="h-12 w-12 cursor-pointer rounded-lg border object-cover"
               @click="previewImage = b.paymentInfo.image"
-            >
+            />
 
             <!-- hover preview -->
             <div
@@ -351,7 +350,7 @@ const paymentMethodText: Record<PaymentMethod, string> = {
               <img
                 :src="b.paymentInfo.image"
                 class="max-h-60 max-w-60 rounded-lg object-contain"
-              >
+              />
             </div>
           </div>
 
