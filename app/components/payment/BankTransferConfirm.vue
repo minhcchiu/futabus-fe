@@ -23,13 +23,6 @@ const emit = defineEmits<{
  * ====================== */
 const remainingSeconds = ref(0);
 let timer: number | undefined;
-const isPayment = computed(() =>
-  [
-    BookingStatus.CONFIRMED,
-    BookingStatus.COMPLETED,
-    BookingStatus.CHECKED_IN,
-  ].includes(props.booking.status),
-);
 
 const updateRemaining = () => {
   const diff = props.expire - Date.now();
@@ -47,16 +40,24 @@ onUnmounted(() => {
 
 const isExpired = computed(() => remainingSeconds.value === 0);
 
+const isPaid = computed(() =>
+  [
+    BookingStatus.CONFIRMED,
+    BookingStatus.COMPLETED,
+    BookingStatus.CHECKED_IN,
+  ].includes(props.booking.status),
+);
+
+const goToDetail = () => {
+  router.push(`/admin/bookings/${props.booking._id}`);
+};
+
 /* ======================
  * ACTION
  * ====================== */
 const onConfirm = () => {
-  if (isExpired.value || isPayment.value) return;
+  if (isExpired.value || isPaid.value) return;
   emit("payment");
-};
-
-const onViewDetail = () => {
-  router.push(`/admin/bookings/${props.booking._id}`);
 };
 </script>
 
@@ -73,7 +74,7 @@ const onViewDetail = () => {
     </div>
 
     <!-- ================= PAID ================= -->
-    <div v-else-if="isPayment" class="space-y-3 text-center">
+    <div v-else-if="isPaid" class="space-y-3 text-center">
       <div class="text-lg font-semibold text-green-600">
         ✅ Đã thanh toán thành công
       </div>
@@ -81,7 +82,7 @@ const onViewDetail = () => {
 
       <button
         class="w-full rounded-xl bg-green-100 py-4 text-base font-semibold text-green-700 transition hover:bg-green-200"
-        @click="onViewDetail"
+        @click="goToDetail"
       >
         Xem chi tiết vé
       </button>

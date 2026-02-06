@@ -140,6 +140,18 @@ onMounted(() => {
 onUnmounted(() => {
   if (expireTimer) clearInterval(expireTimer);
 });
+
+const isPaid = computed(() =>
+  [
+    BookingStatus.CONFIRMED,
+    BookingStatus.COMPLETED,
+    BookingStatus.CHECKED_IN,
+  ].includes(props.booked.status),
+);
+
+const goToDetail = () => {
+  router.push(`/admin/bookings/${props.booked._id}`);
+};
 </script>
 
 <template>
@@ -268,27 +280,46 @@ onUnmounted(() => {
 
     <!-- BOTTOM PAYMENT BAR -->
     <div class="fixed bottom-0 left-0 right-0 z-30 border-t bg-white px-4 py-3">
-      <!-- Remaining time -->
-      <div v-if="!isExpired" class="mb-2 text-center text-sm text-gray-500">
-        ⏳ Thời gian giữ chỗ còn
-        <span class="font-semibold text-green-600">
-          {{ formatRemaining }}
-        </span>
+      <!-- ============ EXPIRED ============ -->
+      <div v-if="isExpired" class="text-center">
+        <button
+          disabled
+          class="w-full cursor-not-allowed rounded-xl bg-gray-300 py-3 text-lg font-semibold text-gray-500"
+        >
+          ⛔ Đã hết hạn thanh toán
+        </button>
       </div>
 
-      <button
-        class="w-full rounded-xl py-3 text-lg font-semibold transition"
-        :class="[
-          isExpired
-            ? 'cursor-not-allowed bg-gray-300 text-gray-500'
-            : 'bg-green-500 text-white hover:bg-green-600',
-        ]"
-        :disabled="isExpired"
-        @click="showMethodSheet = true"
-      >
-        <template v-if="isExpired"> ⛔ Đã hết hạn thanh toán </template>
-        <template v-else> Thanh toán </template>
-      </button>
+      <!-- ============ PAID ============ -->
+      <div v-else-if="isPaid" class="space-y-2 text-center">
+        <div class="text-sm font-medium text-green-600">
+          ✅ Đã thanh toán thành công
+        </div>
+
+        <button
+          class="w-full rounded-xl bg-green-100 py-3 text-lg font-semibold text-green-700 transition hover:bg-green-200"
+          @click="goToDetail"
+        >
+          Xem chi tiết vé
+        </button>
+      </div>
+
+      <!-- ============ PENDING ============ -->
+      <div v-else>
+        <div class="mb-2 text-center text-sm text-gray-500">
+          ⏳ Thời gian giữ chỗ còn
+          <span class="font-semibold text-green-600">
+            {{ formatRemaining }}
+          </span>
+        </div>
+
+        <button
+          class="w-full rounded-xl bg-green-500 py-3 text-lg font-semibold text-white transition hover:bg-green-600"
+          @click="showMethodSheet = true"
+        >
+          Thanh toán
+        </button>
+      </div>
     </div>
   </div>
 </template>
