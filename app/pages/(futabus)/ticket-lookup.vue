@@ -29,14 +29,14 @@ const findTickets = async () => {
     await bookingStore.fetchAll({
       code: code.value,
       _populate:
-        "fromStopId,toStopId,tripId,tripId.routeId,tripId.routeId.startStopId endStopId,seatIds",
+        "fromStopId.stopId,toStopId.stopId,tripId,tripId.routeId,tripId.routeId.startStopId endStopId,seatIds",
       _sort: "-createdAt",
     });
   } else if (phone.value) {
     await bookingStore.fetchAll({
       "customerInfo.phone": phone.value,
       _populate:
-        "fromStopId,toStopId,tripId,tripId.routeId,tripId.routeId.startStopId endStopId,seatIds",
+        "fromStopId.stopId,toStopId.stopId,tripId,tripId.routeId,tripId.routeId.startStopId endStopId,seatIds",
       _sort: "-createdAt",
     });
   }
