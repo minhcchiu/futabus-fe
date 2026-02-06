@@ -27,7 +27,7 @@ onMounted(async () => {
 
   seatIdsBooked.value = await bookingStore.getSeatsBooked({
     tripId,
-    [`expireAt>${date.value}`]: "",
+    [`expireAt>${Date.now()}`]: "",
     status: BookingStatus.PENDING,
   });
 
