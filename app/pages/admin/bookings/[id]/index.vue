@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useBookingStore } from "~/stores/booking.store";
 import { formatMoney } from "~/utils/helpers/data.helper";
 import type { Booking } from "~/validations/admin/booking.validation";
+
 const { setHeaderHeight } = useHeightHeader();
 setHeaderHeight("h-20 md:h-36");
+
 definePageMeta({
   layout: "default",
 });
@@ -30,7 +32,7 @@ const bookingStatusText: Record<string, string> = {
 
 const paymentStatusText: Record<string, string> = {
   UNPAID: "Chưa thanh toán",
-  PENDING: "Đang xử lý",
+  PENDING: "Chờ thanh toán",
   PAID: "Đã thanh toán",
   FAILED: "Thanh toán lỗi",
   REFUNDED: "Đã hoàn tiền",
@@ -60,23 +62,56 @@ const fetchDetail = async () => {
 
 onMounted(fetchDetail);
 
+/* ================= TIMER (REALTIME) ================= */
+const now = ref(Date.now());
+const timer = setInterval(() => {
+  now.value = Date.now();
+}, 1000);
+
+onUnmounted(() => clearInterval(timer));
+
 /* ================= COMPUTED ================= */
 const isExpired = computed(() => {
   if (!booking.value?.expireAt) return false;
-  return Date.now() > booking.value.expireAt;
+  return now.value > booking.value.expireAt;
 });
 
 const remainMinutes = computed(() => {
   if (!booking.value?.expireAt) return null;
-  return Math.ceil((booking.value.expireAt - Date.now()) / 60000);
+  const diff = booking.value.expireAt - now.value;
+  if (diff <= 0) return 0;
+  return Math.ceil(diff / 60000);
 });
+
+/* ================= PAYMENT LOGIC ================= */
+const isPaymentExpired = computed(() => {
+  if (!booking.value?.expireAt) return true;
+  return now.value > booking.value.expireAt;
+});
+
+const showPaymentAction = computed(() => {
+  if (!booking.value?.paymentInfo) return false;
+
+  return (
+    booking.value.status === "PENDING" &&
+    booking.value.paymentInfo.status === "PENDING" &&
+    booking.value.paymentInfo.method !== "CASH" &&
+    !isPaymentExpired.value
+  );
+});
+
+const goToPayment = () => {
+  router.push({
+    path: `/payment/${bookingId}`,
+  });
+};
 </script>
 
 <template>
   <div class="my-6">
     <!-- HEADER -->
     <div
-      class="sticky top-0 z-30 mb-6 flex items-center justify-between space-y-2 rounded-xl border-b bg-white px-4 py-3"
+      class="sticky top-0 z-30 mb-6 flex items-center justify-between rounded-xl border-b bg-white px-4 py-3"
     >
       <div>
         <h1 class="text-2xl font-semibold">Chi tiết đặt vé</h1>
@@ -106,7 +141,7 @@ const remainMinutes = computed(() => {
       v-else-if="booking"
       class="grid auto-rows-fr grid-cols-1 gap-6 lg:grid-cols-2"
     >
-      <!-- ROW 1 -->
+      <!-- TRẠNG THÁI -->
       <div class="rounded-xl border bg-white p-5">
         <h2 class="mb-4 font-semibold">Trạng thái</h2>
 
@@ -133,6 +168,7 @@ const remainMinutes = computed(() => {
         </div>
       </div>
 
+      <!-- KHÁCH HÀNG -->
       <div class="rounded-xl border bg-white p-5">
         <h2 class="mb-4 font-semibold">Khách hàng</h2>
 
@@ -146,7 +182,7 @@ const remainMinutes = computed(() => {
         </p>
       </div>
 
-      <!-- ROW 2 -->
+      <!-- HÀNH TRÌNH -->
       <div class="rounded-xl border bg-white p-5">
         <h2 class="mb-4 font-semibold">Hành trình</h2>
 
@@ -166,10 +202,11 @@ const remainMinutes = computed(() => {
         </div>
       </div>
 
+      <!-- THANH TOÁN -->
       <div class="rounded-xl border bg-white p-5">
         <h2 class="mb-4 font-semibold">Thanh toán</h2>
 
-        <div v-if="booking.paymentInfo?.status" class="space-y-1 text-sm">
+        <div v-if="booking.paymentInfo" class="space-y-1 text-sm">
           <div>
             <b>Trạng thái:</b>
             {{ paymentStatusText[booking.paymentInfo.status] }}
@@ -184,12 +221,49 @@ const remainMinutes = computed(() => {
           </div>
         </div>
 
-        <p v-else class="text-sm italic text-gray-400">
-          Chưa có thông tin thanh toán
-        </p>
+        <!-- PAYMENT ACTION -->
+        <div v-if="booking.paymentInfo?.status === 'PENDING'" class="mt-4">
+          <!-- CÒN HẠN -->
+          <div
+            v-if="showPaymentAction"
+            class="rounded-xl border border-amber-200 bg-amber-50 p-4"
+          >
+            <div class="flex items-start justify-between gap-4">
+              <div class="space-y-1">
+                <p class="text-sm font-semibold text-amber-900">
+                  ⏳ Chờ thanh toán
+                </p>
+                <p class="text-sm text-amber-800">
+                  Vui lòng hoàn tất trong
+                  <b>{{ remainMinutes }} phút</b>
+                </p>
+                <p class="text-xs text-amber-700">
+                  Hết thời gian, booking sẽ tự động huỷ
+                </p>
+              </div>
+
+              <button
+                class="rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white hover:bg-green-600"
+                @click="goToPayment"
+              >
+                Thanh toán ngay
+              </button>
+            </div>
+          </div>
+
+          <!-- HẾT HẠN -->
+          <div v-else class="rounded-xl border border-red-200 bg-red-50 p-4">
+            <p class="text-sm font-semibold text-red-700">
+              ⛔ Đã hết thời gian thanh toán
+            </p>
+            <p class="text-xs text-red-600">
+              Booking này không còn hiệu lực để thanh toán
+            </p>
+          </div>
+        </div>
       </div>
 
-      <!-- ROW 3 -->
+      <!-- GHẾ -->
       <div class="rounded-xl border bg-white p-5">
         <h2 class="mb-4 font-semibold">Ghế</h2>
 
@@ -206,11 +280,12 @@ const remainMinutes = computed(() => {
         <p v-else class="text-sm italic text-gray-400">Chưa chọn ghế</p>
       </div>
 
+      <!-- SYSTEM -->
       <div class="rounded-xl border bg-white p-5">
         <h2 class="mb-4 font-semibold">Thông tin hệ thống</h2>
 
         <div class="space-y-1 text-sm">
-          <div><b>ID:</b> {{ booking._id }}</div>
+          <div><b>ID:</b> {{ booking.code }}</div>
           <div>
             <b>Ngày tạo:</b>
             {{ new Date(booking.createdAt).toLocaleString() }}
