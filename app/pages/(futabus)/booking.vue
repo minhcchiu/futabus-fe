@@ -135,11 +135,7 @@ const checkSelectedSeats = () => {
 };
 
 const checkCustomerInfo = () => {
-  if (
-    !customerForm.value.name ||
-    !customerForm.value.phone ||
-    !customerForm.value.email
-  ) {
+  if (!customerForm.value.name || !customerForm.value.phone) {
     toast.error(`Vui lòng nhập đầy đủ thông tin: Tên, Số điện thoại, Email`);
     return false;
   }

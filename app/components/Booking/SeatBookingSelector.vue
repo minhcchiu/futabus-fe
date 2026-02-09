@@ -80,12 +80,16 @@ function toggleSeat(seat: Seat) {
 
 <template>
   <div class="rounded-xl border bg-white p-5">
+    <!-- HEADER -->
     <div class="mb-4 flex justify-between">
       <h2 class="font-semibold">Chọn ghế</h2>
       <a href="#" class="text-sm text-blue-600">Thông tin xe</a>
     </div>
 
-    <div class="grid grid-cols-2 gap-12 gap-x-8 md:gap-x-16 lg:gap-x-28">
+    <!-- SEAT GRID -->
+    <div
+      class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12 md:gap-x-16 lg:gap-x-28"
+    >
       <!-- TẦNG DƯỚI -->
       <div>
         <h3 class="mb-3 text-center text-sm font-medium">Tầng dưới</h3>
@@ -93,7 +97,7 @@ function toggleSeat(seat: Seat) {
           <div
             v-for="(rowSeats, row) in lowerGrid"
             :key="row"
-            class="mb-3 flex justify-between gap-3"
+            class="flex justify-between gap-3"
           >
             <SeatBookingItem
               v-for="seat in rowSeats"
@@ -113,7 +117,7 @@ function toggleSeat(seat: Seat) {
           <div
             v-for="(rowSeats, row) in upperGrid"
             :key="row"
-            class="mb-3 flex justify-between gap-3"
+            class="flex justify-between gap-3"
           >
             <SeatBookingItem
               v-for="seat in rowSeats"
@@ -127,6 +131,7 @@ function toggleSeat(seat: Seat) {
       </div>
     </div>
 
+    <!-- LEGEND -->
     <div class="mt-6 flex justify-end gap-6 text-xs text-gray-600">
       <BookingLegend color="bg-gray-300" label="Đã bán" />
       <BookingLegend color="bg-blue-100" label="Còn trống" />

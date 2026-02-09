@@ -56,7 +56,7 @@ export const CreateBookingSchema = z.object({
   customerInfo: z.object({
     name: z.string(),
     phone: z.string(),
-    email: z.string(),
+    email: z.string().optional(),
     note: z.string().optional(),
   }),
 });
@@ -83,7 +83,7 @@ export type PaymentInfo = {
 export type CustomerInfo = {
   name: string;
   phone: string;
-  email: string;
+  email?: string;
   note?: string;
 };
 

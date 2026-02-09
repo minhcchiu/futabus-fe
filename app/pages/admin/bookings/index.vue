@@ -175,6 +175,50 @@ const updateBookingStatus = async (
   fetchData();
 };
 
+const getPaymentDisplay = (b: any) => {
+  if (!b.paymentInfo) return { text: "—", class: "bg-gray-100 text-gray-500" };
+
+  const status = b.paymentInfo.status;
+
+  if (status === PaymentStatus.PENDING && isExpiredBooking(b)) {
+    return {
+      text: "Đã hết hạn thanh toán",
+      class: "bg-red-100 text-red-600",
+    };
+  }
+
+  // Chỉ xử lý đặc biệt cho PENDING
+  if (status === PaymentStatus.PENDING) {
+    if (b.expireAt && Date.now() > b.expireAt) {
+      return {
+        text: "Đã hết hạn thanh toán",
+        class: "bg-red-100 text-red-600",
+      };
+    }
+
+    const minutesLeft = b.expireAt
+      ? Math.ceil((b.expireAt - Date.now()) / 60000)
+      : null;
+
+    return {
+      text: `Đang xử lý${minutesLeft ? ` (còn ${minutesLeft} phút)` : ""}`,
+      class: "bg-yellow-100 text-yellow-600",
+    };
+  }
+
+  // Các trạng thái còn lại
+  return {
+    text: paymentStatusText[status],
+    class: STATUS_COLOR[status] || "bg-gray-100 text-gray-600",
+  };
+};
+
+const isExpiredBooking = (b: any) => {
+  return (
+    b.status === BookingStatus.PENDING && b.expireAt && Date.now() > b.expireAt
+  );
+};
+
 const updatePaymentStatus = async (
   bookingId: string,
   status: PaymentStatus,
@@ -205,16 +249,14 @@ const updatePaymentStatus = async (
     <!-- TABLE -->
     <AdminTable
       :columns="[
-        'Booking',
-        'Route',
-        'Seats',
-        'Customer',
-        'Payment',
-        'Amount',
-        'Status',
-        'Expire',
-        'Proof',
-        'Actions',
+        'Mã',
+        'Tuyến đường',
+        'Chỗ ngồi',
+        'Khách hàng',
+        'Thanh Toán',
+        'Tổng tiền',
+        'Trạng thái',
+        'Hành động',
       ]"
       :data="bookings"
       :page="page"
@@ -272,9 +314,9 @@ const updatePaymentStatus = async (
           <div class="mb-1 font-medium">
             {{
               b.paymentInfo?.method
-                ? b.paymentInfo?.method === "CASH"
+                ? b.paymentInfo.method === "CASH"
                   ? "Tiền mặt tại quầy"
-                  : `Thanh toán bằng ${b.paymentInfo?.method}`
+                  : `Thanh toán bằng ${b.paymentInfo.method}`
                 : "—"
             }}
           </div>
@@ -282,13 +324,10 @@ const updatePaymentStatus = async (
           <span
             :class="[
               'rounded-full px-2 py-0.5 text-xs font-medium',
-              b.paymentInfo?.status === 'PAID' && 'bg-green-100 text-green-600',
-              b.paymentInfo?.status === 'PENDING' &&
-                'bg-yellow-100 text-yellow-600',
-              b.paymentInfo?.status === 'FAILED' && 'bg-red-100 text-red-600',
+              getPaymentDisplay(b).class,
             ]"
           >
-            {{ paymentStatusText[b.paymentInfo?.status] }}
+            {{ getPaymentDisplay(b).text }}
           </span>
         </td>
 
@@ -302,59 +341,13 @@ const updatePaymentStatus = async (
           <span
             :class="[
               'rounded-full px-3 py-1 text-xs font-medium',
-              b.status === 'PENDING' && 'bg-yellow-100 text-yellow-700',
-              b.status === 'CONFIRMED' && 'bg-green-100 text-green-700',
-              b.status === 'CANCELLED' && 'bg-gray-200 text-gray-600',
-              b.status === 'EXPIRED' && 'bg-red-100 text-red-600',
-              b.status === 'COMPLETED' && 'bg-blue-100 text-blue-600',
+              isExpiredBooking(b)
+                ? 'bg-gray-200 text-gray-600'
+                : STATUS_COLOR[b.status],
             ]"
           >
-            {{ bookingStatusText[b.status] }}
+            {{ isExpiredBooking(b) ? "Hết hạn" : bookingStatusText[b.status] }}
           </span>
-        </td>
-
-        <!-- EXPIRE -->
-        <td class="px-4 py-3 text-xs">
-          <!-- Chỉ giữ chỗ mới có hạn -->
-          <template v-if="b.status === 'PENDING'">
-            <span
-              v-if="Date.now() > b.expireAt"
-              class="font-medium text-red-600"
-            >
-              Hết hạn
-            </span>
-
-            <span v-else class="text-yellow-700">
-              Còn {{ Math.ceil((b.expireAt - Date.now()) / 60000) }} phút
-            </span>
-          </template>
-
-          <!-- Các trạng thái khác -->
-          <span v-else class="italic text-gray-400"> — </span>
-        </td>
-
-        <!-- PAYMENT PROOF -->
-        <td class="px-4 py-3">
-          <div v-if="b.paymentInfo?.image" class="group relative">
-            <img
-              :src="b.paymentInfo.image"
-              alt="Payment proof"
-              class="h-12 w-12 cursor-pointer rounded-lg border object-cover"
-              @click="previewImage = b.paymentInfo.image"
-            />
-
-            <!-- hover preview -->
-            <div
-              class="pointer-events-none absolute left-14 top-0 z-20 hidden rounded-xl border bg-white p-2 shadow-lg group-hover:block"
-            >
-              <img
-                :src="b.paymentInfo.image"
-                class="max-h-60 max-w-60 rounded-lg object-contain"
-              />
-            </div>
-          </div>
-
-          <span v-else class="text-xs italic text-gray-400"> No image </span>
         </td>
 
         <!-- ACTION -->
@@ -387,8 +380,11 @@ const updatePaymentStatus = async (
             <select
               v-if="b.paymentInfo"
               class="rounded border px-2 py-1 text-xs font-medium"
-              :class="STATUS_COLOR[b.paymentInfo.status]"
-              :disabled="PAYMENT_STATUS_FLOW[b.paymentInfo.status].length === 0"
+              :class="STATUS_COLOR[b.status]"
+              :disabled="
+                isExpiredBooking(b) ||
+                BOOKING_STATUS_FLOW[b.status].length === 0
+              "
               :value="b.paymentInfo.status"
               @change="
                 updatePaymentStatus(

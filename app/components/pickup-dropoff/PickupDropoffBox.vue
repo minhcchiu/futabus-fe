@@ -26,8 +26,8 @@ const emit = defineEmits<{
 /* ========================
    STATE
 ======================== */
-const pickupType = ref<"station" | "custom">("station");
-const dropoffType = ref<"station" | "custom">("station");
+const pickupType = ref<"station" | "custom">("custom");
+const dropoffType = ref<"station" | "custom">("custom");
 
 const pickupTripStopId = ref<string>("");
 const dropoffTripStopId = ref<string>("");
@@ -120,38 +120,37 @@ watch(
             <input
               v-model="pickupType"
               type="radio"
-              value="station"
+              value="custom"
               class="accent-green-500"
-            >
-            Bến xe/VP
+            />
+            Tự nhập
           </label>
 
           <label class="flex items-center gap-1">
             <input
               v-model="pickupType"
               type="radio"
-              value="custom"
+              value="station"
               class="accent-green-500"
-            >
-            Tự nhập
+            />
+            Bến xe/VP
           </label>
         </div>
 
+        <!-- Custom -->
+        <input
+          v-if="pickupType === 'custom'"
+          v-model="pickupCustomAddress"
+          placeholder="Nhập điểm đón"
+          class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
+        />
         <!-- Station -->
         <PickupLocationSelect
-          v-if="pickupType === 'station'"
+          v-else
           v-model="pickupTripStopId"
           :options="startLocations"
           placeholder="Chọn điểm đón"
         />
-
-        <!-- Custom -->
-        <input
-          v-else
-          v-model="pickupCustomAddress"
-          placeholder="Nhập điểm đón (VD: 123 Lê Duẩn, Đà Nẵng)"
-          class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
-        >
       </div>
 
       <!-- ================= ĐIỂM TRẢ ================= -->
@@ -163,38 +162,38 @@ watch(
             <input
               v-model="dropoffType"
               type="radio"
-              value="station"
+              value="custom"
               class="accent-green-500"
-            >
-            Bến xe/VP
+            />
+            Tự nhập
           </label>
 
           <label class="flex items-center gap-1">
             <input
               v-model="dropoffType"
               type="radio"
-              value="custom"
+              value="station"
               class="accent-green-500"
-            >
-            Tự nhập
+            />
+            Bến xe/VP
           </label>
         </div>
 
+        <!-- Custom -->
+        <input
+          v-if="dropoffType === 'custom'"
+          v-model="dropoffCustomAddress"
+          placeholder="Nhập điểm trả"
+          class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
+        />
+
         <!-- Station -->
         <PickupLocationSelect
-          v-if="dropoffType === 'station'"
+          v-else
           v-model="dropoffTripStopId"
           :options="endLocations"
           placeholder="Chọn điểm trả"
         />
-
-        <!-- Custom -->
-        <input
-          v-else
-          v-model="dropoffCustomAddress"
-          placeholder="Nhập điểm trả (VD: Sân bay Tân Sơn Nhất)"
-          class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
-        >
       </div>
     </div>
   </div>
