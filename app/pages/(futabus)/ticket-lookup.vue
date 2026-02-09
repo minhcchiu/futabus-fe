@@ -96,13 +96,13 @@ const canCancel = (ticket: any) => {
           v-model="phone"
           placeholder="Nhập số điện thoại"
           class="w-full rounded-lg border px-4 py-3 text-sm focus:border-emerald-500"
-        />
+        >
 
         <input
           v-model="code"
           placeholder="Nhập mã vé"
           class="w-full rounded-lg border px-4 py-3 text-sm focus:border-emerald-500"
-        />
+        >
 
         <button
           class="rounded-full bg-emerald-500 px-8 py-2 text-sm font-medium text-white hover:bg-emerald-600"

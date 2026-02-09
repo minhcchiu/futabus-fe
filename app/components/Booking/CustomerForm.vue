@@ -146,9 +146,6 @@ watch(
             class="w-full rounded-md border px-3 py-2"
             placeholder="Nhập email"
           />
-          <p v-if="errors.email" class="mt-1 text-xs text-red-500">
-            {{ errors.email }}
-          </p>
         </div>
 
         <!-- Note -->

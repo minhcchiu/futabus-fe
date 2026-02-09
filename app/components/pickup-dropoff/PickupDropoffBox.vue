@@ -122,7 +122,7 @@ watch(
               type="radio"
               value="custom"
               class="accent-green-500"
-            />
+            >
             Tự nhập
           </label>
 
@@ -132,7 +132,7 @@ watch(
               type="radio"
               value="station"
               class="accent-green-500"
-            />
+            >
             Bến xe/VP
           </label>
         </div>
@@ -143,7 +143,7 @@ watch(
           v-model="pickupCustomAddress"
           placeholder="Nhập điểm đón"
           class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
-        />
+        >
         <!-- Station -->
         <PickupLocationSelect
           v-else
@@ -164,7 +164,7 @@ watch(
               type="radio"
               value="custom"
               class="accent-green-500"
-            />
+            >
             Tự nhập
           </label>
 
@@ -174,7 +174,7 @@ watch(
               type="radio"
               value="station"
               class="accent-green-500"
-            />
+            >
             Bến xe/VP
           </label>
         </div>
@@ -185,7 +185,7 @@ watch(
           v-model="dropoffCustomAddress"
           placeholder="Nhập điểm trả"
           class="w-full rounded-lg border px-4 py-3 outline-none focus:border-green-500"
-        />
+        >
 
         <!-- Station -->
         <PickupLocationSelect
