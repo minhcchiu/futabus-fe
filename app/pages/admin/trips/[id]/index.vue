@@ -25,12 +25,13 @@ const vehicleList = computed(() => vehicleStore.list || []);
 /* =========================
   FORM
 ========================= */
-const form = reactive<CreateTrip>({
+const form = reactive<CreateTrip & { driverPhone: string }>({
   routeId: "",
   companyId: "",
   vehicleId: "",
+  driverPhone: "", // 👈 NEW
   departureTime: Date.now(),
-  arrivalTime: Date.now(), // auto
+  arrivalTime: Date.now(),
   status: TripStatus.CREATED,
 });
 
@@ -64,7 +65,7 @@ const selectedRoute = computed(() =>
 );
 
 /* =========================
-  ETA PREVIEW (LABEL)
+  ETA PREVIEW
 ========================= */
 const arrivalPreview = computed(() => {
   if (!selectedRoute.value?.durationHour || !form.departureTime) return "";
@@ -93,6 +94,7 @@ const fetchDetail = async () => {
   form.routeId = res.routeId;
   form.companyId = getCompanyIdFromTrip(res.companyId);
   form.vehicleId = res.vehicleId;
+  form.driverPhone = res.driverPhone || ""; // 👈 NEW
   form.departureTime = res.departureTime;
   form.arrivalTime = res.arrivalTime;
   form.status = res.status;
@@ -131,7 +133,7 @@ watch(
 
     if (oldRouteId && routeId !== oldRouteId) {
       form.vehicleId = "";
-      calcArriveTime(); // auto recal
+      calcArriveTime();
     }
 
     form.companyId = companyId;
@@ -165,6 +167,12 @@ const departureTimeInput = computed({
 const validateForm = () => {
   try {
     CreateTripSchema.parse(form);
+
+    if (!form.driverPhone) {
+      errors.value = { driverPhone: "Số điện thoại tài xế là bắt buộc" };
+      return false;
+    }
+
     errors.value = {};
     return true;
   } catch (err) {
@@ -199,7 +207,7 @@ const submit = async () => {
       <div>
         <label class="flex items-center justify-between">
           <span>Tuyến đường</span>
-          <span v-if="arrivalPreview" class="text-xs font-normal text-gray-500">
+          <span v-if="arrivalPreview" class="text-xs text-gray-500">
             ⏱ {{ arrivalPreview }}
           </span>
         </label>
@@ -230,6 +238,18 @@ const submit = async () => {
         <p class="error">{{ errors.vehicleId }}</p>
       </div>
 
+      <!-- DRIVER PHONE -->
+      <div>
+        <label>SĐT tài xế <span class="text-red-500">*</span></label>
+        <input
+          v-model="form.driverPhone"
+          type="tel"
+          placeholder="VD: 0901234567"
+          class="input"
+        />
+        <p class="error">{{ errors.driverPhone }}</p>
+      </div>
+
       <!-- DEPARTURE -->
       <div>
         <label>Khởi hành</label>
@@ -237,7 +257,7 @@ const submit = async () => {
           v-model="departureTimeInput"
           type="datetime-local"
           class="input"
-        >
+        />
         <p class="error">{{ errors.departureTime }}</p>
       </div>
 
@@ -248,7 +268,7 @@ const submit = async () => {
           :value="new Date(form.arrivalTime).toLocaleString('vi-VN')"
           class="input bg-gray-100"
           disabled
-        >
+        />
       </div>
 
       <!-- STATUS -->

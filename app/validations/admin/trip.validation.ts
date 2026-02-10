@@ -22,6 +22,7 @@ export const CreateTripSchema = z.object({
   price: z.number().optional(),
   departureProvinceIds: z.array(z.string()).optional(),
   arrivalProvinceIds: z.array(z.string()).optional(),
+  driverPhone: z.string(),
   status: z.enum([
     TripStatus.CREATED,
     TripStatus.DEPARTED,
@@ -48,4 +49,5 @@ export type Trip = {
   status: TripStatus;
   tripPrices: TripPrice[];
   tripStops: TripStop[];
+  driverPhone: string;
 };
