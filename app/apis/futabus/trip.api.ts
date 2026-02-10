@@ -4,6 +4,7 @@ import { authFetch, guestFetch } from "~/utils/fetch";
 import type { FetchOptions, PaginationParams } from "~/utils/types/fetch.types";
 import type {
   CreateTrip,
+  LocationsFromTo,
   Trip,
   UpdateTrip,
 } from "~/validations/admin/trip.validation";
@@ -11,6 +12,10 @@ import type {
 const TRIP_URL = "/trips";
 export const tripApi = {
   //  ----- Method: GET -----
+  getLocationsFromTo: (): Promise<LocationsFromTo[]> => {
+    return guestFetch.get(`${TRIP_URL}/locations`);
+  },
+
   paginate: (
     query?: PaginationParams,
     options?: FetchOptions,

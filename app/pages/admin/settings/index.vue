@@ -25,12 +25,6 @@ const form = reactive({
   mapLink: "",
   termsOfUse: "",
   privacyPolicy: "",
-  bankInfo: {
-    bankName: "",
-    accountNumber: "",
-    accountHolder: "",
-    qr: "",
-  },
 });
 
 const setting = computed(() => store.selected);
@@ -46,9 +40,7 @@ onMounted(async () => {
 /* ================= UPLOAD ================= */
 const uploading = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
-const currentField = ref<"logo" | "banner" | "coverImage" | "bankQr" | null>(
-  null,
-);
+const currentField = ref<"logo" | "banner" | "coverImage" | null>(null);
 
 const triggerUpload = (field: typeof currentField.value) => {
   currentField.value = field;
@@ -77,9 +69,6 @@ const onChooseFile = async (e: Event) => {
     case "coverImage":
       form.coverImage = res.url;
       break;
-    case "bankQr":
-      form.bankInfo.qr = res.url;
-      break;
   }
 
   uploading.value = false;
@@ -87,8 +76,7 @@ const onChooseFile = async (e: Event) => {
 };
 
 const removeImage = (field: typeof currentField.value) => {
-  if (field === "bankQr") form.bankInfo.qr = "";
-  else (form as any)[field!] = "";
+  (form as any)[field!] = "";
 };
 
 /* ================= SUBMIT ================= */
@@ -164,17 +152,17 @@ const onSubmit = async () => {
             v-model="form.shortName"
             placeholder="Tên ngắn"
             class="input"
-          >
+          />
           <input
             v-model="form.fullName"
             placeholder="Tên đầy đủ"
             class="input"
-          >
+          />
           <input
             v-model="form.website"
             placeholder="Website"
             class="input col-span-2"
-          >
+          />
         </div>
       </section>
 
@@ -182,10 +170,10 @@ const onSubmit = async () => {
       <section>
         <h3 class="section-title">Liên hệ</h3>
         <div class="grid grid-cols-2 gap-4">
-          <input v-model="form.phone" placeholder="SĐT" class="input" >
-          <input v-model="form.zalo" placeholder="Zalo" class="input" >
-          <input v-model="form.email" placeholder="Email" class="input" >
-          <input v-model="form.fax" placeholder="Fax" class="input" >
+          <input v-model="form.phone" placeholder="SĐT" class="input" />
+          <input v-model="form.zalo" placeholder="Zalo" class="input" />
+          <input v-model="form.email" placeholder="Email" class="input" />
+          <input v-model="form.fax" placeholder="Fax" class="input" />
         </div>
 
         <textarea
@@ -198,39 +186,7 @@ const onSubmit = async () => {
           v-model="form.mapLink"
           placeholder="Link bản đồ"
           class="input mt-4"
-        >
-      </section>
-
-      <!-- ================= BANK ================= -->
-      <section>
-        <h3 class="section-title">Thông tin ngân hàng</h3>
-
-        <div class="grid grid-cols-2 gap-4">
-          <input
-            v-model="form.bankInfo.bankName"
-            placeholder="Tên ngân hàng"
-            class="input"
-          >
-          <input
-            v-model="form.bankInfo.accountHolder"
-            placeholder="Chủ tài khoản"
-            class="input"
-          >
-          <input
-            v-model="form.bankInfo.accountNumber"
-            placeholder="Số tài khoản"
-            class="input col-span-2"
-          >
-        </div>
-
-        <div class="mt-4 max-w-xs">
-          <UploadImage
-            label="QR Thanh toán"
-            :src="form.bankInfo.qr"
-            @upload="triggerUpload('bankQr')"
-            @remove="removeImage('bankQr')"
-          />
-        </div>
+        />
       </section>
 
       <!-- ================= LEGAL ================= -->
@@ -269,7 +225,7 @@ const onSubmit = async () => {
       accept="image/*"
       class="hidden"
       @change="onChooseFile"
-    >
+    />
   </div>
 </template>
 

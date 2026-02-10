@@ -51,3 +51,8 @@ export type Trip = {
   tripStops: TripStop[];
   driverPhone: string;
 };
+
+export type LocationsFromTo = {
+  provinceFrom: Province;
+  provincesTo: Province[];
+};

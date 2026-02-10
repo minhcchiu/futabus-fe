@@ -14,12 +14,6 @@ export const CreateSettingSchema = z.object({
   mapLink: z.string(),
   termsOfUse: z.string(),
   privacyPolicy: z.string(),
-  bankInfo: z.object({
-    bankName: z.string(),
-    accountNumber: z.string(),
-    accountHolder: z.string(),
-    qr: z.string(),
-  }),
 });
 
 export type CreateSetting = z.infer<typeof CreateSettingSchema>;
@@ -43,12 +37,6 @@ export type Setting = {
   termsOfUse: string;
   privacyPolicy: string;
   coverImage: string;
-  bankInfo: {
-    bankName: string;
-    accountNumber: string;
-    accountHolder: string;
-    qr: string;
-  };
   createdAt: string;
   updatedAt: string;
 };

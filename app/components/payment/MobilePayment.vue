@@ -199,7 +199,6 @@ const goToDetail = () => {
           <PaymentMethodList
             v-model="methodSelected"
             :banks="banks"
-            :cash="setting?.bankInfo"
             @update:model-value="selectMethod"
           />
         </div>

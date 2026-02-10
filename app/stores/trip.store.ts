@@ -3,6 +3,7 @@ import type { PaginateResponse } from "~/types/paginate-response.type";
 import type { PaginationParams } from "~/utils/types/fetch.types";
 import type {
   CreateTrip,
+  LocationsFromTo,
   Trip,
   UpdateTrip,
 } from "~/validations/admin/trip.validation";
@@ -64,6 +65,17 @@ export const useTripStore = defineStore("trip", () => {
     }
   };
 
+  const locationsFromTo = ref<LocationsFromTo[]>([]);
+  const getLocationsFromTo = async () => {
+    loading.value = true;
+    try {
+      locationsFromTo.value = await tripApi.getLocationsFromTo();
+      return list.value;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     loading,
     list,
@@ -75,5 +87,8 @@ export const useTripStore = defineStore("trip", () => {
     create,
     updateById,
     deleteManyByIds,
+
+    locationsFromTo,
+    getLocationsFromTo,
   };
 });

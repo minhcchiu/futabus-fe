@@ -1,7 +1,6 @@
 import { z } from "zod";
 import type { BusCompany } from "~/validations/admin/bus_company.validation";
 import type { StopLocation } from "~/validations/admin/stop_location.validation";
-import type { Province } from "~/validations/pre-built/province.validation";
 
 export const CreateRouteSchema = z.object({
   companyId: z.string(),
@@ -20,9 +19,4 @@ export type Route = {
   durationHour?: number;
   createdAt: string;
   updatedAt: string;
-};
-
-export type LocationsFromTo = {
-  provinceFrom: Province;
-  provincesTo: Province[];
 };

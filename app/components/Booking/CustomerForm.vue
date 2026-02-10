@@ -115,7 +115,7 @@ watch(
             type="text"
             class="w-full rounded-md border px-3 py-2"
             placeholder="Nhập họ và tên"
-          />
+          >
           <p v-if="errors.name" class="mt-1 text-xs text-red-500">
             {{ errors.name }}
           </p>
@@ -131,7 +131,7 @@ watch(
             type="tel"
             class="w-full rounded-md border px-3 py-2"
             placeholder="Số điện thoại (Zalo)"
-          />
+          >
           <p v-if="errors.phone" class="mt-1 text-xs text-red-500">
             {{ errors.phone }}
           </p>
@@ -145,7 +145,7 @@ watch(
             type="email"
             class="w-full rounded-md border px-3 py-2"
             placeholder="Nhập email"
-          />
+          >
         </div>
 
         <!-- Note -->
@@ -185,7 +185,7 @@ watch(
         v-model="localForm.accepted"
         type="checkbox"
         class="mt-1 accent-green-500"
-      />
+      >
       <span>
         <span class="text-green-500">Chấp nhận điều khoản</span>
         & chính sách bảo mật

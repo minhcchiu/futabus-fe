@@ -4,10 +4,6 @@ import type { Sepay } from "~/validations/admin/sepay.validation";
 
 const props = defineProps<{
   banks: Sepay[];
-  cash?: {
-    bankName: string;
-    note?: string;
-  };
   modelValue?: string | "CASH";
 }>();
 
@@ -46,9 +42,9 @@ const model = computed<string | "CASH">({
           type="radio"
           class="accent-green-500"
           :value="item.code"
-        >
+        />
 
-        <img :src="item.logo" class="w-12" >
+        <img :src="item.logo" class="w-12" />
 
         <div>
           <div class="font-medium">
@@ -69,7 +65,7 @@ const model = computed<string | "CASH">({
           type="radio"
           class="accent-green-500"
           value="CASH"
-        >
+        />
 
         <div
           class="ml-2 mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"

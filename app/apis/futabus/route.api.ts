@@ -4,7 +4,6 @@ import { authFetch, guestFetch } from "~/utils/fetch";
 import type { FetchOptions, PaginationParams } from "~/utils/types/fetch.types";
 import type {
   CreateRoute,
-  LocationsFromTo,
   Route,
   UpdateRoute,
 } from "~/validations/admin/route.validation";
@@ -12,10 +11,6 @@ import type {
 const ROUTE_URL = "/routes";
 export const routeApi = {
   //  ----- Method: GET -----
-  getLocationsFromTo: (): Promise<LocationsFromTo[]> => {
-    return guestFetch.get(`${ROUTE_URL}/locations`);
-  },
-
   paginate: (
     query?: PaginationParams,
     options?: FetchOptions,

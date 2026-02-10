@@ -26,7 +26,6 @@ const emit = defineEmits<{
         <PaymentMethodList
           :banks="banks"
           :model-value="methodSelected"
-          :cash="setting?.bankInfo"
           @update:model-value="emit('update:method', $event)"
         />
       </div>
@@ -47,7 +46,7 @@ const emit = defineEmits<{
 
         <div v-else class="rounded-xl bg-red-50 p-6 text-center text-red-600">
           ⛔ Thời gian thanh toán đã hết hiệu lực
-          <br >
+          <br />
           Vui lòng đặt vé lại
         </div>
       </div>

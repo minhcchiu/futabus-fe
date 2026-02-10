@@ -3,7 +3,6 @@ import { endOfDay, format, startOfDay } from "date-fns";
 import type { Trip } from "~/validations/admin/trip.validation";
 
 const tripStore = useTripStore();
-const routeStore = useRouteStore();
 
 const settingStore = useSettingStore();
 const setting = computed(() => settingStore.selected);
@@ -27,7 +26,7 @@ const date = computed(() => {
 });
 
 const trips = computed(() => tripStore.list);
-const locationsFromTo = computed(() => routeStore.locationsFromTo);
+const locationsFromTo = computed(() => tripStore.locationsFromTo);
 
 const getProvinceId = (name: string) => {
   return locationsFromTo.value.find((l) => l.provinceFrom.name === name)
@@ -80,7 +79,7 @@ const fetchTrips = async (query: {
 };
 
 onMounted(async () => {
-  await routeStore.getLocationsFromTo();
+  await tripStore.getLocationsFromTo();
   await fetchTrips({
     date: date.value,
     ticket: ticket.value ? +ticket.value : undefined,
@@ -160,7 +159,6 @@ const onCloseMobileTripList = () => {
 
     <div class="hidden md:block">
       <TripSearchBox
-        v-if="!routeStore.loading"
         :locations-from-to="locationsFromTo"
         @search="searchOnDesktop"
       />
@@ -168,7 +166,6 @@ const onCloseMobileTripList = () => {
 
     <div class="block md:hidden">
       <MobileSearch
-        v-if="!routeStore.loading"
         :locations-from-to="locationsFromTo"
         @search="searchOnMobile"
       />
@@ -205,7 +202,7 @@ const onCloseMobileTripList = () => {
               :src="setting?.coverImage"
               alt="Mail Linh"
               class="h-full w-full object-cover"
-            >
+            />
             <div class="absolute inset-0 bg-black/30" />
             <div class="absolute bottom-3 left-4 text-white">
               <h2 class="text-lg font-semibold">Liên hệ với chúng tôi</h2>
@@ -291,6 +288,7 @@ const onCloseMobileTripList = () => {
           :dropoff-province="to"
           :date-label="format(date, 'dd/MM/yyyy')"
           @select="selectedTrip = $event"
+          :is-loading="tripStore.loading"
         />
       </main>
     </div>
@@ -306,6 +304,7 @@ const onCloseMobileTripList = () => {
           :pickup-province="from"
           :dropoff-province="to"
           :date-label="format(date, 'dd/MM/yyyy')"
+          :is-loading="tripStore.loading"
           @open-filter="openFilter = true"
           @select="selectedTrip = $event"
           @back="onCloseMobileTripList"
@@ -327,7 +326,7 @@ const onCloseMobileTripList = () => {
             src="/images/empty_list.svg"
             alt="Không có chuyến xe"
             class="mx-auto mb-4 h-20 opacity-80"
-          >
+          />
 
           <p class="text-lg font-semibold">Không có chuyến xe</p>
 
