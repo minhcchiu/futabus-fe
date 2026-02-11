@@ -49,7 +49,7 @@ const emit = defineEmits(["openFilter", "select", "back"]);
           src="https://futabus.vn/images/icons/edit_filter.svg"
           alt="filter"
           class="h-5 w-5"
-        />
+        >
       </button>
     </div>
   </div>
@@ -105,7 +105,7 @@ const emit = defineEmits(["openFilter", "select", "back"]);
         src="/images/empty_list.svg"
         alt="Không có chuyến xe"
         class="mb-4 h-24 opacity-80"
-      />
+      >
 
       <p class="text-sm font-medium">Không có chuyến xe cho ngày đã chọn</p>
 

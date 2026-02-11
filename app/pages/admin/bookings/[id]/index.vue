@@ -182,15 +182,24 @@ const goToPayment = () => {
         <h2 class="mb-4 font-semibold">Hành trình</h2>
 
         <div class="space-y-1 text-sm">
-          <div>
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500">Liên hệ tài xế:</span>
+            <a
+              :href="`tel:${booking.tripId?.driverPhone}`"
+              class="italic text-blue-600 underline"
+            >
+              {{ booking.tripId?.driverPhone || "—" }}
+            </a>
+          </div>
+          <div class="flex items-center gap-2">
             <span class="text-gray-500">Từ:</span>
             {{ booking.tripId?.routeId?.startStopId?.name || "—" }}
           </div>
-          <div>
+          <div class="flex items-center gap-2">
             <span class="text-gray-500">Đến:</span>
             {{ booking.tripId?.routeId?.endStopId?.name || "—" }}
           </div>
-          <div class="pt-1">
+          <div class="flex items-center gap-2">
             <span class="text-gray-500">Giờ khởi hành:</span>
             {{ new Date(booking.departureTime).toLocaleString() }}
           </div>

@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { reactive, watch } from "vue";
+import { computed, reactive, watch } from "vue";
+
+const settingStore = useSettingStore();
+
+const setting = computed(() => settingStore.selected);
+
+onMounted(async () => {
+  await settingStore.fetchOne();
+});
 
 /* =========================
   TYPES
@@ -115,7 +123,7 @@ watch(
             type="text"
             class="w-full rounded-md border px-3 py-2"
             placeholder="Nhập họ và tên"
-          >
+          />
           <p v-if="errors.name" class="mt-1 text-xs text-red-500">
             {{ errors.name }}
           </p>
@@ -131,7 +139,7 @@ watch(
             type="tel"
             class="w-full rounded-md border px-3 py-2"
             placeholder="Số điện thoại (Zalo)"
-          >
+          />
           <p v-if="errors.phone" class="mt-1 text-xs text-red-500">
             {{ errors.phone }}
           </p>
@@ -145,7 +153,7 @@ watch(
             type="email"
             class="w-full rounded-md border px-3 py-2"
             placeholder="Nhập email"
-          >
+          />
         </div>
 
         <!-- Note -->
@@ -164,15 +172,20 @@ watch(
       <div>
         <h3 class="mb-3 font-semibold text-green-500">ĐIỀU KHOẢN & LƯU Ý</h3>
 
-        <p class="mb-3 text-sm font-medium text-red-500">
-          Quý khách vui lòng Đăng ký/Đăng nhập để nhận khuyến mãi.
-        </p>
-
         <div class="space-y-3 text-sm text-gray-700">
+          <p>{{ setting?.termsOfUse }}</p>
+
+          <p>{{ setting?.privacyPolicy }}</p>
+
           <p>(*) Có mặt trước giờ khởi hành ít nhất 30 phút.</p>
           <p>
             (*) Liên hệ tổng đài
-            <span class="font-medium text-green-500">1900 6067</span>
+            <a
+              class="font-medium text-green-500"
+              :href="`tel:${setting?.phone}`"
+            >
+              {{ setting?.phone }}
+            </a>
             khi cần hỗ trợ.
           </p>
         </div>
@@ -185,7 +198,7 @@ watch(
         v-model="localForm.accepted"
         type="checkbox"
         class="mt-1 accent-green-500"
-      >
+      />
       <span>
         <span class="text-green-500">Chấp nhận điều khoản</span>
         & chính sách bảo mật

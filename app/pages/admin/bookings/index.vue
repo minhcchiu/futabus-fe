@@ -88,28 +88,39 @@ const canChangePaymentStatus = (current: PaymentStatus, next: PaymentStatus) =>
 
 /* ================= UI STATE ================= */
 const keyword = ref("");
-const statusFilter = ref("ALL");
+const selectedDate = ref(null);
 const page = ref(1);
 const pageSize = ref(5);
-const previewImage = ref<string | null>(null);
 
 /* ================= FETCH ================= */
 const fetchData = async () => {
-  await store.fetchPaginate({
+  const searchValue = keyword.value ? `/${keyword.value}/i` : undefined;
+  const query = {
     _page: page.value,
     _limit: pageSize.value,
-    code: keyword.value || undefined,
-    "paymentInfo.status":
-      statusFilter.value !== "ALL" ? statusFilter.value : undefined,
+    code: searchValue,
+    [`_oneOf.code`]: searchValue,
+    [`_oneOf.customerInfo.phone`]: searchValue,
+    [`_oneOf.name`]: searchValue,
     _sort: "-createdAt",
     _populate:
       "tripId.routeId.startStopId endStopId,seatIds,customerInfo,paymentInfo",
-  });
+  };
+  if (selectedDate.value) {
+    Object.assign(query, {
+      [`departureTime>=${new Date(selectedDate.value).setHours(0, 0, 0, 0)}`]:
+        "",
+      [`departureTime<=${new Date(selectedDate.value).setHours(23, 59, 59, 999)}`]:
+        "",
+    });
+  }
+
+  await store.fetchPaginate(query);
 };
 
 onMounted(fetchData);
 
-watch([keyword, statusFilter, pageSize], () => {
+watch([keyword, pageSize, selectedDate], () => {
   page.value = 1;
   fetchData();
 });
@@ -246,6 +257,30 @@ const updatePaymentStatus = async (
 
 <template>
   <div>
+    <!-- HEADER -->
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold">Bookings</h1>
+        <p class="text-sm text-gray-500">Quản lý danh sách đặt vé</p>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="mb-4 flex items-center gap-3">
+      <input
+        v-model="keyword"
+        placeholder="Mã, SĐT,.."
+        class="w-64 rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
+      />
+
+      <!-- Date filter -->
+      <input
+        v-model="selectedDate"
+        type="date"
+        class="rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-primary"
+      />
+    </div>
+
     <!-- TABLE -->
     <AdminTable
       :columns="[

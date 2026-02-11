@@ -152,17 +152,17 @@ const onSubmit = async () => {
             v-model="form.shortName"
             placeholder="Tên ngắn"
             class="input"
-          />
+          >
           <input
             v-model="form.fullName"
             placeholder="Tên đầy đủ"
             class="input"
-          />
+          >
           <input
             v-model="form.website"
             placeholder="Website"
             class="input col-span-2"
-          />
+          >
         </div>
       </section>
 
@@ -170,10 +170,10 @@ const onSubmit = async () => {
       <section>
         <h3 class="section-title">Liên hệ</h3>
         <div class="grid grid-cols-2 gap-4">
-          <input v-model="form.phone" placeholder="SĐT" class="input" />
-          <input v-model="form.zalo" placeholder="Zalo" class="input" />
-          <input v-model="form.email" placeholder="Email" class="input" />
-          <input v-model="form.fax" placeholder="Fax" class="input" />
+          <input v-model="form.phone" placeholder="SĐT" class="input" >
+          <input v-model="form.zalo" placeholder="Zalo" class="input" >
+          <input v-model="form.email" placeholder="Email" class="input" >
+          <input v-model="form.fax" placeholder="Fax" class="input" >
         </div>
 
         <textarea
@@ -186,7 +186,7 @@ const onSubmit = async () => {
           v-model="form.mapLink"
           placeholder="Link bản đồ"
           class="input mt-4"
-        />
+        >
       </section>
 
       <!-- ================= LEGAL ================= -->
@@ -225,7 +225,7 @@ const onSubmit = async () => {
       accept="image/*"
       class="hidden"
       @change="onChooseFile"
-    />
+    >
   </div>
 </template>
 

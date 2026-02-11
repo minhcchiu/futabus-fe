@@ -98,39 +98,39 @@ const submit = async () => {
 
 <template>
   <div class="max-w-2xl space-y-6">
-    <h1 class="text-2xl font-semibold">Edit Sepay / Ngân hàng</h1>
+    <h1 class="text-2xl font-semibold">Cập nhật Sepay / Ngân hàng</h1>
 
     <div class="grid grid-cols-2 gap-4">
       <!-- NAME -->
       <div class="col-span-2">
         <label class="label">Tên ngân hàng</label>
-        <input v-model="form.name" class="input" >
+        <input v-model="form.name" class="input" />
         <p class="error">{{ errors.name }}</p>
       </div>
 
       <!-- CODE -->
       <div>
         <label class="label">Code</label>
-        <input v-model="form.code" class="input" >
+        <input v-model="form.code" class="input" />
         <p class="error">{{ errors.code }}</p>
       </div>
 
       <!-- BIN -->
       <div>
         <label class="label">BIN</label>
-        <input v-model="form.bin" class="input" >
+        <input v-model="form.bin" class="input" />
       </div>
 
       <!-- SHORT NAME -->
       <div>
         <label class="label">Short name</label>
-        <input v-model="form.shortName" class="input" >
+        <input v-model="form.shortName" class="input" />
       </div>
 
       <!-- SWIFT -->
       <div>
         <label class="label">Swift code</label>
-        <input v-model="form.swift_code" class="input" >
+        <input v-model="form.swift_code" class="input" />
       </div>
 
       <!-- SUPPORT -->
@@ -157,12 +157,12 @@ const submit = async () => {
 
       <div>
         <label class="label">Số tài khoản</label>
-        <input v-model="form.bankInfo!.accountNumber" class="input" >
+        <input v-model="form.bankInfo!.accountNumber" class="input" />
       </div>
 
       <div>
         <label class="label">Chủ tài khoản</label>
-        <input v-model="form.bankInfo!.accountHolder" class="input" >
+        <input v-model="form.bankInfo!.accountHolder" class="input" />
       </div>
 
       <!-- NOTE -->
@@ -174,7 +174,7 @@ const submit = async () => {
       <!-- IS USE -->
       <div class="col-span-2">
         <label class="flex items-center gap-2">
-          <input v-model="form.isUse" type="checkbox" >
+          <input v-model="form.isUse" type="checkbox" />
           <span>Đang sử dụng</span>
         </label>
       </div>
