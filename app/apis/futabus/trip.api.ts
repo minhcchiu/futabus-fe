@@ -43,6 +43,13 @@ export const tripApi = {
     return authFetch.post(TRIP_URL, body, options);
   },
 
+  copyTripToDates: (
+    body: { tripId: string; dates: number[] },
+    options?: FetchOptions,
+  ): Promise<Trip[]> => {
+    return authFetch.post(`${TRIP_URL}/many`, body, options);
+  },
+
   //  ----- Method: PATCH -----
   updateById: (
     id: string,

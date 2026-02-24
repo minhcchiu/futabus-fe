@@ -76,6 +76,18 @@ export const useTripStore = defineStore("trip", () => {
     }
   };
 
+  const copyTripToDates = async (input: {
+    tripId: string;
+    dates: number[];
+  }) => {
+    loading.value = true;
+    try {
+      return await tripApi.copyTripToDates(input);
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     loading,
     list,
@@ -90,5 +102,6 @@ export const useTripStore = defineStore("trip", () => {
 
     locationsFromTo,
     getLocationsFromTo,
+    copyTripToDates,
   };
 });

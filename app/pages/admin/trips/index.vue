@@ -11,20 +11,48 @@ const store = useTripStore();
 
 const page = ref(1);
 const pageSize = ref(5);
+const selectedDate = ref(new Date().toISOString().split("T")[0]); // Default to current date
+
+// Helper functions for date filtering
+const startOfDay = (dateString: string) => {
+  const date = new Date(dateString);
+  date.setHours(0, 0, 0, 0);
+  return date.getTime();
+};
+
+const endOfDay = (dateString: string) => {
+  const date = new Date(dateString);
+  date.setHours(23, 59, 59, 999);
+  return date.getTime();
+};
 
 /* =========================
   FETCH
 ========================= */
 const fetchData = async () => {
-  await store.fetchPaginate({
+  const query: any = {
     _page: page.value,
     _limit: pageSize.value,
     _populate: "companyId,routeId,vehicleId,routeId.startStopId endStopId",
-  });
+  };
+
+  // Add date filter using departureTime format
+  if (selectedDate.value) {
+    Object.assign(query, {
+      [`departureTime>=${startOfDay(selectedDate.value)}`]: "",
+      [`departureTime<=${endOfDay(selectedDate.value)}`]: "",
+    });
+  }
+
+  await store.fetchPaginate(query);
 };
 
 onMounted(fetchData);
 watch(page, fetchData);
+watch(selectedDate, () => {
+  page.value = 1; // Reset to first page when date changes
+  fetchData();
+});
 
 /* =========================
   COMPUTED
@@ -51,6 +79,21 @@ const openStops = (trip: any) => {
   selectedTrip.value = trip;
   showStopModal.value = true;
 };
+
+/* =========================
+  COPY TRIP MODAL
+========================= */
+const showCopyModal = ref(false);
+const selectedTripForCopy = ref<any>(null);
+
+const openCopyModal = (trip: any) => {
+  selectedTripForCopy.value = trip;
+  showCopyModal.value = true;
+};
+
+const handleCopySuccess = () => {
+  fetchData();
+};
 </script>
 
 <template>
@@ -62,12 +105,26 @@ const openStops = (trip: any) => {
         <p class="text-sm text-gray-500">Quản lý chuyến</p>
       </div>
 
-      <NuxtLink
-        to="/admin/trips/create"
-        class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:opacity-90"
-      >
-        + Thêm chuyến
-      </NuxtLink>
+      <div class="flex items-center gap-3">
+        <!-- Date Filter -->
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-700"
+            >Lọc theo ngày:</label
+          >
+          <input
+            v-model="selectedDate"
+            type="date"
+            class="rounded border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+
+        <NuxtLink
+          to="/admin/trips/create"
+          class="rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white shadow hover:opacity-90"
+        >
+          + Thêm chuyến
+        </NuxtLink>
+      </div>
     </div>
 
     <!-- TABLE -->
@@ -145,6 +202,13 @@ const openStops = (trip: any) => {
             Sửa
           </NuxtLink>
 
+          <button
+            @click="openCopyModal(t)"
+            class="text-green-600 hover:underline"
+          >
+            Sao chép
+          </button>
+
           <DeleteButton
             :on-delete="() => store.deleteManyByIds([t._id])"
             :disabled="store.loading"
@@ -161,6 +225,14 @@ const openStops = (trip: any) => {
       v-if="showStopModal"
       :trip="selectedTrip"
       @close="showStopModal = false"
+    />
+
+    <!-- COPY TRIP MODAL -->
+    <CopyTripModal
+      v-if="showCopyModal"
+      :trip="selectedTripForCopy"
+      @close="showCopyModal = false"
+      @success="handleCopySuccess"
     />
   </div>
 </template>
